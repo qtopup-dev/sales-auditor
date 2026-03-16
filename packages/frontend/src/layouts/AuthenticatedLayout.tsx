@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
@@ -105,15 +106,59 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function AuthenticatedLayout() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Escape closes the mobile drawer
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
+
   return (
-    <div className="flex h-screen overflow-hidden antialiased">
-      {/* Sidebar — 240px fixed width per UI-SPEC.md */}
-      <aside className="w-60 flex-shrink-0 bg-gray-100 dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden antialiased">
+      {/* Mobile top bar — hidden at md+ */}
+      <header className="md:hidden flex items-center gap-3 px-4 h-14 flex-shrink-0 bg-gray-100 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open navigation"
+          className="flex items-center justify-center w-11 h-11 -ml-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+        >
+          {/* Hamburger icon */}
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sales Auditor</span>
+      </header>
+
+      {/* Static sidebar — desktop only. 240px fixed width per UI-SPEC.md */}
+      <aside className="hidden md:flex w-60 flex-shrink-0 bg-gray-100 dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex-col">
         <SidebarContent />
       </aside>
 
+      {/* Mobile drawer + backdrop */}
+      {drawerOpen && (
+        <div className="md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-30 bg-gray-900/50"
+            onClick={() => setDrawerOpen(false)}
+            aria-hidden="true"
+          />
+          {/* Drawer — same content as the desktop sidebar */}
+          <aside className="fixed inset-y-0 left-0 z-40 w-60 bg-gray-100 dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col shadow-xl">
+            <SidebarContent onNavigate={() => setDrawerOpen(false)} />
+          </aside>
+        </div>
+      )}
+
       {/* Main content area */}
-      <main className="flex-1 bg-gray-50 dark:bg-gray-900 overflow-auto p-8">
+      <main className="flex-1 bg-gray-50 dark:bg-gray-900 overflow-auto p-4 md:p-8">
         <Outlet />
       </main>
     </div>
