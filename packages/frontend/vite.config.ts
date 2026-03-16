@@ -18,6 +18,7 @@ export default defineConfig({
     postcss: {
       plugins: [
         tailwindcss({
+          darkMode: 'class',
           content: [
             join(__dirname, 'index.html'),
             join(__dirname, 'src/**/*.{js,ts,jsx,tsx}'),
