@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AsyncSelect from 'react-select/async';
 import type { Sale } from '@alejinput/shared';
 import { api } from '../../lib/axios';
+import { makeSelectStyles } from '../../lib/selectStyles';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -198,16 +199,7 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
             autoFocus
             menuPortalTarget={document.body}
             menuPosition="fixed"
-            styles={{
-              control: (base) => ({
-                ...base,
-                minHeight: '36px',
-                fontSize: '14px',
-                borderColor: '#3b82f6',
-                boxShadow: '0 0 0 1px #3b82f6',
-              }),
-              menu: (base) => ({ ...base, zIndex: 9999 }),
-            }}
+            styles={makeSelectStyles<{ value: number; label: string }>({ focusRing: true })}
             defaultInputValue={displayValue}
             onChange={handleSelectChange}
             onMenuClose={() => {

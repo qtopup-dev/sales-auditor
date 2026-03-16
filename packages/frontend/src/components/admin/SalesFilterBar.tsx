@@ -4,6 +4,7 @@
 
 import Select from 'react-select';
 import type { Sale } from '@alejinput/shared';
+import { makeSelectStyles } from '../../lib/selectStyles';
 
 export interface FilterState {
   startDate: string | null;
@@ -37,20 +38,9 @@ interface SalesFilterBarProps {
   users: Array<{ id: number; username: string }>;
 }
 
-// react-select custom styles matching UI-SPEC.md §SalesFilterBar
-// Controls are h-10 (40px) to align with button height across the app
-const selectStyles = {
-  control: (base: Record<string, unknown>) => ({
-    ...base,
-    height: '40px',
-    minHeight: '40px',
-    borderColor: '#d1d5db',   // gray-300
-    borderRadius: '6px',
-    fontSize: '14px',
-    '&:hover': { borderColor: '#9ca3af' },  // gray-400
-  }),
-  placeholder: (base: Record<string, unknown>) => ({ ...base, color: '#6b7280' }), // gray-500
-};
+// Controls are h-10 (40px) to align with button height across the app;
+// theme-aware styling comes from the shared select styles module.
+const selectStyles = makeSelectStyles<{ value: number; label: string }>({ height: 40 });
 
 export function SalesFilterBar({
   filters,

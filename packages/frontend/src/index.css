@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme variables for libraries that render inline styles (react-select). */
+:root {
+  --select-bg: #ffffff;          /* white */
+  --select-border: #d1d5db;      /* gray-300 */
+  --select-border-hover: #9ca3af;/* gray-400 */
+  --select-text: #111827;        /* gray-900 */
+  --select-placeholder: #6b7280; /* gray-500 */
+  --select-menu-bg: #ffffff;
+  --select-option-focus: #eff6ff;   /* blue-50 */
+  --select-option-selected: #2563eb;/* blue-600 */
+  --select-disabled-bg: #f3f4f6; /* gray-100 */
+}
+
+.dark {
+  --select-bg: #1f2937;          /* gray-800 */
+  --select-border: #4b5563;      /* gray-600 */
+  --select-border-hover: #6b7280;/* gray-500 */
+  --select-text: #f3f4f6;        /* gray-100 */
+  --select-placeholder: #9ca3af; /* gray-400 */
+  --select-menu-bg: #1f2937;
+  --select-option-focus: #172554;   /* blue-950 */
+  --select-option-selected: #2563eb;/* blue-600 */
+  --select-disabled-bg: #111827; /* gray-900 */
+}

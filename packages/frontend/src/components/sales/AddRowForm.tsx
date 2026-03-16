@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import AsyncSelect from 'react-select/async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
+import { makeSelectStyles } from '../../lib/selectStyles';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 
 interface AddRowFormProps {
@@ -155,18 +156,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
                 menuPosition="fixed"
                 isDisabled={isPending || isCatalogLoading}
                 placeholder="Select product..."
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '36px',
-                    fontSize: '14px',
-                    borderColor: errors.productId ? '#ef4444' : base.borderColor,
-                  }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
-                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
-                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                }}
+                styles={makeSelectStyles({ nowrapValue: true, error: !!errors.productId })}
                 onChange={(option) => {
                   const opt = option as ProductOption | null;
                   field.onChange(opt?.value ?? null);
@@ -203,18 +193,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
                 menuPosition="fixed"
                 isDisabled={isPending || isCatalogLoading}
                 placeholder="Select MOP..."
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '36px',
-                    fontSize: '14px',
-                    borderColor: errors.mopId ? '#ef4444' : base.borderColor,
-                  }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
-                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
-                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                }}
+                styles={makeSelectStyles({ nowrapValue: true, error: !!errors.mopId })}
                 onChange={(option) => {
                   const opt = option as MopOption | null;
                   field.onChange(opt?.value ?? null);
@@ -240,18 +219,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
                 menuPosition="fixed"
                 isDisabled={isPending || isCatalogLoading}
                 placeholder="Select receiver..."
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '36px',
-                    fontSize: '14px',
-                    borderColor: errors.receiverId ? '#ef4444' : base.borderColor,
-                  }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
-                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
-                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                }}
+                styles={makeSelectStyles({ nowrapValue: true, error: !!errors.receiverId })}
                 onChange={(option) => {
                   const opt = option as ReceiverOption | null;
                   field.onChange(opt?.value ?? null);
