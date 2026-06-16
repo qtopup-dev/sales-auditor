@@ -2,7 +2,7 @@
 
 **Version:** v1
 **Last updated:** 2026-06-17
-**Status:** Defined — pending roadmap traceability
+**Status:** Defined — roadmap traceability complete
 
 ---
 
@@ -137,11 +137,76 @@
 
 ## Traceability
 
-*To be populated by the roadmapper — maps each REQ-ID to a phase.*
-
-| REQ-ID | Phase |
-|--------|-------|
-| *(pending)* | |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Pending |
+| AUTH-07 | Phase 2 | Pending |
+| ROLES-01 | Phase 2 | Pending |
+| ROLES-02 | Phase 2 | Pending |
+| ROLES-03 | Phase 2 | Pending |
+| ROLES-04 | Phase 2 | Pending |
+| ROLES-05 | Phase 2 | Pending |
+| ROLES-06 | Phase 2 | Pending |
+| ROLES-07 | Phase 2 | Pending |
+| ROLES-08 | Phase 2 | Pending |
+| ROLES-09 | Phase 2 | Pending |
+| PROD-01 | Phase 2 | Pending |
+| PROD-02 | Phase 2 | Pending |
+| PROD-03 | Phase 2 | Pending |
+| PROD-04 | Phase 2 | Pending |
+| PROD-05 | Phase 2 | Pending |
+| PROD-06 | Phase 2 | Pending |
+| PROD-07 | Phase 2 | Pending |
+| PAY-01 | Phase 2 | Pending |
+| PAY-02 | Phase 2 | Pending |
+| PAY-03 | Phase 2 | Pending |
+| PAY-04 | Phase 2 | Pending |
+| PAY-05 | Phase 2 | Pending |
+| PAY-06 | Phase 2 | Pending |
+| SALES-01 | Phase 3 | Pending |
+| SALES-02 | Phase 3 | Pending |
+| SALES-03 | Phase 3 | Pending |
+| SALES-04 | Phase 3 | Pending |
+| SALES-05 | Phase 3 | Pending |
+| SALES-06 | Phase 3 | Pending |
+| SALES-07 | Phase 3 | Pending |
+| SALES-08 | Phase 3 | Pending |
+| SALES-09 | Phase 3 | Pending |
+| SALES-10 | Phase 3 | Pending |
+| SALES-11 | Phase 3 | Pending |
+| SALES-12 | Phase 3 | Pending |
+| SALES-13 | Phase 3 | Pending |
+| SALES-14 | Phase 3 | Pending |
+| SALES-15 | Phase 3 | Pending |
+| SALES-16 | Phase 3 | Pending |
+| SALES-17 | Phase 3 | Pending |
+| SALES-18 | Phase 3 | Pending |
+| AUDIT-01 | Phase 3 | Pending |
+| AUDIT-02 | Phase 3 | Pending |
+| AUDIT-03 | Phase 3 | Pending |
+| ADMIN-01 | Phase 4 | Pending |
+| ADMIN-02 | Phase 4 | Pending |
+| ADMIN-03 | Phase 4 | Pending |
+| ADMIN-04 | Phase 4 | Pending |
+| ADMIN-05 | Phase 4 | Pending |
+| ADMIN-06 | Phase 4 | Pending |
+| ADMIN-07 | Phase 4 | Pending |
+| ADMIN-08 | Phase 4 | Pending |
+| ADMIN-09 | Phase 4 | Pending |
+| ADMIN-10 | Phase 4 | Pending |
+| ADMIN-11 | Phase 4 | Pending |
+| ADMIN-12 | Phase 4 | Pending |
+| USERS-01 | Phase 4 | Pending |
+| USERS-02 | Phase 4 | Pending |
+| USERS-03 | Phase 4 | Pending |
+| USERS-04 | Phase 4 | Pending |
+| USERS-05 | Phase 4 | Pending |
+| USERS-06 | Phase 4 | Pending |
 
 ---
 
