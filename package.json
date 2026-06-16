@@ -1,0 +1,30 @@
+{
+  "name": "alejinput",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"api,ui\" \"npm run dev:api\" \"npm run dev:ui\"",
+    "dev:api": "cross-env TZ=UTC tsx --watch packages/backend/src/index.ts",
+    "dev:ui": "vite --config packages/frontend/vite.config.ts",
+    "build": "npm run build --workspaces",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate": "cd packages/backend && npx prisma migrate dev",
+    "db:seed": "cd packages/backend && npx prisma db seed",
+    "db:studio": "cd packages/backend && npx prisma studio"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "cross-env": "^7.0.3",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "tsx": "^4.22.4",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.61.1"
+  }
+}

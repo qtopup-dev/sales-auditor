@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment (never commit secrets)
+.env
+
+# Build outputs
+dist/
+packages/*/dist/
+
+# Prisma generated client
+packages/backend/generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
