@@ -16,7 +16,7 @@ progress:
 
 **Last updated:** 2026-06-17
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** Phase 1 plan 01-03 complete — Prisma 7 schema (7 models), init migration applied, admin user seeded, PrismaClient singleton with $extends soft-delete filter
+**Last session:** Phase 1 plan 01-05 complete — React 18 frontend shell with Vite 8, createRoot, /api proxy to backend port 3001, "App coming soon" placeholder
 
 ---
 
@@ -38,13 +38,13 @@ Plan: 1 of --name
 |-------|-------|
 | Milestone | 1 — v1 MVP |
 | Current phase | 1 — Foundation |
-| Current plan | 01-04 (ready to execute) |
-| Phase status | In progress — 3/5 plans complete |
+| Current plan | 01-05 (complete) |
+| Phase status | In progress — 4/5 plans complete (01-04 pending) |
 | Overall progress | 0 of 4 phases complete |
 
 ```
-Progress: [=--->] 15%
-Phase 1: Foundation         [====>] In progress (3/5 plans complete)
+Progress: [==--->] 20%
+Phase 1: Foundation         [=====>] In progress (4/5 plans complete)
 Phase 2: Auth + Catalogs    [ ] Not started
 Phase 3: Sales Core         [ ] Not started
 Phase 4: Admin Dashboard    [ ] Not started
@@ -59,7 +59,7 @@ Phase 4: Admin Dashboard    [ ] Not started
 | Phases complete | 0/4 |
 | Requirements complete | 0/57 |
 | Plans written | 5 |
-| Plans complete | 3 |
+| Plans complete | 4 |
 
 ---
 
@@ -89,6 +89,7 @@ Phase 4: Admin Dashboard    [ ] Not started
 | Seed command in prisma.config.ts migrations.seed | Prisma 7 no longer reads package.json prisma.seed field |
 | packages/backend/.env alongside root .env | Prisma CLI resolves dotenv from CWD (packages/backend/); root .env not found |
 | MySQL 8.4 uses --mysql-native-password=ON | --default-authentication-plugin removed in MySQL 8.4 |
+| Vite config sets root: __dirname via fileURLToPath(import.meta.url) | When invoked via `vite --config packages/frontend/vite.config.ts` from repo root, Vite resolves index.html relative to CWD; setting root to config file's directory is required |
 
 ### Critical Pitfalls to Watch
 
