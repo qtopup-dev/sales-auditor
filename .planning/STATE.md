@@ -1,7 +1,22 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-06-17T06:40:00Z"
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 5
+  completed_plans: 3
+  percent: 60
+---
+
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-06-17
 **Mode:** yolo | **Granularity:** coarse
+**Last session:** Phase 1 plan 01-03 complete — Prisma 7 schema (7 models), init migration applied, admin user seeded, PrismaClient singleton with $extends soft-delete filter
 
 ---
 
@@ -9,7 +24,7 @@
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase --phase — 01
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express v4 + Prisma v5 + MySQL (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -17,17 +32,19 @@
 
 ## Current Position
 
+Phase: --phase (01) — EXECUTING
+Plan: 1 of --name
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
 | Current phase | 1 — Foundation |
-| Current plan | None (planning not yet started) |
-| Phase status | Not started |
+| Current plan | 01-04 (ready to execute) |
+| Phase status | In progress — 3/5 plans complete |
 | Overall progress | 0 of 4 phases complete |
 
 ```
-Progress: [----] 0%
-Phase 1: Foundation         [ ] Not started
+Progress: [=--->] 15%
+Phase 1: Foundation         [====>] In progress (3/5 plans complete)
 Phase 2: Auth + Catalogs    [ ] Not started
 Phase 3: Sales Core         [ ] Not started
 Phase 4: Admin Dashboard    [ ] Not started
@@ -41,8 +58,8 @@ Phase 4: Admin Dashboard    [ ] Not started
 |--------|-------|
 | Phases complete | 0/4 |
 | Requirements complete | 0/57 |
-| Plans written | 0 |
-| Plans complete | 0 |
+| Plans written | 5 |
+| Plans complete | 3 |
 
 ---
 
@@ -62,6 +79,16 @@ Phase 4: Admin Dashboard    [ ] Not started
 | Audit log in same DB transaction as mutation | AUDIT-02 hard constraint — impossible to mutate without an audit record; impossible to have orphaned audit records |
 | Virtual scroll with @tanstack/react-virtual | Dynamic row heights via dynamic size measurement; edit state in Zustand isolated from React Query server state |
 | Monorepo — npm workspaces | /packages/backend, /packages/frontend, /packages/shared for shared TypeScript types |
+| React pinned to 18.3.1 exact (no caret) | npm latest is React 19.x; caret would allow accidental upgrade |
+| Prisma 7.x adopted (not v5) | npm latest is Prisma 7.8.0; research covers v7 patterns ($extends, prisma.config.ts, dotenv/config) |
+| Backend tsconfig uses moduleResolution:node16 | tsx runs in Node.js context where bundler resolution is invalid |
+| MySQL docker-compose uses mysql_native_password | Avoids caching_sha2_password issues with mariadb JS driver |
+| TypeScript ~5.9.3 pinned (not TS 6) | Avoids ecosystem compatibility risk with Vite 8 and tsx 4.x |
+| Prisma 7 config at CWD root (packages/backend/prisma.config.ts) | Prisma 7 CLI resolves config relative to CWD; placing in prisma/ subdirectory fails |
+| Prisma 7 generates client.ts (not index.js) | Entry point is client.js for ESM resolution; imports must use client.js not index.js |
+| Seed command in prisma.config.ts migrations.seed | Prisma 7 no longer reads package.json prisma.seed field |
+| packages/backend/.env alongside root .env | Prisma CLI resolves dotenv from CWD (packages/backend/); root .env not found |
+| MySQL 8.4 uses --mysql-native-password=ON | --default-authentication-plugin removed in MySQL 8.4 |
 
 ### Critical Pitfalls to Watch
 
@@ -74,13 +101,16 @@ Phase 4: Admin Dashboard    [ ] Not started
 - CSV injection: sanitize any value starting with =, -, +, @, tab, CR; prepend UTF-8 BOM
 - Invite link: GET renders form only (stateless); POST consumes token — prevents security scanner false-consumption
 - All three UTC configs required: MySQL my.cnf + Prisma connection URL (?timezone=UTC) + TZ=UTC Node env var
+- Prisma 7: prisma.config.ts must be at CWD root (where npx prisma runs), NOT inside prisma/ subdirectory
+- Prisma 7: generated client entry point is client.ts/client.js NOT index.js — update all imports
+- Prisma 7: seed command is migrations.seed in prisma.config.ts, NOT package.json prisma.seed
 
 ### Todos
 
-- [ ] Verify Express 4 vs Express 5 stable status at expressjs.com before Phase 1
-- [ ] Verify Tailwind CSS v3 vs v4 stable status before Phase 1
-- [ ] Verify Prisma v5 current patch via `npm info prisma version` before Phase 1
-- [ ] Verify express-mysql-session is still actively maintained in 2026
+- [x] Verify Express 4 vs Express 5 stable status → Express 5.2.1 is stable (Oct 2024); plans use Express 5
+- [ ] Verify Tailwind CSS v3 vs v4 stable status before Phase 2 (frontend build phase)
+- [x] Verify Prisma v5 current patch → Prisma 7.8.0 is latest; plans use Prisma 7 with $extends pattern
+- [x] Verify express-mysql-session active maintenance → v3.0.3, last release July 2024, still maintained
 - [ ] Confirm with user: SALES-03 dynamic row heights vs CSS truncation + tooltip for Notes field (before Phase 3)
 - [ ] Confirm with user: Admin password reset UX — display new password or send reset-invite link?
 
@@ -92,9 +122,10 @@ Phase 4: Admin Dashboard    [ ] Not started
 
 ## Session Continuity
 
-**How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-plan-phase 1` to begin planning Phase 1.
+**How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-execute-phase 1` to execute the 5 plans for Phase 1.
 
 **Phase planning order:**
+
 1. `/gsd-plan-phase 1` — Foundation (schema, monorepo, seed, Express skeleton)
 2. `/gsd-plan-phase 2` — Auth + Catalogs (login, invite, sessions, RBAC, products, MOPs)
 3. `/gsd-plan-phase 3` — Sales Core (inline-edit sheet, add row, void, transactional audit log)

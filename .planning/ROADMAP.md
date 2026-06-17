@@ -27,7 +27,13 @@
   3. A seeded admin user and one organization row exist; the admin can be confirmed present via a direct DB query
   4. The Express skeleton responds to `GET /health` with 200, and helmet security headers are present in the response
   5. All timestamps in the system are stored and returned in UTC — MySQL, Prisma connection, and Node process are all configured to UTC
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [x] 01-01-PLAN.md — Root monorepo scaffold: package.json workspaces, Docker Compose MySQL, .env.example, ESLint+Prettier, tsconfigs for all three packages
+- [x] 01-02-PLAN.md — Shared TypeScript types: domain entity interfaces for User, Sale, Product, Mop, AuditEntry, Organization
+- [x] 01-03-PLAN.md — Prisma 7 schema, migration, and seed: all 7 models with correct types/indexes, init migration, admin user seed
+- [ ] 01-04-PLAN.md — Express 5 backend skeleton: app.ts, index.ts, health route, error handler, session store
+- [ ] 01-05-PLAN.md — React 18 frontend shell: Vite + placeholder "App coming soon" page
 
 ### Phase 2: Auth + Catalogs
 **Goal**: Users can securely log in, invite new moderators, manage sessions, and the admin can maintain the product and MOP catalogs that the sales sheet depends on.
@@ -74,7 +80,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/0 | Not started | - |
+| 1. Foundation | 3/5 | In Progress | - |
 | 2. Auth + Catalogs | 0/0 | Not started | - |
 | 3. Sales Core | 0/0 | Not started | - |
 | 4. Admin Dashboard + Management | 0/0 | Not started | - |
