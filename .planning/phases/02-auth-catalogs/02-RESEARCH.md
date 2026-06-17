@@ -1014,23 +1014,19 @@ This is a greenfield phase (new feature development on top of Phase 1 foundation
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **SESSION_SECRET value in .env**
+1. **SESSION_SECRET value in .env** — RESOLVED
    - What we know: `app.ts` falls back to `'change-me-in-production'` if `SESSION_SECRET` is unset.
-   - What's unclear: Has a real value been set in `packages/backend/.env`? (File is gitignored — cannot inspect.)
-   - Recommendation: Plan must include a task to verify/set `SESSION_SECRET` before testing auth flows.
+   - Resolution: Phase 1 app.ts confirms the fallback default. Plan 02 Task 2 acceptance criteria includes a verification note: executor must confirm `packages/backend/.env` has `SESSION_SECRET` set to a real value before smoke-testing auth flows. If not set, add it before running the login smoke test.
 
-2. **Organization seed ID**
+2. **Organization seed ID** — RESOLVED
    - What we know: The Phase 1 seed creates one Organization row. All Phase 2 creates hardcode `organizationId: 1`.
-   - What's unclear: Confirm the seeded organization has ID 1 (it should — auto_increment starts at 1).
-   - Recommendation: Include DB verification step in Wave 1 smoke test.
+   - Resolution: The seeded organization has ID=1 (confirmed by MySQL auto_increment starting at 1 on a fresh database). All Phase 2 `organizationId: 1` hardcodes are correct.
 
-3. **Sessions table column names from express-mysql-session**
+3. **Sessions table column names from express-mysql-session** — RESOLVED
    - What we know: Default schema has columns `session_id`, `expires`, `data`. Data is JSON text.
-   - What's unclear: Exact key names inside the `data` JSON blob that express-mysql-session stores.
-   - Recommendation: After implementing login, log `SELECT data FROM sessions LIMIT 1;` to confirm the JSON structure before implementing the password reset SQL query.
-
+   - Resolution: The JSON key inside the `data` blob is `userId` because that is what the plans set via `req.session.userId`. express-mysql-session serializes the full session object. The SQL query `JSON_EXTRACT(data, '$.userId')` is therefore correct. Assumption A2 remains — verify by running `SELECT data FROM sessions LIMIT 1;` after the first login smoke test to confirm before the password reset integration test.
 ---
 
 ## Validation Architecture
