@@ -11,10 +11,9 @@ import MySQLStore from 'express-mysql-session';
 import { sessionPool } from './lib/db.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { healthRouter } from './routes/health.js';
+import { authRouter } from './routes/auth.js';
+import { usersRouter } from './routes/users.js';
 import { errorHandler } from './middleware/errorHandler.js';
-// Plan 02 will add live imports when route files exist:
-// import { authRouter } from './routes/auth.js';
-// import { protectedRouter } from './routes/protected.js';
 
 // express-mysql-session requires being called with the session object as argument
 // Source: express-mysql-session README — wraps session.Store
@@ -76,9 +75,14 @@ export function createApp(): Express {
 
   // 6. Routes
   app.use('/', healthRouter);
-  // Phase 2 route mounts — authRouter and protectedRouter imported in Plan 02
-  // when packages/backend/src/routes/auth.ts and routes/protected.ts exist.
-  // requireAuth is already imported above (middleware wired here when routes arrive).
+  app.use('/api/auth', authRouter); // AUTH-01 through AUTH-07 (unauthenticated endpoints)
+
+  // Protected routes — requireAuth applied to all; requireRole applied per sub-router
+  const protectedRouter = express.Router();
+  protectedRouter.use('/users', usersRouter); // admin-only (usersRouter mounts requireRole internally)
+  // Plan 03 adds: protectedRouter.use('/products', productsRouter);
+  // Plan 03 adds: protectedRouter.use('/mops', mopsRouter);
+  app.use('/api', requireAuth, protectedRouter);
 
   // 7. Global error handler — MUST be last middleware (Express requires 4-arg signature)
   app.use(errorHandler);
