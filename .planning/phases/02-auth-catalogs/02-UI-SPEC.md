@@ -46,22 +46,26 @@ Declared values (multiples of 4 only):
 Exceptions:
 - Sidebar width: 240px (fixed, not on the 8-point scale — functional requirement)
 - Touch targets (buttons, nav items): minimum 44px height
-- Status badge: 6px vertical padding, 12px horizontal padding (both on the 4-point scale)
+- Status badge: 4px vertical padding (`py-1`), 12px horizontal padding (`px-3`) — both on the 4-point scale
 
 ---
 
 ## Typography
 
-| Role | Size | Weight | Line Height |
-|------|------|--------|-------------|
-| Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 500 (medium) | 1.4 |
-| Heading | 20px | 600 (semibold) | 1.3 |
-| Display | 24px | 600 (semibold) | 1.2 |
+| Role | Size | Weight | Line Height | Distinguisher |
+|------|------|--------|-------------|---------------|
+| Body | 14px | 400 (regular) | 1.5 | `text-gray-900` |
+| Label | 14px | 400 (regular) | 1.4 | `text-gray-500` (muted color, not weight) |
+| Heading | 20px | 600 (semibold) | 1.3 | `text-gray-900` |
+| Display | 24px | 600 (semibold) | 1.2 | `text-gray-900` |
+
+**Declared font weights: 2 total — 400 (regular / `font-normal`) and 600 (semibold / `font-semibold`).**
+
+Weight 500 (`font-medium`) is not used anywhere in this phase. Labels are distinguished from body text by color (`text-gray-500` for labels vs `text-gray-900` for body) and, where needed, by font-size rather than weight.
 
 **Notes:**
-- Body (14px/400) covers: table cell content, form input text, placeholder text, sidebar nav item text
-- Label (14px/500) covers: form field labels, table column headers, modal section labels, button text
+- Body (14px/400/gray-900) covers: table cell content, form input text, placeholder text, sidebar nav item text
+- Label (14px/400/gray-500) covers: form field labels, table column headers, modal section labels, button text
 - Heading (20px/600) covers: page titles (Products, MOPs, Dashboard), modal titles
 - Display (24px/600) covers: login page heading only
 - No italic, no underline except hyperlinks (none in Phase 2)
@@ -81,7 +85,7 @@ Internal tool — clean, neutral palette. No brand color decisions locked yet; u
 | Destructive | `bg-red-600` text / `border-red-500` | #dc2626 | Destructive action buttons only (no destructive actions in Phase 2 — reserved for Phase 4 void) |
 
 **Accent (`blue-600`) reserved for:**
-1. Primary action buttons: "Log In" CTA, "Add Product" button, "Add MOP" button, "Save" button in modals
+1. Primary action buttons: "Log In" CTA, "Add Product" button, "Add MOP" button, "Add Product" / "Add MOP" / "Save Changes" buttons in modals
 2. Active sidebar nav item indicator (left border accent or background tint `bg-blue-50` with `text-blue-700`)
 3. Focus rings on all interactive elements: `focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`
 
@@ -95,7 +99,7 @@ Internal tool — clean, neutral palette. No brand color decisions locked yet; u
 | Purpose | Tailwind Class |
 |---------|---------------|
 | Body text | `text-gray-900` |
-| Secondary text (placeholders, captions) | `text-gray-500` |
+| Secondary text (placeholders, captions, labels) | `text-gray-500` |
 | Disabled state text | `text-gray-400` |
 | Input border (default) | `border-gray-300` |
 | Input border (focus) | `border-blue-500` |
@@ -168,7 +172,7 @@ Internal tool — clean, neutral palette. No brand color decisions locked yet; u
 - Background: `bg-gray-100 border-r border-gray-200`
 - Top section: App name "Sales Auditor" — 20px/600, padding 24px
 - Nav items list: padding 8px (vertical between items)
-- Nav item: 44px height, 16px horizontal padding, 14px/500, `text-gray-700`
+- Nav item: 44px height, 16px horizontal padding, 14px/400, `text-gray-700`
 - Nav item hover: `hover:bg-gray-200 hover:text-gray-900`, transition
 - Nav item active: `bg-blue-50 text-blue-700 border-l-2 border-blue-600`
 - Bottom section: Username display (14px/400, text-gray-500) + "Log Out" button (text-only, `text-gray-500 hover:text-gray-900`)
@@ -205,7 +209,7 @@ Internal tool — clean, neutral palette. No brand color decisions locked yet; u
 
 **Header row:**
 - Left: "Products" heading (20px/600)
-- Right: "Add Product" button (accent blue, 40px height, 14px/500)
+- Right: "Add Product" button (accent blue, 40px height, 14px/400)
 
 **Table (built with @tanstack/react-table v8):**
 
@@ -217,21 +221,21 @@ Internal tool — clean, neutral palette. No brand color decisions locked yet; u
 | Actions | 160px | "Edit" + "Deactivate"/"Activate" buttons |
 
 **Table anatomy:**
-- Header row: `bg-gray-100`, 14px/500, text-gray-500, height 40px, `border-b border-gray-200`
+- Header row: `bg-gray-100`, 14px/400, text-gray-500, height 40px, `border-b border-gray-200`
 - Body row: `bg-white hover:bg-gray-50`, 14px/400, height 48px, `border-b border-gray-200`
 - Row click: opens Edit modal (same as "Edit" button)
 - Table border: `border border-gray-200 rounded-md`
 - Empty state: see Copywriting Contract
 
 **Status badge:**
-- Active: `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800` — label "Active"
-- Inactive: `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600` — label "Inactive"
+- Active: `inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-green-100 text-green-800` — label "Active"
+- Inactive: `inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-gray-200 text-gray-600` — label "Inactive"
 
 **Action buttons (per row):**
-- "Edit": text button, `text-blue-600 hover:text-blue-800`, 14px/500
+- "Edit": text button, `text-blue-600 hover:text-blue-800`, 14px/400
 - Separator: `|` in text-gray-300
-- "Deactivate" (when active): text button, `text-gray-600 hover:text-gray-900`, 14px/500
-- "Activate" (when inactive): text button, `text-gray-600 hover:text-gray-900`, 14px/500
+- "Deactivate" (when active): text button, `text-gray-600 hover:text-gray-900`, 14px/400
+- "Activate" (when inactive): text button, `text-gray-600 hover:text-gray-900`, 14px/400
 - Disabled state (in-flight): `text-gray-400 cursor-not-allowed` — pessimistic UI, button disabled during round-trip
 
 ---
@@ -269,10 +273,15 @@ Identical pattern to Products page with these differences:
 **MOP form fields:**
 1. Name — label "Payment Method Name", input type text, required
 
-**Modal footer buttons:**
-- "Cancel": secondary button (`border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`), 40px height
-- "Save" / "Save Changes": primary accent button (`bg-blue-600 text-white hover:bg-blue-700`), 40px height
-- In-flight: "Save" button shows "Saving..." and is disabled; all form inputs disabled (pessimistic UI)
+**Modal footer buttons (create modals):**
+- "Discard": secondary button (`border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`), 40px height
+- "Add Product" (Product create modal) or "Add MOP" (MOP create modal): primary accent button (`bg-blue-600 text-white hover:bg-blue-700`), 40px height
+
+**Modal footer buttons (edit modals):**
+- "Discard": secondary button (`border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`), 40px height
+- "Save Changes": primary accent button (`bg-blue-600 text-white hover:bg-blue-700`), 40px height
+
+**In-flight state (both create and edit):** Primary button shows "Saving..." and is disabled; all form inputs disabled (pessimistic UI).
 
 **Validation error display:** Inline below the field that failed — `text-red-600 text-sm mt-1`. Input border switches to `border-red-500`.
 
@@ -300,9 +309,10 @@ Not a visual component — but defines observable UX:
 | Invite expired/used | "This invite link has expired or already been used. Contact your admin for a new link." |
 | Add Product CTA | "Add Product" |
 | Add MOP CTA | "Add MOP" |
-| Save modal CTA (create) | "Save" |
-| Save modal CTA (edit) | "Save Changes" |
-| Cancel modal | "Cancel" |
+| Create modal CTA — Product | "Add Product" |
+| Create modal CTA — MOP | "Add MOP" |
+| Edit modal CTA | "Save Changes" |
+| Modal dismiss button | "Discard" |
 | Table empty state — Products | Heading: "No products yet" / Body: "Add your first product to get started." |
 | Table empty state — MOPs | Heading: "No modes of payment yet" / Body: "Add your first payment method to get started." |
 | Toggle to inactive (confirmation) | No confirmation dialog — action is reversible. Button label toggles immediately to "Activate" after deactivation. |
@@ -325,7 +335,7 @@ Not a visual component — but defines observable UX:
 
 Every form submit and every row action follows pessimistic UI:
 
-1. User triggers action (click Save, click Deactivate/Activate)
+1. User triggers action (click "Add Product" / "Add MOP" / "Save Changes", click Deactivate/Activate)
 2. Immediately: disable all interactive elements in scope (form inputs, modal buttons, action buttons on that row)
 3. Show loading indicator (button label changes to in-flight copy)
 4. Await server response
@@ -337,7 +347,7 @@ No optimistic cache updates. No skeleton loaders for actions. Loading state is s
 ### Modal open/close
 
 - Open: triggered by "Add" button or row click/Edit button
-- Close: "Cancel" button, X button, Escape key, clicking overlay backdrop
+- Close: "Discard" button, X button, Escape key, clicking overlay backdrop
 - Close is blocked while a save is in-flight (disabled state)
 - No animation required for Phase 2 — simple show/hide
 
@@ -382,6 +392,16 @@ No third-party shadcn registries. No registry vetting gate required.
 | CLAUDE.md Architecture Rules | Rule 6 (DECIMAL/string for price), Rule 8 (soft-delete filter), Rule 9 (backend RBAC), Rule 10 (pessimistic UI) |
 | STATE.md | Tailwind v3 vs v4 open item resolved to v3, Express 5 confirmed, Prisma 7 confirmed |
 | User input (this session) | None required — all contract decisions pre-populated from upstream artifacts |
+
+---
+
+## Revision Log
+
+| Date | Issue | Fix Applied |
+|------|-------|-------------|
+| 2026-06-17 | Checker D1: generic "Save" / "Cancel" CTA labels | Create modal CTA changed to "Add Product" / "Add MOP"; dismiss changed to "Discard" everywhere |
+| 2026-06-17 | Checker D4: three font weights declared (400, 500, 600) | Removed weight 500; Label role now uses 400 + `text-gray-500` color distinction |
+| 2026-06-17 | Checker D5: badge vertical padding documented as 6px (off 4-pt scale) | Corrected to 4px (`py-1`); horizontal remains 12px (`px-3`) — both on 4-point scale |
 
 ---
 
