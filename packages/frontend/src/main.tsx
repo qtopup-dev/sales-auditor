@@ -1,7 +1,10 @@
-// React 18: use createRoot (NOT ReactDOM.render — removed in React 18)
+import './index.css';               // Tailwind CSS v3 directives — MUST be first import
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from 'react-router-dom';
+import { queryClient } from './lib/queryClient';
+import { router } from './router';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -10,6 +13,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </StrictMode>,
 );
