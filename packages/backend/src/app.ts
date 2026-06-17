@@ -13,6 +13,8 @@ import { requireAuth } from './middleware/requireAuth.js';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
+import { productsRouter } from './routes/products.js';
+import { mopsRouter } from './routes/mops.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 // express-mysql-session requires being called with the session object as argument
@@ -80,8 +82,8 @@ export function createApp(): Express {
   // Protected routes — requireAuth applied to all; requireRole applied per sub-router
   const protectedRouter = express.Router();
   protectedRouter.use('/users', usersRouter); // admin-only (usersRouter mounts requireRole internally)
-  // Plan 03 adds: protectedRouter.use('/products', productsRouter);
-  // Plan 03 adds: protectedRouter.use('/mops', mopsRouter);
+  protectedRouter.use('/products', productsRouter); // admin-only (productsRouter mounts requireRole internally)
+  protectedRouter.use('/mops', mopsRouter); // admin-only (mopsRouter mounts requireRole internally)
   app.use('/api', requireAuth, protectedRouter);
 
   // 7. Global error handler — MUST be last middleware (Express requires 4-arg signature)
