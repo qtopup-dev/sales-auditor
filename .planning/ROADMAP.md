@@ -38,7 +38,7 @@ Plans:
 ### Phase 2: Auth + Catalogs
 **Goal**: Users can securely log in, invite new moderators, manage sessions, and the admin can maintain the product and MOP catalogs that the sales sheet depends on.
 **Depends on**: Phase 1
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, ROLES-01, ROLES-02, ROLES-03, ROLES-04, ROLES-05, ROLES-06, ROLES-07, ROLES-08, ROLES-09, PROD-01, PROD-02, PROD-03, PROD-04, PROD-05, PROD-06, PROD-07, PAY-01, PAY-02, PAY-03, PAY-04, PAY-05, PAY-06
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, ROLES-01, ROLES-02, ROLES-07, ROLES-08, ROLES-09, PROD-01, PROD-02, PROD-03, PROD-04, PROD-06, PROD-07, PAY-01, PAY-02, PAY-03, PAY-04, PAY-06
 **Success Criteria** (what must be TRUE):
   1. An admin can log in with username and password, navigate the admin dashboard, and remain logged in after closing and reopening the browser — then explicitly log out and be redirected to the login page with the session fully invalidated
   2. An admin can generate an invite link, share it with a new user, and that user can visit the link (GET renders a form only; POST consumes the token), set their own password, and log in — the invite link cannot be reused after registration and expires after 48 hours
@@ -57,13 +57,14 @@ Plans:
 ### Phase 3: Sales Core
 **Goal**: Moderators can enter, edit, and void sales rows in a spreadsheet-like interface, and every write is captured in an immutable audit log written in the same database transaction.
 **Depends on**: Phase 2
-**Requirements**: SALES-01, SALES-02, SALES-03, SALES-04, SALES-05, SALES-06, SALES-07, SALES-08, SALES-09, SALES-10, SALES-11, SALES-12, SALES-13, SALES-14, SALES-15, SALES-16, SALES-17, SALES-18, AUDIT-01, AUDIT-02, AUDIT-03
+**Requirements**: SALES-01, SALES-02, SALES-03, SALES-04, SALES-05, SALES-06, SALES-07, SALES-08, SALES-09, SALES-10, SALES-11, SALES-12, SALES-13, SALES-14, SALES-15, SALES-16, SALES-17, SALES-18, AUDIT-01, AUDIT-02, AUDIT-03, ROLES-03, ROLES-04, ROLES-05, ROLES-06, PROD-05, PAY-05
 **Success Criteria** (what must be TRUE):
   1. A moderator can click "Add Row", select a product from the searchable combo box, see the price auto-populate and lock, select a MOP, enter a receiver name, and save — the row appears at the top of the sheet newest-first and is immediately visible without a page reload
   2. A moderator can click any editable cell on a row they created (when edit rights are on), edit it inline, and the cell saves on blur — the cell is disabled with a save indicator during the round-trip, and the Date Edited column updates to the current timestamp on every save
   3. An audit log entry is created inside the same database transaction as every create, edit, and void — if the mutation fails, no orphaned audit record exists; if the audit write fails, the mutation is rolled back (AUDIT-02 hard constraint)
   4. Voided rows remain visible in the sheet with strikethrough styling and are never removed from view; a moderator cannot void rows (only admin can), and a moderator cannot edit rows belonging to another moderator or their own rows if their edit rights are disabled — these checks are enforced by the backend, not just the UI
   5. The sales sheet handles large row counts via virtual scroll without pagination; SALES-03 (dynamic row heights from Notes content) is implemented — note: if CSS truncation with tooltip is used instead of true dynamic heights, this must be confirmed acceptable before phase closes; the layout is usable on mobile (SALES-18)
+  6. Inactive products are hidden from the Product combo box (PROD-05) and inactive MOPs are hidden from the MOP combo box (PAY-05) when adding new rows; row-level edit rights and void permission are enforced server-side (ROLES-03/04/05/06)
 **Plans**: TBD
 **UI hint**: yes
 
@@ -106,10 +107,10 @@ Plans:
 | AUTH-07 | Phase 2 |
 | ROLES-01 | Phase 2 |
 | ROLES-02 | Phase 2 |
-| ROLES-03 | Phase 2 |
-| ROLES-04 | Phase 2 |
-| ROLES-05 | Phase 2 |
-| ROLES-06 | Phase 2 |
+| ROLES-03 | Phase 3 |
+| ROLES-04 | Phase 3 |
+| ROLES-05 | Phase 3 |
+| ROLES-06 | Phase 3 |
 | ROLES-07 | Phase 2 |
 | ROLES-08 | Phase 2 |
 | ROLES-09 | Phase 2 |
@@ -117,14 +118,14 @@ Plans:
 | PROD-02 | Phase 2 |
 | PROD-03 | Phase 2 |
 | PROD-04 | Phase 2 |
-| PROD-05 | Phase 2 |
+| PROD-05 | Phase 3 |
 | PROD-06 | Phase 2 |
 | PROD-07 | Phase 2 |
 | PAY-01 | Phase 2 |
 | PAY-02 | Phase 2 |
 | PAY-03 | Phase 2 |
 | PAY-04 | Phase 2 |
-| PAY-05 | Phase 2 |
+| PAY-05 | Phase 3 |
 | PAY-06 | Phase 2 |
 | SALES-01 | Phase 3 |
 | SALES-02 | Phase 3 |
