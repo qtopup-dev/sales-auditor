@@ -7,10 +7,14 @@ import cors from 'cors';
 import morgan from 'morgan';
 import session from 'express-session';
 import MySQLStore from 'express-mysql-session';
-import mysql2 from 'mysql2/promise';
 
+import { sessionPool } from './lib/db.js';
+import { requireAuth } from './middleware/requireAuth.js';
 import { healthRouter } from './routes/health.js';
 import { errorHandler } from './middleware/errorHandler.js';
+// Plan 02 will add live imports when route files exist:
+// import { authRouter } from './routes/auth.js';
+// import { protectedRouter } from './routes/protected.js';
 
 // express-mysql-session requires being called with the session object as argument
 // Source: express-mysql-session README — wraps session.Store
@@ -39,17 +43,10 @@ export function createApp(): Express {
   app.use(express.urlencoded({ extended: false }));
 
   // 5. Session store — express-mysql-session with dedicated mysql2 pool
+  // sessionPool is imported from lib/db.ts (module-level singleton).
   // This is a SEPARATE connection from the Prisma adapter (which uses mariadb driver).
   // express-mysql-session manages the `sessions` table automatically (createDatabaseTable: true).
   // Never use MemoryStore — it leaks sessions on process restart (STATE.md pitfall).
-  const sessionPool = mysql2.createPool({
-    host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT ?? 3306),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  });
-
   const store = new MySQLSessionStore(
     {
       expiration: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
@@ -79,8 +76,9 @@ export function createApp(): Express {
 
   // 6. Routes
   app.use('/', healthRouter);
-  // Phase 2 will add: app.use('/api/auth', authRouter);
-  // Phase 2 will add: app.use('/api', protectedRouter);
+  // Phase 2 route mounts — authRouter and protectedRouter imported in Plan 02
+  // when packages/backend/src/routes/auth.ts and routes/protected.ts exist.
+  // requireAuth is already imported above (middleware wired here when routes arrive).
 
   // 7. Global error handler — MUST be last middleware (Express requires 4-arg signature)
   app.use(errorHandler);
