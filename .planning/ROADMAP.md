@@ -45,8 +45,14 @@ Plans:
   3. When an admin resets any user's password, that user's active session is immediately invalidated — the user cannot make any authenticated API call with their old session cookie (this validates the express-session-over-JWT decision for AUTH-07 and USERS-06)
   4. A moderator who logs in sees only the sales sheet view; an admin who logs in sees the admin navigation — direct URL access to admin-only routes by a moderator returns a 403 from the backend, not just a frontend redirect
   5. Admin can create, edit, toggle active/inactive status, and view all products and MOPs; inactive products and MOPs do not appear in the combo box options for new entries but existing rows that reference them still display their names correctly
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 6 plans
+Plans:
+- [ ] 02-01-PLAN.md — Backend foundation: extract sessionPool to lib/db.ts, requireAuth + requireRole middleware, shared InviteToken/AuthSession types
+- [ ] 02-02-PLAN.md — Backend auth routes: login, logout, invite generate, invite register, password reset + users route (canEdit toggle, reset-password); wire into app.ts
+- [ ] 02-03-PLAN.md — Backend catalog routes: products CRUD + toggle, MOPs CRUD + toggle; wire into protectedRouter
+- [ ] 02-04-PLAN.md — Frontend infrastructure: install deps, Tailwind v3, axios + queryClient + authStore singletons, router with ProtectedRoute guards, AuthenticatedLayout, placeholder pages
+- [ ] 02-05-PLAN.md — Frontend auth pages: LoginPage + InviteRegisterPage with form handling, returnTo navigation, error states
+- [ ] 02-06-PLAN.md — Frontend catalog pages: Modal + StatusBadge primitives, ProductsPage + MopsPage with @tanstack/react-table v8, ProductModal + MopModal
 
 ### Phase 3: Sales Core
 **Goal**: Moderators can enter, edit, and void sales rows in a spreadsheet-like interface, and every write is captured in an immutable audit log written in the same database transaction.
@@ -81,7 +87,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-06-17 |
-| 2. Auth + Catalogs | 0/0 | Not started | - |
+| 2. Auth + Catalogs | 0/6 | Not started | - |
 | 3. Sales Core | 0/0 | Not started | - |
 | 4. Admin Dashboard + Management | 0/0 | Not started | - |
 
