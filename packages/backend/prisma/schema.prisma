@@ -1,0 +1,174 @@
+// Prisma 7 schema — uses "prisma-client" provider (NOT "prisma-client-js")
+// Datasource url is in prisma.config.ts — NOT here (Prisma 7 breaking change)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  admin
+  moderator
+}
+
+enum SaleStatus {
+  active
+  void
+}
+
+enum AuditAction {
+  create
+  update
+  void
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Organization {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  products     Product[]
+  mops         Mop[]
+  sales        Sale[]
+  auditLogs    AuditLog[]
+  inviteTokens InviteToken[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  username       String       @db.VarChar(100)
+  passwordHash   String       @db.VarChar(255)
+  role           Role
+  canEdit        Boolean      @default(true)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  salesCreated  Sale[]        @relation("CreatedBy")
+  salesEdited   Sale[]        @relation("LastEditedBy")
+  auditLogs     AuditLog[]
+  inviteTokens  InviteToken[] @relation("CreatedByUser")
+
+  @@unique([organizationId, username])
+  @@map("users")
+}
+
+model Product {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String       @db.VarChar(255)
+  price          Decimal      @db.Decimal(10, 2)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sales Sale[]
+
+  @@index([organizationId, isActive])
+  @@map("products")
+}
+
+model Mop {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String       @db.VarChar(255)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sales Sale[]
+
+  @@index([organizationId, isActive])
+  @@map("mops")
+}
+
+model Sale {
+  id                   Int          @id @default(autoincrement())
+  organizationId       Int
+  organization         Organization @relation(fields: [organizationId], references: [id])
+  productId            Int
+  product              Product      @relation(fields: [productId], references: [id])
+  // Snapshot fields — denormalized at creation; never join products/mops for display (CLAUDE.md Rule 4)
+  productNameSnapshot  String       @db.VarChar(255)
+  priceSnapshot        Decimal      @db.Decimal(10, 2)
+  mopId                Int
+  mop                  Mop          @relation(fields: [mopId], references: [id])
+  mopNameSnapshot      String       @db.VarChar(255)
+  receiver             String       @db.VarChar(255)
+  notes                String?      @db.Text
+  status               SaleStatus   @default(active)
+  createdById          Int
+  createdBy            User         @relation("CreatedBy", fields: [createdById], references: [id])
+  lastEditedById       Int?
+  lastEditedBy         User?        @relation("LastEditedBy", fields: [lastEditedById], references: [id])
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdById])
+  @@index([organizationId, productId])
+  @@index([organizationId, mopId])
+  @@index([organizationId, createdAt])
+  @@map("sales")
+}
+
+model AuditLog {
+  id             BigInt       @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         Int
+  user           User         @relation(fields: [userId], references: [id])
+  saleId         Int?
+  sale           Sale?        @relation(fields: [saleId], references: [id])
+  tableName      String       @db.VarChar(100)
+  rowId          Int
+  action         AuditAction
+  fieldName      String?      @db.VarChar(100)
+  oldValue       String?      @db.Text
+  newValue       String?      @db.Text
+  createdAt      DateTime     @default(now())
+
+  // Composite indexes per CLAUDE.md planning notes and ROADMAP.md success criterion 2
+  @@index([organizationId, tableName, rowId])
+  @@index([organizationId, userId, createdAt])
+  @@index([organizationId, createdAt])
+  @@map("audit_log")
+}
+
+model InviteToken {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  tokenHash      String       @unique @db.VarChar(255)
+  role           Role
+  createdById    Int
+  createdBy      User         @relation("CreatedByUser", fields: [createdById], references: [id])
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([tokenHash])
+  @@map("invite_tokens")
+}
+
+// NOTE: The `sessions` table is NOT defined here.
+// express-mysql-session creates and manages it automatically via its own mysql2 connection pool.
+// Do not add it to this schema — Prisma and express-mysql-session operate independently.
