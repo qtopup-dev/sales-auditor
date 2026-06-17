@@ -8,7 +8,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Foundation** — Monorepo, schema, environment, seed data — the bedrock every other phase builds on
+- [x] **Phase 1: Foundation** — Monorepo, schema, environment, seed data — the bedrock every other phase builds on
 - [ ] **Phase 2: Auth + Catalogs** — Login, sessions, invite flow, roles enforcement, product catalog, MOP catalog
 - [ ] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [ ] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
@@ -32,7 +32,7 @@ Plans:
 - [x] 01-01-PLAN.md — Root monorepo scaffold: package.json workspaces, Docker Compose MySQL, .env.example, ESLint+Prettier, tsconfigs for all three packages
 - [x] 01-02-PLAN.md — Shared TypeScript types: domain entity interfaces for User, Sale, Product, Mop, AuditEntry, Organization
 - [x] 01-03-PLAN.md — Prisma 7 schema, migration, and seed: all 7 models with correct types/indexes, init migration, admin user seed
-- [ ] 01-04-PLAN.md — Express 5 backend skeleton: app.ts, index.ts, health route, error handler, session store
+- [x] 01-04-PLAN.md — Express 5 backend skeleton: app.ts, index.ts, health route, error handler, session store
 - [x] 01-05-PLAN.md — React 18 frontend shell: Vite + placeholder "App coming soon" page
 
 ### Phase 2: Auth + Catalogs
@@ -80,7 +80,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 4/5 | In Progress | - |
+| 1. Foundation | 5/5 | Complete | 2026-06-17 |
 | 2. Auth + Catalogs | 0/0 | Not started | - |
 | 3. Sales Core | 0/0 | Not started | - |
 | 4. Admin Dashboard + Management | 0/0 | Not started | - |

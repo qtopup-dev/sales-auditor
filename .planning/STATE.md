@@ -2,21 +2,21 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-06-17T06:40:00Z"
+status: in_progress
+last_updated: "2026-06-17T06:54:07Z"
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-06-17
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** Phase 1 plan 01-05 complete — React 18 frontend shell with Vite 8, createRoot, /api proxy to backend port 3001, "App coming soon" placeholder
+**Last session:** Phase 1 plan 01-04 complete — Express 5 backend skeleton with helmet, mysql session store, GET /health 200 confirmed, TZ=UTC at startup
 
 ---
 
@@ -38,13 +38,13 @@ Plan: 1 of --name
 |-------|-------|
 | Milestone | 1 — v1 MVP |
 | Current phase | 1 — Foundation |
-| Current plan | 01-05 (complete) |
-| Phase status | In progress — 4/5 plans complete (01-04 pending) |
-| Overall progress | 0 of 4 phases complete |
+| Current plan | 01-04 (complete) |
+| Phase status | Complete — 5/5 plans complete |
+| Overall progress | 1 of 4 phases complete |
 
 ```
-Progress: [==--->] 20%
-Phase 1: Foundation         [=====>] In progress (4/5 plans complete)
+Progress: [=====>] 25%
+Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [ ] Not started
 Phase 3: Sales Core         [ ] Not started
 Phase 4: Admin Dashboard    [ ] Not started
@@ -56,10 +56,10 @@ Phase 4: Admin Dashboard    [ ] Not started
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 0/4 |
+| Phases complete | 1/4 |
 | Requirements complete | 0/57 |
 | Plans written | 5 |
-| Plans complete | 4 |
+| Plans complete | 5 |
 
 ---
 
@@ -90,6 +90,8 @@ Phase 4: Admin Dashboard    [ ] Not started
 | packages/backend/.env alongside root .env | Prisma CLI resolves dotenv from CWD (packages/backend/); root .env not found |
 | MySQL 8.4 uses --mysql-native-password=ON | --default-authentication-plugin removed in MySQL 8.4 |
 | Vite config sets root: __dirname via fileURLToPath(import.meta.url) | When invoked via `vite --config packages/frontend/vite.config.ts` from repo root, Vite resolves index.html relative to CWD; setting root to config file's directory is required |
+| errorHandler reads err.statusCode and err.code for extensibility | Phase 2 auth errors use statusCode: 401 + code: 'UNAUTHORIZED' pattern; fallback to 500/INTERNAL_ERROR |
+| express-mysql-session pool separate from Prisma mariadb adapter | MySQLStore(session) pattern with dedicated mysql2.createPool; sessions table auto-created with createDatabaseTable: true |
 
 ### Critical Pitfalls to Watch
 
