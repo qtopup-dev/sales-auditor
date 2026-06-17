@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 import { requireRole } from '../middleware/requireRole.js';
 
 export const authRouter = Router();
@@ -98,7 +99,7 @@ authRouter.post('/logout', (req, res) => {
 // CONTEXT.md §Specifics: raw token in URL, sha256 hash stored in DB
 // Security: 32 bytes = 256-bit token space; timing attacks prevented by hash lookup
 
-authRouter.post('/invite', requireRole('admin'), async (req, res) => {
+authRouter.post('/invite', requireAuth, requireRole('admin'), async (req, res) => {
   const rawToken = crypto.randomBytes(32).toString('base64url'); // 43 URL-safe chars
   const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
   const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours

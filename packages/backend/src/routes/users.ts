@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
@@ -45,7 +45,7 @@ usersRouter.get('/', async (_req, res) => {
 
 usersRouter.patch(
   '/:id',
-  [body('canEdit').isBoolean().withMessage('canEdit must be a boolean')],
+  [param('id').isInt({ min: 1 }).withMessage('Invalid user ID'), body('canEdit').isBoolean().withMessage('canEdit must be a boolean')],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -79,7 +79,15 @@ usersRouter.patch(
 // CONTEXT.md D-03: all active sessions for target user are immediately invalidated
 // RESEARCH.md Pattern 5: direct DELETE SQL is correct approach (O(1) vs O(n) sessionStore.all())
 
-usersRouter.post('/:id/reset-password', async (req, res) => {
+usersRouter.post(
+  '/:id/reset-password',
+  [param('id').isInt({ min: 1 }).withMessage('Invalid user ID')],
+  async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+    return;
+  }
   const targetId = Number(req.params.id);
 
   // Verify target user exists and belongs to this org
