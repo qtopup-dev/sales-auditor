@@ -1,14 +1,13 @@
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getAuthUser } from '../stores/authStore';
 import { AuthenticatedLayout } from '../layouts/AuthenticatedLayout';
+import { LoginPage } from '../pages/LoginPage';
+import { InviteRegisterPage } from '../pages/InviteRegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { SalesPage } from '../pages/SalesPage';
 import { UsersPage } from '../pages/UsersPage';
-// Plan 05 will add: LoginPage, InviteRegisterPage
 // Plan 06 will add: ProductsPage, MopsPage
 // Placeholders for pages not yet created — defined inline to avoid compilation errors:
-const LoginPage = () => <div>Login</div>;       // replaced in Plan 05
-const InviteRegisterPage = () => <div>Register</div>; // replaced in Plan 05
 const ProductsPage = () => <div>Products</div>; // replaced in Plan 06
 const MopsPage = () => <div>MOPs</div>;         // replaced in Plan 06
 
