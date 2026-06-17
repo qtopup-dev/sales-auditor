@@ -6,10 +6,8 @@ import { InviteRegisterPage } from '../pages/InviteRegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { SalesPage } from '../pages/SalesPage';
 import { UsersPage } from '../pages/UsersPage';
-// Plan 06 will add: ProductsPage, MopsPage
-// Placeholders for pages not yet created — defined inline to avoid compilation errors:
-const ProductsPage = () => <div>Products</div>; // replaced in Plan 06
-const MopsPage = () => <div>MOPs</div>;         // replaced in Plan 06
+import { ProductsPage } from '../pages/ProductsPage';
+import { MopsPage } from '../pages/MopsPage';
 
 // ─── ProtectedRoute ──────────────────────────────────────────────────────────
 // CONTEXT.md D-11: stores returnTo in location.state for post-login redirect
