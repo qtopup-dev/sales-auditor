@@ -63,6 +63,8 @@ authRouter.post('/login', loginValidation, async (req, res) => {
 
   req.session.userId = user.id;
   req.session.role = user.role;
+  req.session.username = user.username;
+  req.session.organizationId = user.organizationId;
 
   // RESEARCH.md Pitfall 4: save before responding — async session write must complete first
   await new Promise<void>((resolve, reject) =>

@@ -115,8 +115,10 @@ model Sale {
   status               SaleStatus   @default(active)
   createdById          Int
   createdBy            User         @relation("CreatedBy", fields: [createdById], references: [id])
+  createdByUsername    String       @db.VarChar(100)
   lastEditedById       Int?
   lastEditedBy         User?        @relation("LastEditedBy", fields: [lastEditedById], references: [id])
+  lastEditedByUsername String?      @db.VarChar(100)
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
@@ -136,6 +138,7 @@ model AuditLog {
   organization   Organization @relation(fields: [organizationId], references: [id])
   userId         Int
   user           User         @relation(fields: [userId], references: [id])
+  userUsername   String       @db.VarChar(100)
   saleId         Int?
   sale           Sale?        @relation(fields: [saleId], references: [id])
   tableName      String       @db.VarChar(100)
