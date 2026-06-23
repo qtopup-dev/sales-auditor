@@ -5,26 +5,7 @@ import type { Sale } from '@alejinput/shared';
 import { useAuthStore } from '../../stores/authStore';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { AddRowForm } from './AddRowForm';
-
-// Stub replaced by Plan 06 — EditableCell is not yet built
-function EditableCell({
-  sale,
-  field,
-  displayValue,
-}: {
-  sale: Sale;
-  field: string;
-  displayValue: string;
-}) {
-  const isVoided = sale.status === 'void';
-  return (
-    <span
-      className={`text-sm font-normal ${isVoided ? 'line-through text-gray-400' : 'text-gray-900'}`}
-    >
-      {displayValue}
-    </span>
-  );
-}
+import { EditableCell } from './EditableCell';
 
 type TableRow = Sale | { isNewRow: true };
 
