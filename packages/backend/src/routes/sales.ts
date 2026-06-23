@@ -51,7 +51,9 @@ function serializeSale(sale: {
   };
 }
 
-// AuditLog id is BigInt — must convert to Number for JSON serialization
+// AuditLog id is BigInt — must convert to String for JSON serialization
+// CRITICAL (CR-02): Number(bigint) silently truncates values above 2^53-1.
+// String() is correct for JSON transport; frontend treats id as string.
 function serializeAuditEntry(entry: {
   id: bigint;
   organizationId: number;
@@ -67,7 +69,7 @@ function serializeAuditEntry(entry: {
   createdAt: Date;
 }) {
   return {
-    id: Number(entry.id),
+    id: String(entry.id), // CR-02: was Number(entry.id) — String() prevents BigInt truncation above 2^53
     organizationId: entry.organizationId,
     userId: entry.userId,
     userUsername: entry.userUsername,
@@ -338,15 +340,70 @@ salesRouter.patch('/:id', patchSaleValidation, async (req, res) => {
       });
 
       return updated;
-    } else {
-      // Standard field update: mopId, receiver, or notes
-      let coercedValue: string | number | null;
-      if (field === 'mopId') {
-        coercedValue = Number(rawValue);
-      } else {
-        // receiver or notes — coerce to string; notes can be null/empty
-        coercedValue = field === 'notes' && rawValue === '' ? null : String(rawValue);
+    } else if (field === 'mopId') {
+      // Special case: mopId change must also refresh mopNameSnapshot atomically
+      // Mirror the productId special-case above (CR-01 fix)
+      const newMop = await tx.mop.findFirst({
+        where: {
+          id: Number(rawValue),
+          organizationId: req.session.organizationId!,
+          isActive: true, // explicit — $extends NOT active in tx
+        },
+      });
+      if (!newMop) {
+        throw Object.assign(new Error('MOP not found'), { statusCode: 404, code: 'NOT_FOUND' });
       }
+
+      // Capture old values for audit — from Prisma result BEFORE update (T-03-08)
+      const oldMopId = String(sale.mopId);
+      const oldMopName = sale.mopNameSnapshot;
+
+      const updated = await tx.sale.update({
+        where: { id: saleId },
+        data: {
+          mopId: newMop.id,
+          mopNameSnapshot: newMop.name,
+          lastEditedById: req.session.userId!,
+          lastEditedByUsername: req.session.username!,
+        },
+      });
+
+      // Two audit entries for mopId change: mopId and mopNameSnapshot
+      await tx.auditLog.createMany({
+        data: [
+          {
+            organizationId: req.session.organizationId!,
+            userId: req.session.userId!,
+            userUsername: req.session.username!,
+            saleId,
+            tableName: 'sales',
+            rowId: saleId,
+            action: 'update',
+            fieldName: 'mopId',
+            oldValue: oldMopId,
+            newValue: String(updated.mopId),
+          },
+          {
+            organizationId: req.session.organizationId!,
+            userId: req.session.userId!,
+            userUsername: req.session.username!,
+            saleId,
+            tableName: 'sales',
+            rowId: saleId,
+            action: 'update',
+            fieldName: 'mopNameSnapshot',
+            oldValue: oldMopName,
+            newValue: updated.mopNameSnapshot,
+          },
+        ],
+      });
+
+      return updated;
+    } else {
+      // Standard field update: receiver or notes
+      // receiver or notes — coerce to string; notes can be null/empty
+      const coercedValue: string | null =
+        field === 'notes' && rawValue === '' ? null : String(rawValue);
 
       // Capture old value from DB result BEFORE update (T-03-08: prevents audit forgery)
       const oldValue = String(sale[field as keyof typeof sale] ?? '');
