@@ -33,7 +33,7 @@ const columns: ColumnDef<TableRow>[] = [
       const sale = row.original as Sale;
       return (
         <span
-          className={`block text-right text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400' : 'text-gray-400'}`}
+          className={`block text-right text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400' : 'text-gray-900'}`}
         >
           {sale.priceSnapshot}
         </span>
