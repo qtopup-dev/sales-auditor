@@ -23,6 +23,13 @@ import { errorHandler } from './middleware/errorHandler.js';
 const MySQLSessionStore = MySQLStore(session);
 
 export function createApp(): Express {
+  // CR-03: Fail fast if SESSION_SECRET is absent — never fall back to a known string.
+  // A missing env var must not silently produce a forgeable session cookie.
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    throw new Error('SESSION_SECRET environment variable is required');
+  }
+
   const app = express();
 
   // 1. Security headers — helmet MUST be registered before all routes
@@ -62,7 +69,7 @@ export function createApp(): Express {
 
   app.use(
     session({
-      secret: process.env.SESSION_SECRET ?? 'change-me-in-production',
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       rolling: true, // Resets cookie expiry on each request
