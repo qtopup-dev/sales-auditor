@@ -149,6 +149,12 @@ authRouter.post('/invite/:token', registerValidation, async (req, res) => {
   }
 
   const tokenHash = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const { username, password } = req.body as { username: string; password: string };
+
+  // WR-01: Hash BEFORE opening the transaction — bcrypt with cost 12 takes ~100-300ms of CPU
+  // time and would hold a DB connection open for its entire duration inside a transaction.
+  // Under load this can exhaust the connection pool and trigger transaction timeouts.
+  const passwordHash = await bcrypt.hash(password, 12); // cost factor 12 per CLAUDE.md
 
   await prisma.$transaction(async (tx) => {
     const invite = await tx.inviteToken.findUnique({ where: { tokenHash } });
@@ -165,9 +171,6 @@ authRouter.post('/invite/:token', registerValidation, async (req, res) => {
       where: { tokenHash },
       data: { usedAt: new Date() },
     });
-
-    const { username, password } = req.body as { username: string; password: string };
-    const passwordHash = await bcrypt.hash(password, 12); // cost factor 12 per CLAUDE.md
 
     await tx.user.create({
       data: {
