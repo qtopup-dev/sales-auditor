@@ -16,8 +16,11 @@ declare module 'express-session' {
 // ROLES-09: backend enforces all access checks. requireAuth is mounted at the router level
 // (app.use('/api', requireAuth, protectedRouter)) — NOT per-route. Any route added to
 // protectedRouter automatically inherits this check.
+// WR-02: also assert organizationId — a session with userId but no organizationId (e.g. from
+// an older code version or corrupted store) must be rejected, not silently pass undefined
+// to every WHERE clause, which would match zero rows rather than throwing.
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!req.session.userId) {
+  if (!req.session.userId || !req.session.organizationId) {
     res.status(401).json({ error: 'UNAUTHORIZED' });
     return;
   }
