@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AsyncSelect from 'react-select/async';
 import type { Sale } from '@alejinput/shared';
 import { api } from '../../lib/axios';
@@ -32,6 +32,20 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   } = useSalesEditStore();
 
   const { user } = useAuthStore();
+
+  const { data: cachedProducts = [] } =
+    useQuery<Array<{ id: number; name: string; price: string }>>({
+      queryKey: ['catalog-products'],
+      queryFn: () => api.get('/catalog/products').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const { data: cachedMops = [] } =
+    useQuery<Array<{ id: number; name: string }>>({
+      queryKey: ['catalog-mops'],
+      queryFn: () => api.get('/catalog/mops').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
 
   // D-06: determine if this cell is editable for the current user
   const canEdit =
@@ -97,21 +111,19 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
     }
   };
 
-  const loadProducts = async (inputValue: string) => {
-    const res = await api.get<Array<{ id: number; name: string; price: string }>>(
-      '/products',
+  const loadProducts = (inputValue: string) =>
+    Promise.resolve(
+      cachedProducts
+        .filter((p) => p.name.toLowerCase().includes(inputValue.toLowerCase()))
+        .map((p) => ({ value: p.id, label: p.name }))
     );
-    return res.data
-      .filter((p) => p.name.toLowerCase().includes(inputValue.toLowerCase()))
-      .map((p) => ({ value: p.id, label: p.name }));
-  };
 
-  const loadMops = async (inputValue: string) => {
-    const res = await api.get<Array<{ id: number; name: string }>>('/mops');
-    return res.data
-      .filter((m) => m.name.toLowerCase().includes(inputValue.toLowerCase()))
-      .map((m) => ({ value: m.id, label: m.name }));
-  };
+  const loadMops = (inputValue: string) =>
+    Promise.resolve(
+      cachedMops
+        .filter((m) => m.name.toLowerCase().includes(inputValue.toLowerCase()))
+        .map((m) => ({ value: m.id, label: m.name }))
+    );
 
   const handleSelectChange = (
     option: { value: number; label: string } | null,
@@ -161,7 +173,6 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
           <AsyncSelect
             loadOptions={loadOptions}
             defaultOptions
-            cacheOptions
             autoFocus
             menuPortalTarget={document.body}
             menuPosition="fixed"

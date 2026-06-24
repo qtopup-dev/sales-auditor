@@ -16,6 +16,19 @@ export function SalesPage() {
     queryFn: () => api.get<Sale[]>('/sales').then((r) => r.data),
   });
 
+  // Pre-fetch catalog data to warm React Query cache before Add Row is opened (D-07)
+  // Results are not used as props — cache warming only (D-08)
+  useQuery<Array<{ id: number; name: string; price: string }>>({
+    queryKey: ['catalog-products'],
+    queryFn: () => api.get('/catalog/products').then((r) => r.data),
+    staleTime: 5 * 60 * 1000,
+  });
+  useQuery<Array<{ id: number; name: string }>>({
+    queryKey: ['catalog-mops'],
+    queryFn: () => api.get('/catalog/mops').then((r) => r.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
   return (
     // flex flex-col h-full fills the main content area height
     // AuthenticatedLayout main is `overflow-auto p-8` — this div is inside that

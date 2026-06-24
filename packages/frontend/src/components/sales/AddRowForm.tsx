@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncSelect from 'react-select/async';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 
@@ -46,19 +46,35 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [closeAddRow]);
 
-  const loadProducts = async (inputValue: string) => {
-    const res = await api.get<Array<{ id: number; name: string; price: string }>>('/products');
-    return res.data
-      .filter((p) => p.name.toLowerCase().includes(inputValue.toLowerCase()))
-      .map((p) => ({ value: p.id, label: p.name, price: p.price }));
-  };
+  const { data: cachedProducts = [], isLoading: productsLoading } =
+    useQuery<Array<{ id: number; name: string; price: string }>>({
+      queryKey: ['catalog-products'],
+      queryFn: () => api.get('/catalog/products').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
 
-  const loadMops = async (inputValue: string) => {
-    const res = await api.get<Array<{ id: number; name: string }>>('/mops');
-    return res.data
-      .filter((m) => m.name.toLowerCase().includes(inputValue.toLowerCase()))
-      .map((m) => ({ value: m.id, label: m.name }));
-  };
+  const { data: cachedMops = [], isLoading: mopsLoading } =
+    useQuery<Array<{ id: number; name: string }>>({
+      queryKey: ['catalog-mops'],
+      queryFn: () => api.get('/catalog/mops').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const isCatalogLoading = productsLoading || mopsLoading;
+
+  const loadProducts = (inputValue: string) =>
+    Promise.resolve(
+      cachedProducts
+        .filter((p) => p.name.toLowerCase().includes(inputValue.toLowerCase()))
+        .map((p) => ({ value: p.id, label: p.name, price: p.price }))
+    );
+
+  const loadMops = (inputValue: string) =>
+    Promise.resolve(
+      cachedMops
+        .filter((m) => m.name.toLowerCase().includes(inputValue.toLowerCase()))
+        .map((m) => ({ value: m.id, label: m.name }))
+    );
 
   const createMutation = useMutation({
     mutationFn: (data: AddRowFormData) => api.post('/sales', data).then((r) => r.data),
@@ -87,10 +103,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
               <AsyncSelect
                 loadOptions={loadProducts}
                 defaultOptions
-                cacheOptions
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
-                isDisabled={isPending}
+                isDisabled={isPending || isCatalogLoading}
                 placeholder="Select product..."
                 styles={{
                   control: (base) => ({
@@ -131,10 +146,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
               <AsyncSelect
                 loadOptions={loadMops}
                 defaultOptions
-                cacheOptions
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
-                isDisabled={isPending}
+                isDisabled={isPending || isCatalogLoading}
                 placeholder="Select MOP..."
                 styles={{
                   control: (base) => ({
