@@ -103,6 +103,17 @@ Plans:
 
 ## Backlog
 
+### Phase 999.2: fix: Add Row form does not render on first mount (BACKLOG)
+
+**Goal:** Fix the Add Row form not appearing when clicked. Root cause confirmed via tanstack/virtual-core v3 source: `getVirtualItems()` returns `[]` when `outerSize === 0`, which happens on the first render of `SalesTable` because `parentRef.current` is null and `initialRect` defaults to `{ width: 0, height: 0 }`. This only manifests when `SalesTable` mounts fresh — i.e., when the sales list was empty and "No sales yet" was showing instead of the table. The form IS in the Zustand store (`isAddRowOpen: true`) but never reaches the DOM. Separately, the `AsyncSelect` components in `AddRowForm` have hardcoded `value={null}` which visually clears the selected product/MOP after each pick, though the form value is correctly set internally.
+**Requirements:** SALES-01
+**Plans:** 1 plan
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+---
+
 ### Phase 999.1: fix: Add Row Catalog Lag
 **Goal:** Fix product/MOP dropdown 403 errors for moderators and simultaneous-refetch lag for admins by adding catalog endpoints accessible to all authenticated users and pre-fetching catalog data into React Query cache on SalesPage mount.
 **Requirements:** PROD-05, PAY-05
