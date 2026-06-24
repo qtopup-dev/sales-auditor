@@ -68,11 +68,11 @@ Plans:
 **Plans:** 6 plans
 Plans:
 - [x] 03-01-PLAN.md — [BLOCKING] Schema migration: add createdByUsername/lastEditedByUsername to Sale, userUsername to AuditLog; extend SessionData with username + organizationId; update login handler
-- [ ] 03-02-PLAN.md — Backend sales routes: GET /api/sales, POST /api/sales, PATCH /:id, POST /:id/void, GET /:id/audit — all mutations with transactional audit log; mount salesRouter on protectedRouter
-- [ ] 03-03-PLAN.md — Frontend primitives: salesEditStore (Zustand D-05 shape) + VoidConfirmDialog (wraps Modal.tsx)
-- [ ] 03-04-PLAN.md — Frontend SalesTable (react-table v8 + react-virtual v3 + dynamic row heights) + AddRowForm (react-hook-form + AsyncSelect)
-- [ ] 03-05-PLAN.md — Frontend AuditDrawer (slide-in panel, useQuery audit entries, admin-only)
-- [ ] 03-06-PLAN.md — Frontend EditableCell (inline edit state machine, blur-save, pessimistic UI) + SalesPage full wiring
+- [x] 03-02-PLAN.md — Backend sales routes: GET /api/sales, POST /api/sales, PATCH /:id, POST /:id/void, GET /:id/audit — all mutations with transactional audit log; mount salesRouter on protectedRouter
+- [x] 03-03-PLAN.md — Frontend primitives: salesEditStore (Zustand D-05 shape) + VoidConfirmDialog (wraps Modal.tsx)
+- [x] 03-04-PLAN.md — Frontend SalesTable (react-table v8 + react-virtual v3 + dynamic row heights) + AddRowForm (react-hook-form + AsyncSelect)
+- [x] 03-05-PLAN.md — Frontend AuditDrawer (slide-in panel, useQuery audit entries, admin-only)
+- [x] 03-06-PLAN.md — Frontend EditableCell (inline edit state machine, blur-save, pessimistic UI) + SalesPage full wiring
 **UI hint**: yes
 
 ### Phase 4: Admin Dashboard + Management
@@ -96,21 +96,20 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-06-17 |
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
-| 3. Sales Core | 0/6 | Ready to execute | - |
+| 3. Sales Core | 6/6 | UAT pending | - |
 | 4. Admin Dashboard + Management | 0/0 | Not started | - |
 
 ---
 
 ## Backlog
 
-### Phase 999.1: fix: UI lags on "Add Row" — /mops and /products pending after voiding a row (BACKLOG)
-
-**Goal:** [Captured for future planning]
-**Requirements:** TBD
-**Plans:** 0 plans
-
+### Phase 999.1: fix: Add Row Catalog Lag
+**Goal:** Fix product/MOP dropdown 403 errors for moderators and simultaneous-refetch lag for admins by adding catalog endpoints accessible to all authenticated users and pre-fetching catalog data into React Query cache on SalesPage mount.
+**Requirements:** PROD-05, PAY-05
+**Plans:** 2 plans
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [ ] 999-01-01-PLAN.md — Backend: new catalogRouter (GET /catalog/products + GET /catalog/mops, no requireRole) mounted on protectedRouter
+- [ ] 999-01-02-PLAN.md — Frontend: SalesPage pre-fetch + AddRowForm + EditableCell updated to read from React Query cache
 
 ---
 
