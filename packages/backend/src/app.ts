@@ -16,6 +16,7 @@ import { usersRouter } from './routes/users.js';
 import { productsRouter } from './routes/products.js';
 import { mopsRouter } from './routes/mops.js';
 import { salesRouter } from './routes/sales.js';
+import { catalogRouter } from './routes/catalog.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 // express-mysql-session requires being called with the session object as argument
@@ -93,6 +94,7 @@ export function createApp(): Express {
   protectedRouter.use('/products', productsRouter); // admin-only (productsRouter mounts requireRole internally)
   protectedRouter.use('/mops', mopsRouter); // admin-only (mopsRouter mounts requireRole internally)
   protectedRouter.use('/sales', salesRouter); // all authenticated users (role checks per-route)
+  protectedRouter.use('/catalog', catalogRouter); // all authenticated users (no role restriction — D-05)
   app.use('/api', requireAuth, protectedRouter);
 
   // 7. Global error handler — MUST be last middleware (Express requires 4-arg signature)
