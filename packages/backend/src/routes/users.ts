@@ -38,6 +38,65 @@ usersRouter.get('/', async (_req, res) => {
   res.json(users);
 });
 
+// ─── PATCH /api/users/:id/username ───────────────────────────────────────────
+// USERS-03: admin edits any user's username
+// D-20/D-21: validate non-empty 2–100 chars, unique within organizationId (excluding self)
+// ROUTING: this handler MUST appear BEFORE PATCH /:id to avoid Express capturing "username" as :id
+// usersRouter already mounts requireRole('admin') at router level — no extra guard needed here
+
+usersRouter.patch(
+  '/:id/username',
+  [
+    param('id').isInt({ min: 1 }).withMessage('Invalid user ID'),
+    body('username')
+      .trim()
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Username must be 2–100 characters'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+      return;
+    }
+
+    const targetId = Number(req.params.id);
+    const username = (req.body.username as string).trim();
+    const organizationId = req.session.organizationId!;
+
+    // D-21: uniqueness check excluding self — check active + inactive users (isActive: undefined)
+    // isActive: undefined overrides $extends softDeleteFilter — checks ALL users regardless of isActive
+    const conflict = await prisma.user.findFirst({
+      where: {
+        username,
+        organizationId,
+        NOT: { id: targetId },
+        isActive: undefined, // override $extends — check ALL users regardless of isActive
+      },
+    });
+    if (conflict) {
+      res.status(409).json({ error: 'USERNAME_TAKEN' });
+      return;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: targetId, organizationId },
+      data: { username },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        canEdit: true,
+        isActive: true,
+        organizationId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    res.json(updated);
+  },
+);
+
 // ─── PATCH /api/users/:id ────────────────────────────────────────────────────
 // ROLES-02: toggle canEdit on/off for a moderator
 // Accepts: { canEdit: boolean }
