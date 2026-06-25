@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
 import type { Sale } from '@alejinput/shared';
@@ -138,7 +138,7 @@ const columns: ColumnDef<TableRow>[] = [
 
 export function SalesTable({ sales }: { sales: Sale[] }) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const { isAddRowOpen } = useSalesEditStore();
+  const isAddRowOpen = useSalesEditStore((s) => s.isAddRowOpen);
 
   const rows: TableRow[] = isAddRowOpen
     ? [{ isNewRow: true as const }, ...sales]
@@ -156,12 +156,25 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
     count: tableRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 56,
+    initialRect: { width: 0, height: 600 },
     measureElement:
       typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
         ? (el) => el?.getBoundingClientRect().height
         : undefined,
     overscan: 3,
   });
+
+  const handleSaveSuccess = useCallback(
+    () => virtualizer.scrollToIndex(0, { align: 'start' }),
+    [] // virtualizer instance is stable (created once via useState inside useVirtualizer)
+  );
+
+  const virtualItems = virtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const paddingBottom =
+    virtualItems.length > 0
+      ? virtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
+      : 0;
 
   return (
     <div ref={parentRef} className="overflow-auto h-full">
@@ -185,58 +198,57 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
           ))}
         </thead>
         <tbody>
-          <tr style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}>
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const row = tableRows[virtualItem.index];
-              const originalRow = row.original;
-              const isVoidedRow =
-                !isNewRowGuard(originalRow) && (originalRow as Sale).status === 'void';
-              const isAddRow = isNewRowGuard(originalRow);
+          {paddingTop > 0 && (
+            <tr style={{ height: paddingTop }}>
+              <td colSpan={columns.length} />
+            </tr>
+          )}
+          {virtualItems.map((virtualItem) => {
+            const row = tableRows[virtualItem.index];
+            const originalRow = row.original;
+            const isVoidedRow =
+              !isNewRowGuard(originalRow) && (originalRow as Sale).status === 'void';
+            const isAddRow = isNewRowGuard(originalRow);
 
-              return (
-                <tr
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  className={
-                    isAddRow
-                      ? 'bg-gray-100 border-b border-blue-200'
-                      : isVoidedRow
-                      ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
-                      : 'bg-white border-b border-gray-200 hover:bg-gray-50'
-                  }
-                >
-                  {isAddRow ? (
-                    <td colSpan={columns.length} className="p-0">
-                      <AddRowForm
-                        onSaveSuccess={() => virtualizer.scrollToIndex(0, { align: 'start' })}
-                      />
+            return (
+              <tr
+                key={virtualItem.key}
+                data-index={virtualItem.index}
+                ref={virtualizer.measureElement}
+                className={
+                  isAddRow
+                    ? 'bg-gray-100 border-b border-blue-200'
+                    : isVoidedRow
+                    ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
+                    : 'bg-white border-b border-gray-200 hover:bg-gray-50'
+                }
+              >
+                {isAddRow ? (
+                  <td colSpan={columns.length} className="p-0">
+                    <AddRowForm onSaveSuccess={handleSaveSuccess} />
+                  </td>
+                ) : (
+                  row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="px-4 py-2 text-sm text-gray-900"
+                      style={{ width: cell.column.getSize() }}
+                      onClick={
+                        cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined
+                      }
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
-                  ) : (
-                    row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-4 py-2 text-sm text-gray-900"
-                        style={{ width: cell.column.getSize() }}
-                        onClick={
-                          cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined
-                        }
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))
-                  )}
-                </tr>
-              );
-            })}
-          </tr>
+                  ))
+                )}
+              </tr>
+            );
+          })}
+          {paddingBottom > 0 && (
+            <tr style={{ height: paddingBottom }}>
+              <td colSpan={columns.length} />
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

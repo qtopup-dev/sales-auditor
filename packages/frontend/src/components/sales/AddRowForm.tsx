@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncSelect from 'react-select/async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +18,7 @@ type AddRowFormData = {
 
 export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
   const queryClient = useQueryClient();
-  const { closeAddRow } = useSalesEditStore();
+  const closeAddRow = useSalesEditStore((s) => s.closeAddRow);
 
   const {
     register,
@@ -31,6 +31,11 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
   });
 
   const [priceDisplay, setPriceDisplay] = useState<string>('—');
+
+  type ProductOption = { value: number; label: string; price: string };
+  type MopOption = { value: number; label: string };
+  const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(null);
+  const [selectedMop, setSelectedMop] = useState<MopOption | null>(null);
 
   const watchedProductId = watch('productId');
   const watchedMopId = watch('mopId');
@@ -62,19 +67,29 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
 
   const isCatalogLoading = productsLoading || mopsLoading;
 
-  const loadProducts = (inputValue: string) =>
-    Promise.resolve(
-      cachedProducts
-        .filter((p) => p.name.toLowerCase().includes(inputValue.toLowerCase()))
-        .map((p) => ({ value: p.id, label: p.name, price: p.price }))
-    );
+  const productOptions = useMemo(
+    () => cachedProducts.map((p) => ({ value: p.id, label: p.name, price: p.price })),
+    [cachedProducts]
+  );
+  const mopOptions = useMemo(
+    () => cachedMops.map((m) => ({ value: m.id, label: m.name })),
+    [cachedMops]
+  );
 
-  const loadMops = (inputValue: string) =>
-    Promise.resolve(
-      cachedMops
-        .filter((m) => m.name.toLowerCase().includes(inputValue.toLowerCase()))
-        .map((m) => ({ value: m.id, label: m.name }))
-    );
+  const loadProducts = useCallback(
+    (inputValue: string) =>
+      Promise.resolve(
+        productOptions.filter((p) => p.label.toLowerCase().includes(inputValue.toLowerCase()))
+      ),
+    [productOptions]
+  );
+  const loadMops = useCallback(
+    (inputValue: string) =>
+      Promise.resolve(
+        mopOptions.filter((m) => m.label.toLowerCase().includes(inputValue.toLowerCase()))
+      ),
+    [mopOptions]
+  );
 
   const createMutation = useMutation({
     mutationFn: (data: AddRowFormData) => api.post('/sales', data).then((r) => r.data),
@@ -102,7 +117,7 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
             render={({ field }) => (
               <AsyncSelect
                 loadOptions={loadProducts}
-                defaultOptions
+                defaultOptions={productOptions}
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
                 isDisabled={isPending || isCatalogLoading}
@@ -117,10 +132,12 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
                   menu: (base) => ({ ...base, zIndex: 9999 }),
                 }}
                 onChange={(option) => {
-                  field.onChange(option?.value ?? null);
-                  setPriceDisplay(option ? (option as { value: number; label: string; price: string }).price : '—');
+                  const opt = option as ProductOption | null;
+                  field.onChange(opt?.value ?? null);
+                  setSelectedProduct(opt);
+                  setPriceDisplay(opt ? opt.price : '—');
                 }}
-                value={null}
+                value={selectedProduct}
               />
             )}
           />
@@ -145,7 +162,7 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
             render={({ field }) => (
               <AsyncSelect
                 loadOptions={loadMops}
-                defaultOptions
+                defaultOptions={mopOptions}
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
                 isDisabled={isPending || isCatalogLoading}
@@ -159,8 +176,12 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
                   }),
                   menu: (base) => ({ ...base, zIndex: 9999 }),
                 }}
-                onChange={(option) => field.onChange(option?.value ?? null)}
-                value={null}
+                onChange={(option) => {
+                  const opt = option as MopOption | null;
+                  field.onChange(opt?.value ?? null);
+                  setSelectedMop(opt);
+                }}
+                value={selectedMop}
               />
             )}
           />
