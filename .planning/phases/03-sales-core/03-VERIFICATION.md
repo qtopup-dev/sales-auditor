@@ -1,36 +1,74 @@
 ---
 phase: 03-sales-core
-verified: 2026-06-23T00:00:00Z
+verified: 2026-06-25T19:00:00Z
 status: human_needed
 score: 6/6 must-haves verified
 overrides_applied: 0
+re_verification:
+  previous_status: gaps_found
+  previous_score: 5/6
+  gaps_closed:
+    - "AsyncSelect value={null} visual reset — selectedProduct/selectedMop state now tracks chosen option; combo shows name after selection (Plan 03-07)"
+    - "Fresh SalesTable mount (no existing rows) — initialRect: { width: 0, height: 600 } added to useVirtualizer; AddRowForm renders on first click (Plan 03-07)"
+    - "Session rehydration on page refresh — GET /api/auth/me endpoint added; main.tsx calls it before mounting React tree; no spurious redirect to login (gap closure)"
+    - "EditableCell all-cell re-renders on keystroke — targeted Zustand selectors replace full store subscription; only the active cell re-renders per keystroke (gap closure)"
+    - "Prisma isActive filter in admin list routes — isActive: undefined replaces broken isActive: { in: [true, false] } pattern (gap closure)"
+    - "Transaction timeouts — { timeout: 5000, maxWait: 3000 } added to all three prisma.$transaction calls in sales.ts (gap closure)"
+    - "Human items 3 (Void), 5 (Virtual scroll perf), 6 (Inactive catalog filtering) all passed UAT"
+    - "Add Row hangs browser when 200+ rows — AddRowForm moved outside virtualizer as static non-virtualized <tr> in <tbody>; virtualizer count permanently stable at sales.length (Plan 03-08)"
+  gaps_remaining: []
+  regressions: []
 human_verification:
-  - test: "Add Row end-to-end flow in browser"
-    expected: "Moderator clicks Add Row, selects product from combo (price auto-populates), selects MOP, enters receiver name, clicks Save Row — new row appears at top without page reload"
-    why_human: "Cannot verify React Query refetch timing, virtual scroll scroll-to-index, and DOM rendering without a running browser session"
-  - test: "Inline cell edit on blur"
-    expected: "Moderator clicks an editable cell — it switches to an input; on blur the cell is disabled with a spinner; after round-trip the cell shows the server-returned value and Date Edited column updates to new timestamp"
-    why_human: "Cell state machine timing (active→pending→idle) and Date Edited column update require live browser interaction"
-  - test: "Void row confirmation flow"
-    expected: "Admin clicks Void, sees confirmation modal, both buttons disable during round-trip, row appears with strikethrough and bg-red-50 after success; moderator attempt returns 403 and modal is not reachable"
-    why_human: "Modal lock behavior (Escape blocked while in-flight) and RBAC 403 response require live request"
-  - test: "Audit drawer for admin"
-    expected: "Admin clicks Audit button, right-side 400px drawer opens showing audit entries newest-first with timestamp, username, action type, and old→new values for update entries; Escape closes it; moderator does not see Audit button"
+  - test: "Add Row end-to-end flow with 200+ rows (after virtualizer fix)"
+    expected: "Clicking Add Row does not freeze the browser; form appears immediately; selecting product auto-populates price; selecting MOP name persists in combo; filling receiver and clicking Save Row creates row at top without page reload"
+    why_human: "Requires live browser with populated database to verify zero-hang on form open, React Query cache invalidation timing, and virtualizer scroll-to-top after save"
+  - test: "Inline cell edit on blur with spinner"
+    expected: "Click an editable cell (own row, canEdit=true) — switches to input; blur fires PATCH; cell shows spinner/disabled state during round-trip; Date Edited column updates to current timestamp; Escape discards draft"
+    why_human: "Cell state machine timing (active→pending→idle) and Date Edited column update require live PATCH round-trip in browser"
+  - test: "Audit drawer admin-only"
+    expected: "Admin clicks Audit button — 400px right slide-in drawer opens showing audit entries newest-first with timestamp, username, action type, and old→new values for update entries; Escape closes it; moderator does not see Audit button"
     why_human: "Drawer animation, Escape key close, and role-gated button visibility require browser session"
-  - test: "Virtual scroll performance with many rows"
-    expected: "Loading 200+ rows does not freeze the browser; Notes textarea row height adjusts without overlapping adjacent rows after an edit"
-    why_human: "Performance and ResizeObserver-driven height adjustment require a real browser with many data rows"
-  - test: "Inactive product/MOP not appearing in Add Row combos"
-    expected: "Deactivated products and MOPs do not appear in the AsyncSelect combo boxes; existing rows still show their snapshotted names correctly"
-    why_human: "Requires catalog admin to deactivate an item then verify combo list in sales sheet"
+  - test: "Session rehydration after page refresh"
+    expected: "After a hard page refresh (F5) on /sales, the user is NOT redirected to /login; the sales table loads normally because main.tsx awaits /api/auth/me before rendering the React tree"
+    why_human: "Requires live browser session with valid session cookie to verify no spurious redirect"
 ---
 
 # Phase 3: Sales Core Verification Report
 
 **Phase Goal:** Moderators can enter, edit, and void sales rows in a spreadsheet-like interface, and every write is captured in an immutable audit log written in the same database transaction.
-**Verified:** 2026-06-23
+**Verified:** 2026-06-25T19:00:00Z
 **Status:** human_needed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — after gap closure (Plans 03-07, 03-08 + session/perf fixes). This is the third verification pass.
+
+---
+
+## Re-verification Summary (Plan 03-08 Gap Closure)
+
+**Previous status:** gaps_found (2026-06-25, score 5/6, one architectural blocker)
+
+**What changed since the prior verification (Plan 03-08):**
+
+Plan 03-08 refactored `SalesTable.tsx` to move `AddRowForm` outside the virtualizer entirely. The `TableRow` union type, `isNewRowGuard` type guard, and `isNewRow: true as const` sentinel have been removed. `columns` is now typed as `ColumnDef<Sale>[]` directly. `useReactTable` receives `data: sales` — never a sentinel-prepended array. `useVirtualizer` count is derived from `tableRows.length`, which is permanently equal to `sales.length` regardless of whether Add Row is open. `AddRowForm` renders as a static non-virtualized `<tr>` inside `<tbody>` before the paddingTop spacer row, visible only when `isAddRowOpen` is true.
+
+**Static invariants verified in `packages/frontend/src/components/sales/SalesTable.tsx` (commit c142324):**
+
+| Invariant | Result |
+|-----------|--------|
+| `isNewRow: true` occurrences | 0 |
+| `isNewRowGuard` occurrences | 0 |
+| `type TableRow` occurrences | 0 |
+| `ColumnDef<Sale>[]` on columns declaration (line 10) | Present |
+| `data: sales,` in useReactTable (line 113) | Present — no sentinel prepend |
+| `count: tableRows.length` in useVirtualizer (line 121) | Present — stable count |
+| `initialRect: { width: 0, height: 600 }` (line 124) | Present — Plan 03-07 fix preserved |
+| `overscan: 3` (line 129) | Present |
+| `{isAddRowOpen && (` static `<tr>` in `<tbody>` (line 159) | Present |
+| `data-index={virtualItem.index}` on virtual rows only (line 179) | Present — static AddRowForm `<tr>` has no data-index |
+| TypeScript (`npx tsc --noEmit`) | Exits 0 |
+
+**Architectural invariant confirmed:** When `isAddRowOpen` flips from false to true, `count` passed to `useVirtualizer` does not change. The virtualizer's size cache and row index assignments are unaffected. The browser main thread is not blocked.
+
+**Net result:** All 6 must-have truths are now VERIFIED by static analysis. The single architectural gap is closed. Remaining items require live browser + database and are classified as `human_needed`.
 
 ---
 
@@ -40,14 +78,20 @@ human_verification:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | A moderator can click "Add Row", select a product from searchable combo, see price auto-populate, select MOP, enter receiver, save — row appears newest-first without page reload | ✓ VERIFIED | AddRowForm.tsx: AsyncSelect with defaultOptions+cacheOptions for product/MOP; setPriceDisplay on product change; onSuccess invalidates ['sales'] and calls onSaveSuccess() which triggers scrollToIndex(0); POST /api/sales exists with product+MOP+receiver validation |
-| 2 | Moderator can click any editable cell, edit inline, cell saves on blur — cell disabled with spinner during round-trip, Date Edited updates on every save | ✓ VERIFIED | EditableCell.tsx: isThisCellPending renders spinner; setPending(true) before patchMutation.mutate(); clearActiveCell()+setPending(false) in onSuccess/onError; PATCH handler sets lastEditedById+lastEditedByUsername on every update; Prisma @updatedAt auto-updates updatedAt; SalesTable renders Date Edited from sale.updatedAt when lastEditedById is not null |
-| 3 | Audit log entry created inside same DB transaction as every create/edit/void — rollback guarantees (AUDIT-02 hard constraint) | ✓ VERIFIED | sales.ts has `prisma.$transaction` at lines 154, 248, 405 for POST, PATCH, and void handlers respectively; each transaction creates both the data mutation AND the auditLog record; productId PATCH creates 3 audit entries via tx.auditLog.createMany inside same transaction |
-| 4 | Voided rows visible with strikethrough; only admin can void — moderator attempts return 403; moderators cannot edit rows they didn't create or when edit rights are off | ✓ VERIFIED | SalesTable: voided rows get bg-red-50 and line-through in EditableCell (idle state); POST /:id/void guarded by requireRole('admin') before handler; PATCH checks (sale.createdById === userId && canEdit) OR admin; frontend canEdit guard at EditableCell line 37-40 (UI only, backend enforces) |
-| 5 | Virtual scroll handles large row counts without freezing; Notes textarea row height measured by virtualizer after edit | ✓ VERIFIED | SalesTable.tsx: useVirtualizer with measureElement (getBoundingClientRect().height), data-index on every row, ref={virtualizer.measureElement}; EditableCell Notes textarea uses e.target.style.height auto-resize on onChange; overscan: 3; minWidth 1160px for mobile scroll |
-| 6 | Inactive products and MOPs do not appear in combo boxes; backend enforces RBAC on every mutation, returning 403 for unauthorized attempts | ✓ VERIFIED | POST /api/sales and PATCH product change use tx.product.findFirst({ isActive: true }) and tx.mop.findFirst({ isActive: true }) inside transaction; GET /api/products/$extends default filters isActive=true (existing pattern); requireRole('admin') on void+audit routes; PATCH ownership check throws 403 |
+| 1 | A moderator can click "Add Row", select a product from the searchable combo box, see the price auto-populate and lock, select a MOP, enter a receiver name, and save — the row appears at the top of the sheet newest-first without a page reload | ✓ VERIFIED | Architectural blocker closed by Plan 03-08: `SalesTable.tsx` line 121 `count: tableRows.length` is permanently `sales.length`; `isAddRowOpen` toggle does not change virtualizer count; AddRowForm at lines 159-165 is a static `<tr>` outside the virtualizer. `AddRowForm.tsx`: `selectedProduct`/`selectedMop` state tracks chosen option; `setPriceDisplay` on product change; POST `/api/sales` is transactional. Human UAT still needed for zero-hang confirmation with live data. |
+| 2 | A moderator can click any editable cell on a row they created (edit rights on), edit it inline, cell saves on blur — cell disabled with save indicator during round-trip, Date Edited updates | ✓ VERIFIED | `EditableCell.tsx`: `isThisCellPending` guard renders spinner + opacity-60; `setPending(true)` before `patchMutation.mutate()`; `clearActiveCell`+`setPending(false)` in `onSuccess`/`onError`; PATCH sets `lastEditedById`+`lastEditedByUsername`; targeted Zustand selectors prevent all-cell re-renders on keystroke |
+| 3 | Audit log entry created inside same DB transaction as every create/edit/void — rollback guarantee (AUDIT-02 hard constraint) | ✓ VERIFIED | `sales.ts`: `prisma.$transaction` at lines for POST, PATCH, and void; each wraps data mutation + `auditLog.create(Many)` in same transaction; `{ timeout: 5000, maxWait: 3000 }` added to all three |
+| 4 | Voided rows visible with strikethrough; only admin can void — moderator attempts return 403; moderators cannot edit rows they didn't create or when edit rights are off | ✓ VERIFIED | `SalesTable`: `bg-red-50` + `line-through` in `EditableCell` idle state; `requireRole('admin')` on `POST /:id/void`; PATCH checks `(createdById === userId && canEdit)` OR admin; UAT test 3 passed |
+| 5 | Virtual scroll handles large row counts without freezing; Notes textarea row height measured by virtualizer after edit | ✓ VERIFIED | `useVirtualizer` with `measureElement` (`getBoundingClientRect().height`); `data-index` on every virtual row; `ref={virtualizer.measureElement}`; `EditableCell` Notes textarea auto-height on `onChange`; `overscan: 3`; UAT test 5 passed |
+| 6 | Inactive products and MOPs do not appear in combo boxes; backend enforces RBAC on every mutation, returning 403 for unauthorized attempts | ✓ VERIFIED | `catalogRouter` (`GET /catalog/products` + `GET /catalog/mops`) uses `$extends` softDeleteFilter (active-only); POST `/api/sales` and PATCH `productId`/`mopId` use `tx.product.findFirst({ isActive: true })` and `tx.mop.findFirst({ isActive: true })` inside transaction; `requireRole('admin')` on void+audit routes; UAT test 6 passed |
 
 **Score:** 6/6 truths verified
+
+---
+
+### Deferred Items
+
+None.
 
 ---
 
@@ -55,18 +99,14 @@ human_verification:
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `packages/backend/prisma/schema.prisma` | Sale model with createdByUsername, AuditLog with userUsername | ✓ VERIFIED | createdByUsername String @db.VarChar(100) at line 118; lastEditedByUsername String? @db.VarChar(100) at line 121; userUsername String @db.VarChar(100) at line 141; DECIMAL(10,2) on priceSnapshot |
-| `packages/backend/src/middleware/requireAuth.ts` | SessionData with username and organizationId | ✓ VERIFIED | Interface at lines 8-13 contains username: string and organizationId: number |
-| `packages/backend/src/routes/auth.ts` | Login writes username + organizationId to session | ✓ VERIFIED | req.session.username = user.username at line 66; req.session.organizationId at line 67 |
-| `packages/backend/src/routes/sales.ts` | All 5 endpoints with transactional audit writes | ✓ VERIFIED | 478 lines; exports salesRouter; GET /, POST /, PATCH /:id, POST /:id/void, GET /:id/audit all present; prisma.$transaction in all 3 mutations |
-| `packages/backend/src/app.ts` | salesRouter mounted on protectedRouter | ✓ VERIFIED | Line 88: protectedRouter.use('/sales', salesRouter); inside app.use('/api', requireAuth, protectedRouter) at line 89 |
-| `packages/frontend/src/stores/salesEditStore.ts` | Zustand v5 store with D-05 locked shape | ✓ VERIFIED | All 8 state fields and 10 actions present; Zustand v5 double-call syntax create<SalesEditState>()() |
-| `packages/frontend/src/components/sales/VoidConfirmDialog.tsx` | Void confirmation modal with pessimistic UI | ✓ VERIFIED | Modal lock pattern onClose={isPending ? undefined : closeVoidDialog}; both buttons disabled when isPending; "Voiding..." label; invalidates ['sales'] on success |
-| `packages/frontend/src/components/sales/SalesTable.tsx` | react-table v8 + react-virtual v3 virtual scroll | ✓ VERIFIED | useVirtualizer with measureElement; data-index on every row; ref={virtualizer.measureElement}; sticky header; minWidth 1160px; bg-red-50 on voided rows |
-| `packages/frontend/src/components/sales/AddRowForm.tsx` | Inline Add Row form as virtual row 0 | ✓ VERIFIED | AsyncSelect with menuPortalTarget={document.body}; price auto-populate via setPriceDisplay; disabled={isPending || !isFormValid} on Save Row; Escape dismisses; onSaveSuccess() scrolls to top |
-| `packages/frontend/src/components/sales/AuditDrawer.tsx` | Slide-in audit drawer for admin | ✓ VERIFIED | queryKey ['sales', openAuditSaleId, 'audit']; enabled: openAuditSaleId !== null; if (!isOpen) return null; Escape handler; overlay click closes; aria-modal=true |
-| `packages/frontend/src/components/sales/EditableCell.tsx` | Cell display-to-input state machine with blur-save | ✓ VERIFIED | display→active→pending→display cycle; isThisCellPending spinner; draftValue from Zustand; setPending(true) before mutate; clearActiveCell in onSuccess and onError; menuPortalTarget on AsyncSelect; D-03 isAddRowOpen guard; Escape to discard |
-| `packages/frontend/src/pages/SalesPage.tsx` | Full SalesPage integrating all Phase 3 components | ✓ VERIFIED | SalesTable, AuditDrawer (admin-only), VoidConfirmDialog all rendered; flex-1 min-h-0 on table container; queryKey ['sales']; isAddRowOpen disables Add Row button |
+| `packages/backend/src/routes/sales.ts` | All 5 endpoints with transactional audit writes | ✓ VERIFIED | 537 lines; GET /, POST /, PATCH /:id, POST /:id/void, GET /:id/audit all present; `prisma.$transaction` with timeout in all 3 mutations |
+| `packages/backend/src/routes/auth.ts` | GET /me endpoint for session rehydration | ✓ VERIFIED | Lines 91-111: `requireAuth` guard, DB lookup, returns user object; called by `main.tsx` before React tree mounts |
+| `packages/backend/src/routes/catalog.ts` | GET /catalog/products + GET /catalog/mops (no requireRole) | ✓ VERIFIED | Both endpoints present; mounted at `protectedRouter.use('/catalog', catalogRouter)` in `app.ts` |
+| `packages/frontend/src/main.tsx` | Awaits /api/auth/me before mounting React tree | ✓ VERIFIED | `api.get('/auth/me').then(setUser).catch(setNull).finally(createRoot+render)` — prevents spurious /login redirect on refresh |
+| `packages/frontend/src/stores/authStore.ts` | Zustand v5 store with setUser action | ✓ VERIFIED | `create<AuthState>()()` curried syntax; `user: null` initial; `setUser` action; `getAuthUser` sync getter |
+| `packages/frontend/src/components/sales/SalesTable.tsx` | react-table v8 + react-virtual v3; AddRowForm outside virtualizer as static `<tr>` | ✓ VERIFIED | `ColumnDef<Sale>[]` at line 10; `data: sales` (no sentinel) at line 113; `count: tableRows.length` at line 121; `initialRect` at line 124; static `{isAddRowOpen && (<tr>)}` at line 159; `data-index` only on virtual rows (line 179); no `isNewRow`, `isNewRowGuard`, or `TableRow` union anywhere in file |
+| `packages/frontend/src/components/sales/AddRowForm.tsx` | AsyncSelect with selectedProduct/selectedMop state | ✓ VERIFIED | `ProductOption`/`MopOption` types; `selectedProduct`/`selectedMop` state; `value={selectedProduct}` and `value={selectedMop}` on AsyncSelects; `setSelectedProduct`/`setSelectedMop` in `onChange` handlers |
+| `packages/frontend/src/components/sales/EditableCell.tsx` | Targeted Zustand selectors per cell | ✓ VERIFIED | `isThisCellActive`, `isThisCellPending`, `draftValue` all use targeted selectors that only fire when this specific cell's state changes; action references are stable Zustand getters |
 
 ---
 
@@ -74,15 +114,13 @@ human_verification:
 
 | From | To | Via | Status | Details |
 |------|----|-----|--------|---------|
-| `packages/backend/src/routes/auth.ts` | express-session SessionData | req.session.username at line 66 | ✓ WIRED | Both username and organizationId written before session.save() |
-| `packages/backend/src/app.ts` | `packages/backend/src/routes/sales.ts` | protectedRouter.use('/sales', salesRouter) at line 88 | ✓ WIRED | Inside app.use('/api', requireAuth, protectedRouter) — unauthenticated returns 401 |
-| `packages/backend/src/routes/sales.ts` | Prisma $transaction | prisma.$transaction at lines 154, 248, 405 | ✓ WIRED | Three mutation handlers each wrap data write + auditLog.create in same transaction |
-| `packages/frontend/src/components/sales/VoidConfirmDialog.tsx` | /api/sales/:id/void | api.post(`/sales/${saleId}/void`) in mutationFn | ✓ WIRED | useMutation fires POST; onSuccess invalidates ['sales'] |
-| `packages/frontend/src/components/sales/AuditDrawer.tsx` | /api/sales/:id/audit | useQuery queryFn: api.get(`/sales/${openAuditSaleId}/audit`) | ✓ WIRED | enabled: openAuditSaleId !== null prevents spurious calls |
-| `packages/frontend/src/components/sales/AddRowForm.tsx` | /api/sales POST | api.post('/sales', data) in mutationFn | ✓ WIRED | Invalidates ['sales'] and calls onSaveSuccess() on success |
-| `packages/frontend/src/components/sales/EditableCell.tsx` | /api/sales/:id PATCH | api.patch(`/sales/${saleId}`, { field, value }) in mutationFn | ✓ WIRED | setPending(true) before mutate; clearActiveCell in both onSuccess and onError |
-| `packages/frontend/src/pages/SalesPage.tsx` | SalesTable, AuditDrawer, VoidConfirmDialog | Direct JSX render with sales={data} prop | ✓ WIRED | AuditDrawer gated by user?.role === 'admin'; VoidConfirmDialog rendered for all (store-controlled visibility) |
-| `packages/frontend/src/components/sales/SalesTable.tsx` | EditableCell | import { EditableCell } from './EditableCell' | ✓ WIRED | Stub removed; real import present; used in Product, MOP, Receiver, Notes columns |
+| `packages/frontend/src/main.tsx` | `GET /api/auth/me` | `api.get('/auth/me')` before `createRoot` | ✓ WIRED | `.then(setUser)` + `.catch(setNull)` + `.finally(mount)` — full rehydration flow |
+| `packages/backend/src/routes/auth.ts` | express-session SessionData | `req.session.userId/role/username/organizationId` at login | ✓ WIRED | All four fields written before `session.save()`; GET /me reads from DB (not session) to include `canEdit` |
+| `packages/frontend/src/components/sales/AddRowForm.tsx` | `GET /api/catalog/products` | `useQuery(['catalog-products'])` | ✓ WIRED | Returns array; memoized into `productOptions`; `defaultOptions` + `loadOptions` on AsyncSelect |
+| `packages/frontend/src/components/sales/EditableCell.tsx` | `GET /api/catalog/products` | `useQuery(['catalog-products'])` | ✓ WIRED | Shared React Query cache key — only one fetch regardless of how many rows render |
+| `packages/backend/src/routes/sales.ts` | Prisma $transaction + timeout | `prisma.$transaction(fn, { timeout: 5000, maxWait: 3000 })` | ✓ WIRED | All three mutation handlers (POST, PATCH, void) wrap data write + auditLog write in same transaction with timeout guard |
+| `packages/frontend/src/components/sales/SalesTable.tsx` | AddRowForm | Static `<tr>` in `<tbody>` before paddingTop spacer (line 159) | ✓ WIRED | `{isAddRowOpen && (<tr><td colSpan={columns.length}><AddRowForm onSaveSuccess={handleSaveSuccess} /></td></tr>)}` — not inside virtualizer item loop; virtualizer count unaffected by open/close |
+| `packages/frontend/src/components/sales/SalesTable.tsx` | useVirtualizer count | `tableRows.length` from `useReactTable` on `data: sales` | ✓ WIRED | Line 121: `count: tableRows.length`; `tableRows` derived from `table.getRowModel()` on `data: sales`; count is always `sales.length` — never `sales.length + 1` |
 
 ---
 
@@ -90,16 +128,17 @@ human_verification:
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 |----------|---------------|--------|--------------------|--------|
-| `SalesPage.tsx` | sales | useQuery(['sales']) → GET /api/sales → prisma.sale.findMany | Yes — findMany with org scope, status filter, orderBy | ✓ FLOWING |
-| `AuditDrawer.tsx` | entries | useQuery(['sales', id, 'audit']) → GET /api/sales/:id/audit → prisma.auditLog.findMany | Yes — findMany filtered by saleId+organizationId, ordered by createdAt desc | ✓ FLOWING |
-| `EditableCell.tsx` | draftValue | Zustand salesEditStore — set by setActiveCell from sale[field] prop | Yes — initialized from sale object from React Query cache | ✓ FLOWING |
-| `AddRowForm.tsx` | priceDisplay | setPriceDisplay called on AsyncSelect onChange from API response option.price | Yes — price comes from /api/products response which serializes Decimal.toFixed(2) | ✓ FLOWING |
+| `SalesPage.tsx` | `sales` | `useQuery(['sales'])` → GET /api/sales → `prisma.sale.findMany` | Yes — findMany with org scope, `status: { in: ['active','void'] }`, `orderBy: createdAt desc` | ✓ FLOWING |
+| `AuditDrawer.tsx` | `entries` | `useQuery(['sales', id, 'audit'])` → GET /api/sales/:id/audit → `prisma.auditLog.findMany` | Yes — filtered by `saleId`+`organizationId`, ordered by `createdAt desc` | ✓ FLOWING |
+| `EditableCell.tsx` | `draftValue` | Targeted Zustand selector — set by `setActiveCell` from `sale[field]` prop on click | Yes — initialized from `sale` object in React Query cache | ✓ FLOWING |
+| `AddRowForm.tsx` | `priceDisplay` | `setPriceDisplay(opt.price)` from AsyncSelect `onChange`; `opt.price` comes from `/api/catalog/products` response | Yes — price serialized as `Decimal.toFixed(2)` string in catalogRouter | ✓ FLOWING |
+| `AddRowForm.tsx` | `selectedProduct` / `selectedMop` | Local state set in AsyncSelect `onChange` handler | Yes — option object from React Query cache via `loadProducts`/`loadMops` callbacks | ✓ FLOWING |
 
 ---
 
 ### Behavioral Spot-Checks
 
-Step 7b: SKIPPED — tests require a running dev server and live browser session. The codebase produces runnable code but spot-checks (curl endpoints, module exports) cannot be meaningfully done without a live DB connection.
+Step 7b: SKIPPED — tests require a running dev server and live database. The codebase produces runnable code but behavioral verification (curl endpoints, DOM rendering) cannot be meaningfully done without a live DB connection. Static structural verification (Steps 3-5) is complete.
 
 ---
 
@@ -107,105 +146,90 @@ Step 7b: SKIPPED — tests require a running dev server and live browser session
 
 | Requirement | Source Plans | Description | Status | Evidence |
 |-------------|-------------|-------------|--------|----------|
-| SALES-01 | 02, 06 | Newest-first table | ✓ SATISFIED | GET /: orderBy: { createdAt: 'desc' }; SalesTable renders in order from React Query |
-| SALES-02 | 04, 06 | Virtual scroll | ✓ SATISFIED | useVirtualizer in SalesTable.tsx |
-| SALES-03 | 04, 06 | Dynamic row heights | ✓ SATISFIED | measureElement + data-index + Notes textarea auto-height in EditableCell |
-| SALES-04 | 04, 06 | Add Row form | ✓ SATISFIED | AddRowForm.tsx rendered as virtual row 0 when isAddRowOpen |
-| SALES-05 | 06 | Click to edit inline | ✓ SATISFIED | EditableCell handleClick → setActiveCell → input/select renders |
-| SALES-06 | 06 | Save on blur, disabled + spinner | ✓ SATISFIED | handleBlur calls setPending(true)+patchMutation.mutate(); isThisCellPending renders spinner and disabled state |
-| SALES-07 | 04, 06 | Row columns: Product, Price, MOP, Receiver, Notes, Date Edited | ✓ SATISFIED | All 7 columns defined in SalesTable columns array |
-| SALES-08 | 04, 06 | Product: searchable combo, active only | ✓ SATISFIED | AsyncSelect with loadProducts calling GET /api/products (active only via $extends); EditableCell productId uses AsyncSelect |
-| SALES-09 | 02, 04 | Price auto-populates and locks | ✓ SATISFIED | AddRowForm: setPriceDisplay on product change; Price column is read-only span (not EditableCell); backend: priceSnapshot: product.price in POST |
-| SALES-10 | 04, 06 | MOP: searchable combo, active only | ✓ SATISFIED | AsyncSelect with loadMops calling GET /api/mops (active only via $extends) |
-| SALES-11 | 02, 04 | Receiver: required free-text | ✓ SATISFIED | Backend: body('receiver').notEmpty(); AddRowForm: required rule; disabled={isPending || !isFormValid} until filled |
-| SALES-12 | 04, 06 | Notes: optional, expands row | ✓ SATISFIED | Notes is optional in backend validation; EditableCell Notes textarea auto-height; AddRowForm textarea |
-| SALES-13 | 02 | Date Edited updates on create/edit | ✓ SATISFIED | Prisma @updatedAt on Sale; PATCH sets lastEditedById; SalesTable shows updatedAt when lastEditedById is set |
-| SALES-14 | 02, 04 | Product+MOP+Receiver required | ✓ SATISFIED | Backend validation; AddRowForm isFormValid guard |
-| SALES-15 | 02, 04, 06 | Voided rows visible with strikethrough | ✓ SATISFIED | GET /: status: {in: ['active','void']}; SalesTable: bg-red-50; EditableCell line-through class |
-| SALES-16 | 01, 02, 06 | Moderator edits own rows only + canEdit | ✓ SATISFIED | Backend PATCH: (createdById === userId && canEdit) OR admin; frontend canEdit guard in EditableCell |
-| SALES-17 | 02, 04 | Inactive items hidden from combos, show on existing rows | ✓ SATISFIED | POST/PATCH validate isActive:true in tx; existing rows use productNameSnapshot/mopNameSnapshot (denormalized — never re-fetched from catalog) |
-| SALES-18 | 04, 06 | Responsive, usable on mobile | ✓ SATISFIED | table minWidth: '1160px' with overflow-auto on SalesTable container — horizontal scroll on mobile |
-| AUDIT-01 | 02, 06 | Every create/edit/void logged with user, field, old, new, action, timestamp | ✓ SATISFIED | All 3 mutation handlers write auditLog with userId, userUsername, action, fieldName, oldValue, newValue |
-| AUDIT-02 | 01, 02, 06 | Audit record in same transaction — no orphan/rollback guarantee | ✓ SATISFIED | prisma.$transaction wraps data write + auditLog.create(Many) in all 3 mutation handlers |
-| AUDIT-03 | 02, 05, 06 | Admin views per-row audit via drawer | ✓ SATISFIED | AuditDrawer: GET /api/sales/:id/audit (admin-only via requireRole); rendered only when user.role === 'admin' in SalesPage |
-| ROLES-03 | 01, 02, 06 | Moderator with edit rights edits their rows | ✓ SATISFIED | PATCH check: sale.createdById === userId && requestingUser.canEdit |
-| ROLES-04 | 01, 02, 06 | Moderator without edit rights: no edits | ✓ SATISFIED | requestingUser.canEdit === false causes 403 in PATCH |
-| ROLES-05 | 01, 02, 06 | Admin edits any row | ✓ SATISFIED | req.session.role === 'admin' in PATCH canMutate check |
-| ROLES-06 | 02, 03, 06 | Only admin can void | ✓ SATISFIED | requireRole('admin') middleware on POST /:id/void route |
-| PROD-05 | 02, 04, 06 | Inactive products hidden from combos | ✓ SATISFIED | tx.product.findFirst({ isActive: true }) in POST and PATCH productId; GET /api/products default active-only filter |
-| PAY-05 | 02, 04, 06 | Inactive MOPs hidden from combos | ✓ SATISFIED | tx.mop.findFirst({ isActive: true }) in POST; GET /api/mops default active-only filter |
+| SALES-01 | 02, 06 | Newest-first table | ✓ SATISFIED | GET /: `orderBy: { createdAt: 'desc' }` |
+| SALES-02 | 04, 06, 07 | Virtual scroll | ✓ SATISFIED | `useVirtualizer` in `SalesTable.tsx` with `initialRect` |
+| SALES-03 | 04, 06 | Dynamic row heights | ✓ SATISFIED | `measureElement` + `data-index` + Notes textarea auto-height |
+| SALES-04 | 04, 06, 07, 08 | Add Row form | ✓ SATISFIED | AddRowForm moved outside virtualizer (Plan 03-08); static `<tr>` at line 159; virtualizer count stable at `sales.length`; architectural cascade blocker eliminated |
+| SALES-05 | 06 | Click to edit inline | ✓ SATISFIED | `EditableCell` `handleClick` → `setActiveCell` → input/select renders |
+| SALES-06 | 06 | Save on blur, disabled + spinner | ✓ SATISFIED | `handleBlur` calls `setPending(true)`+`patchMutation.mutate()`; `isThisCellPending` renders spinner |
+| SALES-07 | 04, 06 | Row columns: Product, Price, MOP, Receiver, Notes, Date Edited | ✓ SATISFIED | All 7 columns defined in `SalesTable` columns array |
+| SALES-08 | 04, 06, 07 | Product: searchable combo, active only | ✓ SATISFIED | AsyncSelect with `loadProducts` from `/catalog/products` (active-only via `$extends`) |
+| SALES-09 | 02, 04 | Price auto-populates and locks | ✓ SATISFIED | `AddRowForm`: `setPriceDisplay` on product change; price column is read-only span; backend: `priceSnapshot: product.price` |
+| SALES-10 | 04, 06, 07 | MOP: searchable combo, active only | ✓ SATISFIED | AsyncSelect with `loadMops` from `/catalog/mops` (active-only via `$extends`) |
+| SALES-11 | 02, 04 | Receiver: required free-text | ✓ SATISFIED | Backend validation + `AddRowForm` `isFormValid` guard |
+| SALES-12 | 04, 06 | Notes: optional, expands row | ✓ SATISFIED | Notes optional in backend; `EditableCell` Notes textarea auto-height; `AddRowForm` textarea |
+| SALES-13 | 02 | Date Edited updates on create/edit | ✓ SATISFIED | Prisma `@updatedAt` on Sale; PATCH sets `lastEditedById`; `SalesTable` shows `updatedAt` when `lastEditedById` is set |
+| SALES-14 | 02, 04 | Product+MOP+Receiver required | ✓ SATISFIED | Backend validation; `AddRowForm` `isFormValid` guard |
+| SALES-15 | 02, 04, 06 | Voided rows visible with strikethrough | ✓ SATISFIED | GET /: `status: {in: ['active','void']}`; `SalesTable`: `bg-red-50`; `EditableCell` `line-through` class |
+| SALES-16 | 01, 02, 06 | Moderator edits own rows only + canEdit | ✓ SATISFIED | Backend PATCH: `(createdById === userId && canEdit)` OR admin |
+| SALES-17 | 02, 04 | Inactive items hidden from combos, show on existing rows | ✓ SATISFIED | `/catalog/products` active-only; existing rows use `productNameSnapshot`/`mopNameSnapshot` snapshots |
+| SALES-18 | 04, 06 | Responsive, usable on mobile | ✓ SATISFIED | table `minWidth: '1160px'` with `overflow-auto` on `SalesTable` container |
+| AUDIT-01 | 02, 06 | Every create/edit/void logged | ✓ SATISFIED | All 3 mutation handlers write `auditLog` with `userId`, `userUsername`, `action`, `fieldName`, `oldValue`, `newValue` |
+| AUDIT-02 | 01, 02, 06 | Audit record in same transaction | ✓ SATISFIED | `prisma.$transaction` wraps data write + `auditLog.create(Many)` in all 3 handlers with timeout |
+| AUDIT-03 | 02, 05, 06 | Admin views per-row audit via drawer | ✓ SATISFIED | `AuditDrawer`: GET `/api/sales/:id/audit` (admin-only via `requireRole`) |
+| ROLES-03 | 01, 02, 06 | Moderator with edit rights edits their rows | ✓ SATISFIED | PATCH check: `sale.createdById === userId && requestingUser.canEdit` |
+| ROLES-04 | 01, 02, 06 | Moderator without edit rights: no edits | ✓ SATISFIED | `requestingUser.canEdit === false` causes 403 in PATCH |
+| ROLES-05 | 01, 02, 06 | Admin edits any row | ✓ SATISFIED | `req.session.role === 'admin'` in PATCH `canMutate` check |
+| ROLES-06 | 02, 03, 06 | Only admin can void | ✓ SATISFIED | `requireRole('admin')` middleware on `POST /:id/void` route |
+| PROD-05 | 02, 04, 06 | Inactive products hidden from combos | ✓ SATISFIED | `/catalog/products` uses `$extends` (active-only); `tx.product.findFirst({ isActive: true })` in POST+PATCH |
+| PAY-05 | 02, 04, 06 | Inactive MOPs hidden from combos | ✓ SATISFIED | `/catalog/mops` uses `$extends` (active-only); `tx.mop.findFirst({ isActive: true })` in POST |
 
-**All 28 Phase 3 requirement IDs satisfied.**
+All 27 requirement IDs satisfied. SALES-04 is now closed by Plan 03-08.
 
 ---
 
 ### Anti-Patterns Found
 
-| File | Line | Pattern | Severity | Impact |
-|------|------|---------|----------|--------|
-| `packages/frontend/src/components/sales/EditableCell.tsx` | 86 | `setActiveCell(sale.id, field, String(sale[field as keyof Sale] ?? ''))` — initializes draftValue from the sale prop (React Query cache) on click rather than Zustand. This is intentional: draft is only copied once at activation, then lives in Zustand exclusively. Not a stub. | ℹ️ Info | None — pattern is correct per STATE.md design decision |
-| `packages/frontend/src/components/sales/AddRowForm.tsx` | 108 | `value={null}` on AsyncSelect — controlled mode but value is always null; selection goes via field.onChange only | ℹ️ Info | react-select controlled pattern; keeps combo visually clear after selection; no functional issue |
+No blockers, TODOs, FIXMEs, placeholder returns, or hardcoded stubs found in Phase 3 files after Plan 03-08.
 
-No TODOs, FIXMEs, placeholder returns, or hardcoded empty data found in Phase 3 files.
+The previously reported blocker (`rows = [{ isNewRow: true }, ...sales]` at lines 143-145 in the prior SalesTable.tsx) has been eliminated. The current file contains no sentinel prepend, no union type, and no type guard.
 
 ---
 
 ### Human Verification Required
 
-#### 1. Add Row end-to-end flow
+#### 1. Add Row end-to-end flow with 200+ rows (after virtualizer fix)
 
-**Test:** Log in as moderator. Navigate to /sales. Click "Add Row". In the Product combo, type a product name and select it. Verify the Price column auto-populates and is read-only. Select a MOP. Enter a receiver name. Click "Save Row".
-**Expected:** Row appears at the top of the table immediately after save (virtual scroll scrolls to index 0); no page reload needed; row shows correct product name, price, MOP, receiver, current date in Date Edited column.
-**Why human:** React Query cache invalidation timing, virtualizer scrollToIndex(0) behavior, and actual DOM update cannot be verified without a running browser session.
+**Test:** Log in as moderator on a database with 200+ sales rows. Click "Add Row". Verify the form renders immediately without any browser hang. Select a product — verify the combo shows the product name (not placeholder) and price auto-populates. Select a MOP — verify combo shows MOP name. Enter receiver. Click "Save Row".
+**Expected:** Form appears immediately with no freeze. Selected option names persist in combos. Row appears at top after save without page reload.
+**Why human:** Requires live browser with populated database to verify zero-hang after the Plan 03-08 virtualizer architecture fix, React Query cache invalidation timing, and virtualizer scroll-to-top after save.
 
 #### 2. Inline cell edit on blur with spinner
 
 **Test:** Click an editable cell on a row you own (moderator with canEdit=true). Type a new value. Click outside the cell (blur).
-**Expected:** Cell switches to an input on click; on blur the cell shows grayed-out text with a spinning indicator; after the PATCH round-trip completes, the cell shows the server-returned value and the "Date Edited" column updates to the current timestamp.
-**Why human:** The display→active→pending→idle state machine timing and spinner visibility require a real PATCH round-trip in a browser.
+**Expected:** Cell switches to input on click. On blur, cell shows grayed-out text with spinner. After PATCH round-trip, cell shows server-returned value. "Date Edited" column updates to current timestamp.
+**Why human:** State machine timing (active→pending→idle) and spinner visibility require a real PATCH round-trip in a browser.
 
-#### 3. Void row confirmation and role enforcement
+#### 3. Audit drawer admin-only
 
-**Test (admin):** Log in as admin. Click "Void" on an active row. Confirm in the dialog — both buttons should be disabled while voiding is in-flight; "Void Row" button shows "Voiding...". After success, row shows strikethrough styling and bg-red-50 background.
-**Test (moderator):** Log in as moderator. Verify no "Void" button appears on any row.
-**Expected:** Backend returns 403 if a moderator somehow triggers a POST /:id/void (e.g. via curl). Admin-only void is enforced server-side.
-**Why human:** Modal lock (Escape key blocked during round-trip), RBAC 403 response, and strikethrough rendering require a live browser session.
+**Test (admin):** Click "Audit" on any row. Right-side drawer opens showing audit entries newest-first with timestamp, username, action, and old→new values for update entries.
+**Test (moderator):** Verify no "Audit" button appears on any row.
+**Expected:** Drawer closes on Escape, overlay click, and X button.
+**Why human:** Drawer animation, Escape key handler, and role-gated button visibility require browser interaction.
 
-#### 4. Audit drawer admin-only
+#### 4. Session rehydration after page refresh
 
-**Test:** Log in as admin. Click "Audit" on any row. The right-side drawer should open showing audit entries newest-first with timestamp, username, action (Created row / Updated {field} / Voided row), and old→new values for update entries.
-**Test:** Log in as moderator. Verify no "Audit" button appears on any row.
-**Expected:** Drawer closes on Escape key, overlay click, and X button. Entries load correctly from GET /api/sales/:id/audit.
-**Why human:** Drawer open/close animation, Escape key handler, and role-gated button visibility require browser interaction.
-
-#### 5. Virtual scroll performance
-
-**Test:** Insert 200+ sales rows (or use seed data). Navigate to /sales.
-**Expected:** Table renders without freezing; scrolling is smooth; Notes content with multiple lines causes the row height to expand without overlapping adjacent rows; after editing a Notes cell, the row re-measures height correctly.
-**Why human:** ResizeObserver-driven height adjustment and browser rendering performance cannot be verified statically.
-
-#### 6. Inactive catalog items filtered from combos
-
-**Test:** As admin, deactivate one product and one MOP from the catalog page. Then as moderator, open Add Row form and open both combo boxes.
-**Expected:** The deactivated product and MOP do not appear in the AsyncSelect options. Existing rows that reference those deactivated items still display their snapshotted names correctly.
-**Why human:** Requires admin action in the catalog + verification in the sales combo boxes in the same session.
+**Test:** Log in as moderator. Navigate to /sales. Press F5 (hard reload).
+**Expected:** Page loads the sales table normally. No redirect to /login occurs because `main.tsx` awaits `/api/auth/me` before mounting the React tree.
+**Why human:** Requires live browser session with valid session cookie.
 
 ---
 
 ### Gaps Summary
 
-No automated gaps found. All 6 roadmap success criteria are supported by implementation evidence in the codebase:
+No gaps. All 6 must-have truths are verified by static analysis. All 27 requirement IDs are satisfied.
 
-1. **Add Row flow** — AddRowForm.tsx wired to POST /api/sales; invalidation+scrollToIndex on success.
-2. **Inline edit on blur** — EditableCell.tsx implements full state machine; PATCH handler updates lastEditedById+updatedAt.
-3. **Transactional audit** — All three mutation handlers use prisma.$transaction wrapping both data write and auditLog creation.
-4. **Void + RBAC** — requireRole('admin') on void route; PATCH ownership check with canEdit enforcement.
-5. **Virtual scroll** — useVirtualizer with measureElement + dynamic Notes height.
-6. **Active-only combos + backend RBAC** — isActive:true in all tx queries; requireRole on admin endpoints.
+The architectural blocker from the previous verification (virtualizer size-cache cascade with 200+ rows) has been closed by Plan 03-08. The fix is verified statically:
 
-Six human verification items remain that require a running browser session with a live database to confirm end-to-end behavior.
+- `SalesTable.tsx` contains zero occurrences of `isNewRow`, `isNewRowGuard`, or `TableRow` union
+- `useVirtualizer` receives `count: tableRows.length` where `tableRows` is derived from `data: sales` — count is invariant to Add Row open/close state
+- `AddRowForm` is rendered as a static `<tr>` at line 159, outside the virtualizer's item loop
+- TypeScript compiler exits 0 (`npx tsc --noEmit`)
+
+Four items remain classified as `human_needed` because they require live browser interaction with a running database. These are not code gaps — the implementation is architecturally complete.
 
 ---
 
-_Verified: 2026-06-23_
+_Verified: 2026-06-25T19:00:00Z_
 _Verifier: Claude (gsd-verifier)_
+_Plans verified: 03-01 through 03-08_
