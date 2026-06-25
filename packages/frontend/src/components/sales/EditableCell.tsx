@@ -19,17 +19,24 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  const {
-    activeCellSaleId,
-    activeCellField,
-    draftValue,
-    isPending,
-    isAddRowOpen,
-    setActiveCell,
-    clearActiveCell,
-    setDraftValue,
-    setPending,
-  } = useSalesEditStore();
+  // Targeted selectors: each derived boolean only re-renders THIS cell when ITS state changes.
+  // Full store subscription would re-render all cells on every keystroke or Add Row toggle.
+  const isThisCellActive = useSalesEditStore(
+    (s) => s.activeCellSaleId === sale.id && s.activeCellField === field,
+  );
+  const isThisCellPending = useSalesEditStore(
+    (s) => s.activeCellSaleId === sale.id && s.activeCellField === field && s.isPending,
+  );
+  // Only subscribe to draftValue when this cell is active; returns '' otherwise so
+  // other cells' keystrokes don't cause this cell to re-render.
+  const draftValue = useSalesEditStore((s) =>
+    s.activeCellSaleId === sale.id && s.activeCellField === field ? s.draftValue : '',
+  );
+  // Actions are stable Zustand references — individual selectors never trigger re-renders.
+  const setActiveCell = useSalesEditStore((s) => s.setActiveCell);
+  const clearActiveCell = useSalesEditStore((s) => s.clearActiveCell);
+  const setDraftValue = useSalesEditStore((s) => s.setDraftValue);
+  const setPending = useSalesEditStore((s) => s.setPending);
 
   const { user } = useAuthStore();
 
@@ -53,16 +60,12 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
     (sale.createdById === user?.id && user?.canEdit === true);
   const isEditable = canEdit && sale.status !== 'void';
 
-  const isThisCellActive =
-    activeCellSaleId === sale.id && activeCellField === field;
-  const isThisCellPending = isThisCellActive && isPending;
-
   // Auto-focus input when cell becomes active
   useEffect(() => {
-    if (isThisCellActive && !isPending && inputRef.current) {
+    if (isThisCellActive && !isThisCellPending && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isThisCellActive, isPending]);
+  }, [isThisCellActive, isThisCellPending]);
 
   const patchMutation = useMutation({
     mutationFn: ({
@@ -90,22 +93,26 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   });
 
   const handleClick = () => {
+    // Read transient flags from store directly — no subscription needed for event handlers.
+    const { isAddRowOpen, isPending: curPending, activeCellSaleId: curActive } =
+      useSalesEditStore.getState();
     // D-03: blocked while Add Row form is open
     if (isAddRowOpen) return;
     // D-04: blocked while any PATCH is in-flight
-    if (isPending) return;
+    if (curPending) return;
     if (!isEditable) return;
     // D-04: if another cell is active, let it blur first (do not force clear here)
-    if (activeCellSaleId !== null && activeCellSaleId !== sale.id) return;
+    if (curActive !== null && curActive !== sale.id) return;
     setActiveCell(sale.id, field, String(sale[field as keyof Sale] ?? ''));
   };
 
   const handleBlur = () => {
-    if (!isThisCellActive || isPending) return;
+    const { isPending: curPending, draftValue: curDraft } = useSalesEditStore.getState();
+    if (!isThisCellActive || curPending) return;
     const originalValue = String(sale[field as keyof Sale] ?? '');
-    if (draftValue !== originalValue) {
+    if (curDraft !== originalValue) {
       setPending(true);
-      patchMutation.mutate({ saleId: sale.id, field, value: draftValue });
+      patchMutation.mutate({ saleId: sale.id, field, value: curDraft });
     } else {
       clearActiveCell();
     }
@@ -190,7 +197,7 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
             onChange={handleSelectChange}
             onMenuClose={() => {
               // If user closes menu without selecting, return to display mode
-              if (!isPending) clearActiveCell();
+              if (!useSalesEditStore.getState().isPending) clearActiveCell();
             }}
           />
         </div>
