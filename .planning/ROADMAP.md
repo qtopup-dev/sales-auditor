@@ -65,7 +65,7 @@ Plans:
   4. Voided rows remain visible in the sheet with strikethrough styling and are never removed from view; a moderator cannot void rows (only admin can), and a moderator cannot edit rows belonging to another moderator or their own rows if their edit rights are disabled — these checks are enforced by the backend, not just the UI
   5. The sales sheet handles large row counts via virtual scroll without pagination; SALES-03 (dynamic row heights from Notes content) is implemented — note: if CSS truncation with tooltip is used instead of true dynamic heights, this must be confirmed acceptable before phase closes; the layout is usable on mobile (SALES-18)
   6. Inactive products are hidden from the Product combo box (PROD-05) and inactive MOPs are hidden from the MOP combo box (PAY-05) when adding new rows; row-level edit rights and void permission are enforced server-side (ROLES-03/04/05/06)
-**Plans:** 6 plans
+**Plans:** 7 plans
 Plans:
 - [x] 03-01-PLAN.md — [BLOCKING] Schema migration: add createdByUsername/lastEditedByUsername to Sale, userUsername to AuditLog; extend SessionData with username + organizationId; update login handler
 - [x] 03-02-PLAN.md — Backend sales routes: GET /api/sales, POST /api/sales, PATCH /:id, POST /:id/void, GET /:id/audit — all mutations with transactional audit log; mount salesRouter on protectedRouter
@@ -73,6 +73,7 @@ Plans:
 - [x] 03-04-PLAN.md — Frontend SalesTable (react-table v8 + react-virtual v3 + dynamic row heights) + AddRowForm (react-hook-form + AsyncSelect)
 - [x] 03-05-PLAN.md — Frontend AuditDrawer (slide-in panel, useQuery audit entries, admin-only)
 - [x] 03-06-PLAN.md — Frontend EditableCell (inline edit state machine, blur-save, pessimistic UI) + SalesPage full wiring
+- [ ] 03-07-PLAN.md — Fix: Add Row form not rendering on first mount (react-virtual outerSize=0 on fresh SalesTable) + fix AsyncSelect value={null} visual reset after product/MOP pick
 **UI hint**: yes
 
 ### Phase 4: Admin Dashboard + Management
@@ -102,17 +103,6 @@ Plans:
 ---
 
 ## Backlog
-
-### Phase 999.2: fix: Add Row form does not render on first mount (BACKLOG)
-
-**Goal:** Fix the Add Row form not appearing when clicked. Root cause confirmed via tanstack/virtual-core v3 source: `getVirtualItems()` returns `[]` when `outerSize === 0`, which happens on the first render of `SalesTable` because `parentRef.current` is null and `initialRect` defaults to `{ width: 0, height: 0 }`. This only manifests when `SalesTable` mounts fresh — i.e., when the sales list was empty and "No sales yet" was showing instead of the table. The form IS in the Zustand store (`isAddRowOpen: true`) but never reaches the DOM. Separately, the `AsyncSelect` components in `AddRowForm` have hardcoded `value={null}` which visually clears the selected product/MOP after each pick, though the form value is correctly set internally.
-**Requirements:** SALES-01
-**Plans:** 1 plan
-
-Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
-
----
 
 ### Phase 999.1: fix: Add Row Catalog Lag
 **Goal:** Fix product/MOP dropdown 403 errors for moderators and simultaneous-refetch lag for admins by adding catalog endpoints accessible to all authenticated users and pre-fetching catalog data into React Query cache on SalesPage mount.
