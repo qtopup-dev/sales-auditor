@@ -17,10 +17,10 @@ usersRouter.use(requireRole('admin'));
 // isActive: undefined overrides the $extends default — Boolean fields do not support { in: [...] }.
 // ROLES-01: returns role field for display
 
-usersRouter.get('/', async (_req, res) => {
+usersRouter.get('/', async (req, res) => {
   const users = await prisma.user.findMany({
     where: {
-      organizationId: 1,
+      organizationId: req.session.organizationId!,
       isActive: undefined, // override $extends default — show all (active + inactive)
     },
     select: {
@@ -113,8 +113,24 @@ usersRouter.patch(
     }
 
     const targetId = Number(req.params.id);
+    const organizationId = req.session.organizationId!;
+
+    // WR-04: enforce moderator-only — admins cannot have canEdit toggled
+    const target = await prisma.user.findFirst({
+      where: { id: targetId, organizationId },
+      select: { role: true },
+    });
+    if (!target) {
+      res.status(404).json({ error: 'USER_NOT_FOUND' });
+      return;
+    }
+    if (target.role !== 'moderator') {
+      res.status(400).json({ error: 'CANNOT_EDIT_ADMIN_RIGHTS' });
+      return;
+    }
+
     const user = await prisma.user.update({
-      where: { id: targetId, organizationId: 1 },
+      where: { id: targetId, organizationId },
       data: { canEdit: req.body.canEdit as boolean },
       select: {
         id: true,
@@ -150,8 +166,9 @@ usersRouter.post(
   const targetId = Number(req.params.id);
 
   // Verify target user exists and belongs to this org
+  const orgId = req.session.organizationId!;
   const target = await prisma.user.findFirst({
-    where: { id: targetId, organizationId: 1, isActive: undefined },
+    where: { id: targetId, organizationId: orgId, isActive: undefined },
     select: { id: true },
   });
   if (!target) {
@@ -165,7 +182,7 @@ usersRouter.post(
 
   // Update passwordHash in DB
   await prisma.user.update({
-    where: { id: targetId, organizationId: 1 },
+    where: { id: targetId, organizationId: orgId },
     data: { passwordHash },
   });
 
