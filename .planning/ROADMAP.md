@@ -2,7 +2,7 @@
 
 **Granularity:** Coarse (4 phases)
 **Coverage:** 57/57 v1 requirements mapped
-**Last updated:** 2026-06-18
+**Last updated:** 2026-06-26
 
 ---
 
@@ -11,7 +11,7 @@
 - [x] **Phase 1: Foundation** — Monorepo, schema, environment, seed data — the bedrock every other phase builds on
 - [x] **Phase 2: Auth + Catalogs** — Login, sessions, invite flow, roles enforcement, product catalog, MOP catalog
 - [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
-- [ ] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
+- [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 
 ---
 
@@ -89,12 +89,12 @@ Plans:
   5. Admin can view all users, invite new moderators, edit usernames, toggle moderator edit rights, and reset any user's password — resetting a password immediately invalidates all active sessions for that user, confirmed by the user being unable to make authenticated API calls on their old session (AUTH-07 and USERS-06 correctness test for the express-session architecture)
 **Plans:** 6 plans
 Plans:
-- [ ] 04-01-PLAN.md — Backend: GET /api/admin/summary route (Prisma aggregations + $queryRaw trendData), PATCH /api/users/:id/username endpoint (before PATCH /:id), adminRouter mounted in app.ts
-- [ ] 04-02-PLAN.md — Frontend: install recharts@3.9.0 + @json2csv/plainjs@7.0.6, StatCard component, SalesFilterBar component (FilterState + applyFilters)
-- [ ] 04-03-PLAN.md — Frontend: SalesCharts (three Recharts charts with h-64 parent), AdminSalesTable (read-only react-table v8 + downloadCSV with BOM + injection sanitization)
-- [ ] 04-04-PLAN.md — Frontend: UserModal (username edit + 409 inline error), InviteModal (invite URL + copy), ResetPasswordModal (temp password + copy)
-- [ ] 04-05-PLAN.md — Frontend: DashboardPage full implementation — stats banner + charts + filter bar + admin sales table + CSV export + AuditDrawer + VoidConfirmDialog
-- [ ] 04-06-PLAN.md — Frontend: UsersPage full implementation — users table + invite + edit username + canEdit toggle + reset password
+- [x] 04-01-PLAN.md — Backend: GET /api/admin/summary route (Prisma aggregations + $queryRaw trendData), PATCH /api/users/:id/username endpoint (before PATCH /:id), adminRouter mounted in app.ts
+- [x] 04-02-PLAN.md — Frontend: install recharts@3.9.0 + @json2csv/plainjs@7.0.6, StatCard component, SalesFilterBar component (FilterState + applyFilters)
+- [x] 04-03-PLAN.md — Frontend: SalesCharts (three Recharts charts with h-64 parent), AdminSalesTable (read-only react-table v8 + downloadCSV with BOM + injection sanitization)
+- [x] 04-04-PLAN.md — Frontend: UserModal (username edit + 409 inline error), InviteModal (invite URL + copy), ResetPasswordModal (temp password + copy)
+- [x] 04-05-PLAN.md — Frontend: DashboardPage full implementation — stats banner + charts + filter bar + admin sales table + CSV export + AuditDrawer + VoidConfirmDialog
+- [x] 04-06-PLAN.md — Frontend: UsersPage full implementation — users table + invite + edit username + canEdit toggle + reset password
 **UI hint**: yes
 
 ---
@@ -106,7 +106,7 @@ Plans:
 | 1. Foundation | 5/5 | Complete | 2026-06-17 |
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
-| 4. Admin Dashboard + Management | 0/6 | Not started | - |
+| 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 
 ---
 
