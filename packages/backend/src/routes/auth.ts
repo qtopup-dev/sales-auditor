@@ -82,6 +82,34 @@ authRouter.post('/login', loginValidation, async (req, res) => {
   });
 });
 
+// ─── GET /api/auth/me ────────────────────────────────────────────────────────
+// Returns the current session's user object.
+// Called on every app load to rehydrate Zustand auth state after a page refresh.
+// requireAuth returns 401 if no session — frontend init treats 401 as unauthenticated.
+// DB lookup is required because canEdit is not stored in the session.
+
+authRouter.get('/me', requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.session.userId },
+    select: { id: true, username: true, role: true, canEdit: true, organizationId: true, isActive: true },
+  });
+
+  if (!user || !user.isActive) {
+    res.status(401).json({ error: 'UNAUTHORIZED' });
+    return;
+  }
+
+  res.json({
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      canEdit: user.canEdit,
+      organizationId: user.organizationId,
+    },
+  });
+});
+
 // ─── POST /api/auth/logout ───────────────────────────────────────────────────
 // AUTH-03: logs out from any page, invalidates session immediately
 

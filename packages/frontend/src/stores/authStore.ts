@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // AuthUser is the frontend auth state shape — matches AuthSession.user from @alejinput/shared
-interface AuthUser {
+export interface AuthUser {
   id: number;
   username: string;
   role: 'admin' | 'moderator';
