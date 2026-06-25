@@ -6,6 +6,7 @@ import { queryClient } from '../lib/queryClient';
 // Admin nav items per CONTEXT.md D-04 and UI-SPEC.md §AuthenticatedLayout
 const ADMIN_NAV = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/sales', label: 'Sales' },
   { to: '/products', label: 'Products' },
   { to: '/mops', label: 'MOPs' },
   { to: '/users', label: 'Users' },

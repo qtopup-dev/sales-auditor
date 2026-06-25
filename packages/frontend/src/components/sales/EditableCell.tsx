@@ -54,10 +54,8 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
       staleTime: 5 * 60 * 1000,
     });
 
-  // D-06: determine if this cell is editable for the current user
-  const canEdit =
-    user?.role === 'admin' ||
-    (sale.createdById === user?.id && user?.canEdit === true);
+  // Any user with canEdit=true (or admin) may edit any active row
+  const canEdit = user?.role === 'admin' || user?.canEdit === true;
   const isEditable = canEdit && sale.status !== 'void';
 
   // Auto-focus input when cell becomes active

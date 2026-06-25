@@ -260,10 +260,8 @@ salesRouter.patch('/:id', patchSaleValidation, async (req, res) => {
       throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
     }
 
-    // ROLES-03/04/05 (T-03-05): owner-with-canEdit OR admin can edit
-    const canMutate =
-      (sale.createdById === req.session.userId! && requestingUser.canEdit) ||
-      req.session.role === 'admin';
+    // Any user with canEdit=true (or admin) may edit any active row
+    const canMutate = requestingUser.canEdit || req.session.role === 'admin';
     if (!canMutate) {
       throw Object.assign(new Error('Forbidden'), { statusCode: 403, code: 'FORBIDDEN' });
     }
