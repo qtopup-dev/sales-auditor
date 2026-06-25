@@ -12,6 +12,9 @@ export function VoidConfirmDialog() {
       api.post(`/sales/${saleId}/void`).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      // Invalidate admin-summary so DashboardPage stats refresh after a void.
+      // No-op on SalesPage where admin-summary has no active observer.
+      queryClient.invalidateQueries({ queryKey: ['admin-summary'] });
       closeVoidDialog();
     },
   });
