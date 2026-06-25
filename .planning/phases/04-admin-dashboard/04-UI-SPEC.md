@@ -87,13 +87,13 @@ Inherited from Phase 3 plus one Phase 4 extension (sale Status badge for admin t
 |------|---------------|---------------|
 | Dominant (60%) | `bg-white` / `bg-gray-50` | Main content area (`bg-gray-50` from layout), table row backgrounds (`bg-white`), stat card backgrounds (`bg-white`), chart backgrounds (`bg-white`), modal backgrounds (`bg-white`) |
 | Secondary (30%) | `bg-gray-100` | Table header rows, stat card subtle surface variant, filter bar background is transparent (no fill — sits on gray-50 page bg) |
-| Accent (10%) | `blue-600` | "Export CSV" button, "Invite Moderator" button, "Save" button in UserModal, focus rings on all interactive elements |
+| Accent (10%) | `blue-600` | "Export CSV" button, "Invite Moderator" button, "Save Username" button in UserModal, focus rings on all interactive elements |
 | Destructive | `red-600` | "Void" button in admin sales table (inherited from Phase 3 pattern) |
 
 **Accent (`blue-600`) reserved for in Phase 4:**
 1. "Export CSV" button (primary CTA on DashboardPage)
 2. "Invite Moderator" button (primary CTA on UsersPage)
-3. "Save" button in UserModal (form submit)
+3. "Save Username" button in UserModal (form submit)
 4. Focus rings on all interactive elements: `focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`
 5. Recharts chart line and bar fill: `stroke="#2563eb"` / `fill="#2563eb"` (blue-600 hex) — consistent with app accent
 
@@ -240,7 +240,7 @@ Height container: `h-64` (256px) — critical to prevent ResponsiveContainer col
 **Chart 2 — Product Breakdown (BarChart):**
 - Title: "Sales by Product"
 - Data key: `productBreakdown` from `summary.productBreakdown` — shape `{ name: string; count: number; revenue: string }[]`
-- X axis: `dataKey="name"`, `tick={{ fontSize: 11, angle: -30, textAnchor: 'end' }}`, bottom margin 40px (`margin={{ bottom: 40 }}`)
+- X axis: `dataKey="name"`, `tick={{ fontSize: 12, angle: -30, textAnchor: 'end' }}`, bottom margin 40px (`margin={{ bottom: 40 }}`)
 - Y axis: `allowDecimals={false}`, `tick={{ fontSize: 12 }}`
 - Grid: `CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb"`
 - Bar: `dataKey="count"`, `fill="#2563eb"`, `radius={[3, 3, 0, 0]}`
@@ -460,7 +460,7 @@ Modal for editing a user's username. Follows `ProductModal.tsx` pattern exactly.
 - `open`: boolean
 - `onClose`: `undefined` while save is in-flight (blocks Escape + backdrop close per Modal.tsx API), `() => setModalTarget(null)` otherwise
 - `title`: "Edit User"
-- `footer`: Cancel + Save buttons
+- `footer`: Discard Changes + Save Username buttons
 
 **Form anatomy (react-hook-form v7):**
 ```
@@ -476,9 +476,9 @@ Error text: `text-xs text-red-600 mt-1`
 Input error state border: `border-red-500`
 
 **Footer buttons:**
-- "Cancel": `border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 h-10 rounded-md text-sm`
-- "Save": `bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 h-10 rounded-md text-sm`
-  - In-flight: "Saving..." + disabled + `onClose` → `undefined`
+- "Discard Changes": `border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 h-10 rounded-md text-sm`
+- "Save Username": `bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 h-10 rounded-md text-sm`
+  - In-flight: "Saving Username..." + disabled + `onClose` → `undefined`
 
 **Conflict error (409 USERNAME_TAKEN):** Displayed inline below the input via `setError('username', { message: 'Username already taken.' })` (D-21 / RESEARCH.md UserModal pattern). No page-level alert.
 
@@ -621,9 +621,9 @@ No changes to `VoidConfirmDialog.tsx`. DashboardPage renders it alongside the ad
 | UserModal username field label | "Username" | Claude's discretion |
 | UserModal username taken error | "Username already taken." | D-21 |
 | UserModal username too short error | "Username must be at least 2 characters." | D-20 |
-| UserModal save button (idle) | "Save" | Phase 2/3 pattern |
-| UserModal save button (in-flight) | "Saving..." | Phase 2/3 pattern |
-| UserModal cancel button | "Cancel" | Phase 2/3 pattern |
+| UserModal save button (idle) | "Save Username" | Claude's discretion |
+| UserModal save button (in-flight) | "Saving Username..." | Claude's discretion |
+| UserModal cancel button | "Discard Changes" | Claude's discretion |
 | InviteModal title | "Invite Moderator" | D-17 |
 | InviteModal instruction text | "Share this link with the new moderator. It expires in 48 hours and can only be used once." | AUTH-06 |
 | InviteModal copy button (idle) | "Copy Link" | Claude's discretion |
