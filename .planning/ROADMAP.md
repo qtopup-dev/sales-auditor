@@ -10,7 +10,7 @@
 
 - [x] **Phase 1: Foundation** — Monorepo, schema, environment, seed data — the bedrock every other phase builds on
 - [x] **Phase 2: Auth + Catalogs** — Login, sessions, invite flow, roles enforcement, product catalog, MOP catalog
-- [ ] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
+- [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [ ] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 
 ---
@@ -65,7 +65,7 @@ Plans:
   4. Voided rows remain visible in the sheet with strikethrough styling and are never removed from view; a moderator cannot void rows (only admin can), and a moderator cannot edit rows belonging to another moderator or their own rows if their edit rights are disabled — these checks are enforced by the backend, not just the UI
   5. The sales sheet handles large row counts via virtual scroll without pagination; SALES-03 (dynamic row heights from Notes content) is implemented — note: if CSS truncation with tooltip is used instead of true dynamic heights, this must be confirmed acceptable before phase closes; the layout is usable on mobile (SALES-18)
   6. Inactive products are hidden from the Product combo box (PROD-05) and inactive MOPs are hidden from the MOP combo box (PAY-05) when adding new rows; row-level edit rights and void permission are enforced server-side (ROLES-03/04/05/06)
-**Plans:** 7 plans
+**Plans:** 8 plans
 Plans:
 - [x] 03-01-PLAN.md — [BLOCKING] Schema migration: add createdByUsername/lastEditedByUsername to Sale, userUsername to AuditLog; extend SessionData with username + organizationId; update login handler
 - [x] 03-02-PLAN.md — Backend sales routes: GET /api/sales, POST /api/sales, PATCH /:id, POST /:id/void, GET /:id/audit — all mutations with transactional audit log; mount salesRouter on protectedRouter
@@ -73,7 +73,8 @@ Plans:
 - [x] 03-04-PLAN.md — Frontend SalesTable (react-table v8 + react-virtual v3 + dynamic row heights) + AddRowForm (react-hook-form + AsyncSelect)
 - [x] 03-05-PLAN.md — Frontend AuditDrawer (slide-in panel, useQuery audit entries, admin-only)
 - [x] 03-06-PLAN.md — Frontend EditableCell (inline edit state machine, blur-save, pessimistic UI) + SalesPage full wiring
-- [ ] 03-07-PLAN.md — Fix: Add Row form not rendering on first mount (react-virtual outerSize=0 on fresh SalesTable) + fix AsyncSelect value={null} visual reset after product/MOP pick
+- [x] 03-07-PLAN.md — Fix: Add Row form not rendering on first mount (react-virtual outerSize=0 on fresh SalesTable) + fix AsyncSelect value={null} visual reset after product/MOP pick
+- [x] 03-08-PLAN.md — Fix: AddRowForm outside virtualizer — static non-virtualized `<tr>` eliminates size-cache remap cascade with 200+ rows (gap closure)
 **UI hint**: yes
 
 ### Phase 4: Admin Dashboard + Management
@@ -97,7 +98,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-06-17 |
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
-| 3. Sales Core | 6/6 | UAT pending | - |
+| 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 0/0 | Not started | - |
 
 ---
