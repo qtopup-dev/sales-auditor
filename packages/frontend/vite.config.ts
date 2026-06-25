@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 // __dirname equivalent in ESM — resolves to the packages/frontend/ directory
 // (where this config file lives), regardless of where `vite --config` is invoked from.
@@ -12,6 +14,21 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   root: __dirname, // Vite root = packages/frontend/ (where index.html lives)
   plugins: [react()],
+  css: {
+    postcss: {
+      plugins: [
+        tailwindcss({
+          content: [
+            join(__dirname, 'index.html'),
+            join(__dirname, 'src/**/*.{js,ts,jsx,tsx}'),
+          ],
+          theme: { extend: {} },
+          plugins: [],
+        }),
+        autoprefixer(),
+      ],
+    },
+  },
   server: {
     port: 5173, // Matches CLIENT_ORIGIN in .env and .env.example
     proxy: {
