@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../lib/axios';
 import { useAuthStore } from '../stores/authStore';
+import type { AuthUser } from '../stores/authStore';
 
 type LoginFormData = { username: string; password: string };
 
@@ -12,6 +14,19 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setUser } = useAuthStore();
+
+  // If a server session already exists (e.g. page refresh), skip the login screen
+  useEffect(() => {
+    api.get<{ user: AuthUser }>('/auth/me').then((res) => {
+      setUser(res.data.user);
+      const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+      const defaultRoute = res.data.user.role === 'admin' ? '/dashboard' : '/sales';
+      navigate(returnTo ?? defaultRoute, { replace: true });
+    }).catch(() => {
+      // No active session — stay on login page
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     register,
