@@ -33,14 +33,14 @@ function serializeProduct(p: {
 
 // ─── GET /api/products ───────────────────────────────────────────────────────
 // PROD-04: admin views all products (active and inactive)
-// Override soft-delete $extends: isActive: { in: [true, false] } wins over default isActive: true
-// RESEARCH.md Pitfall 2: explicit isActive key must be in caller's where clause
+// isActive: undefined overrides the $extends default (isActive: true) — Prisma skips undefined
+// where conditions, so all records are returned. Boolean fields do not support { in: [...] }.
 
 productsRouter.get('/', async (_req, res) => {
   const products = await prisma.product.findMany({
     where: {
       organizationId: 1,
-      isActive: { in: [true, false] }, // override $extends default — show all
+      isActive: undefined, // override $extends default — show all (active + inactive)
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -134,9 +134,9 @@ productsRouter.patch(
 
     const id = Number(req.params.id);
 
-    // Fetch current state bypassing $extends default (isActive: { in: [true, false] })
+    // Fetch current state bypassing $extends default — isActive: undefined = no filter
     const current = await prisma.product.findFirst({
-      where: { id, organizationId: 1, isActive: { in: [true, false] } },
+      where: { id, organizationId: 1, isActive: undefined },
       select: { isActive: true },
     });
 

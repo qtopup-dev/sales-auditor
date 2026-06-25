@@ -12,6 +12,7 @@ const adapter = new PrismaMariaDb({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   connectionLimit: 10,
+  acquireTimeout: 5000, // fail fast if pool exhausted — prevents indefinite hangs
   timezone: 'Z', // 'Z' = UTC — satisfies CLAUDE.md Rule 7 at the driver level
 });
 

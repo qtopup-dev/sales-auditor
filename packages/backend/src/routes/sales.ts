@@ -211,7 +211,7 @@ salesRouter.post('/', createSaleValidation, async (req, res) => {
     });
 
     return createdSale;
-  });
+  }, { timeout: 5000, maxWait: 3000 });
 
   res.status(201).json(serializeSale(sale));
 });
@@ -437,7 +437,7 @@ salesRouter.patch('/:id', patchSaleValidation, async (req, res) => {
 
       return updated;
     }
-  });
+  }, { timeout: 5000, maxWait: 3000 });
 
   res.json(serializeSale(updatedSale));
 });
@@ -468,12 +468,14 @@ salesRouter.post(
           status: 'active', // can only void active rows
         },
       });
+
+
       if (!sale) {
         throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
       }
 
       const updated = await tx.sale.update({
-        where: { id: saleId },
+        where: { id: saleId, organizationId: req.session.organizationId! },
         data: {
           status: 'void',
           lastEditedById: req.session.userId!,
@@ -498,7 +500,7 @@ salesRouter.post(
       });
 
       return updated;
-    });
+    }, { timeout: 5000, maxWait: 3000 });
 
     res.json(serializeSale(updatedSale));
   },

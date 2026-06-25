@@ -29,13 +29,13 @@ function serializeMop(m: {
 
 // ─── GET /api/mops ───────────────────────────────────────────────────────────
 // PAY-04: admin views all MOPs (active and inactive)
-// Override soft-delete $extends: isActive: { in: [true, false] } wins over default isActive: true
+// isActive: undefined overrides the $extends default — Boolean fields do not support { in: [...] }.
 
 mopsRouter.get('/', async (_req, res) => {
   const mops = await prisma.mop.findMany({
     where: {
       organizationId: 1,
-      isActive: { in: [true, false] }, // override $extends default — show all
+      isActive: undefined, // override $extends default — show all (active + inactive)
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -100,9 +100,9 @@ mopsRouter.patch(
 
     const id = Number(req.params.id);
 
-    // Fetch current state bypassing $extends default (isActive: { in: [true, false] })
+    // Fetch current state bypassing $extends default — isActive: undefined = no filter
     const current = await prisma.mop.findFirst({
-      where: { id, organizationId: 1, isActive: { in: [true, false] } },
+      where: { id, organizationId: 1, isActive: undefined },
       select: { isActive: true },
     });
 

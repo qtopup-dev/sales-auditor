@@ -14,14 +14,14 @@ usersRouter.use(requireRole('admin'));
 
 // ─── GET /api/users ──────────────────────────────────────────────────────────
 // Returns all users (active and inactive) — admin catalog
-// Override soft-delete $extends: isActive: { in: [true, false] } wins over default true
+// isActive: undefined overrides the $extends default — Boolean fields do not support { in: [...] }.
 // ROLES-01: returns role field for display
 
 usersRouter.get('/', async (_req, res) => {
   const users = await prisma.user.findMany({
     where: {
       organizationId: 1,
-      isActive: { in: [true, false] }, // override $extends default of isActive: true
+      isActive: undefined, // override $extends default — show all (active + inactive)
     },
     select: {
       id: true,
@@ -92,7 +92,7 @@ usersRouter.post(
 
   // Verify target user exists and belongs to this org
   const target = await prisma.user.findFirst({
-    where: { id: targetId, organizationId: 1, isActive: { in: [true, false] } },
+    where: { id: targetId, organizationId: 1, isActive: undefined },
     select: { id: true },
   });
   if (!target) {
