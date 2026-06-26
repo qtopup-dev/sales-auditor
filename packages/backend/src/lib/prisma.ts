@@ -56,6 +56,13 @@ export const prisma = baseClient.$extends({
         return query(args);
       },
     },
+    // Receivers: inject isActive=true as default (catalog endpoint uses this to hide inactive)
+    receiver: {
+      findMany({ args, query }) {
+        args.where = { isActive: true, ...args.where };
+        return query(args);
+      },
+    },
   },
 });
 
