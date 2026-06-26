@@ -12,6 +12,7 @@
 - [x] **Phase 2: Auth + Catalogs** — Login, sessions, invite flow, roles enforcement, product catalog, MOP catalog
 - [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
+- [ ] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
 
 ---
 
@@ -97,6 +98,24 @@ Plans:
 - [x] 04-06-PLAN.md — Frontend: UsersPage full implementation — users table + invite + edit username + canEdit toggle + reset password
 **UI hint**: yes
 
+### Phase 5: Receiver Catalog
+**Goal**: Replace the free-text receiver cell in the sales sheet with a searchable combobox backed by a persistent receivers catalog (id, name, optional account number), so receiver data is consistent and reusable across rows.
+**Depends on**: Phase 4
+**Requirements**: *(new feature beyond v1 requirements — tracked as PHASE5-SC1 through PHASE5-SC5)*
+**Success Criteria** (what must be TRUE):
+  1. A `Receiver` table exists in the database with id, name, and optional account_number columns (with organization_id)
+  2. Admin can manage receivers (create, edit, toggle active/inactive) via a catalog page or modal
+  3. The receiver cell in both the Add Row form and inline edit uses a searchable AsyncSelect combobox loading from the receivers catalog
+  4. Inactive receivers are hidden from the combobox options for new entries; existing rows still display the receiver name correctly
+  5. Sales rows store receiver by id (foreign key), not free text; historical display uses the stored name snapshot — consistent with how products/MOPs are handled
+**Plans:** 5 plans
+Plans:
+- [ ] 05-01-PLAN.md — [BLOCKING] Prisma schema: add Receiver model + modify Sale (receiverId FK + receiverNameSnapshot); create-only migration, inject data transform SQL, apply migration
+- [ ] 05-02-PLAN.md — Shared types (new Receiver interface, Sale updated) + receiversRouter (admin CRUD + toggle) + catalog /receivers endpoint + app.ts wiring
+- [ ] 05-03-PLAN.md — sales.ts update: serializeSale, ALLOWED_PATCH_FIELDS, validators, POST handler (receiverId lookup in tx), PATCH handler receiverId branch (atomic FK + snapshot + 2 audit entries)
+- [ ] 05-04-PLAN.md — Frontend: ReceiversPage + ReceiverModal (create/edit) + /receivers route (admin-only) + "Receivers" nav link in admin sidebar
+- [ ] 05-05-PLAN.md — Frontend: AddRowForm (AsyncSelect receiver combobox) + EditableCell (receiverId in SELECT_FIELDS) + SalesTable (receiverNameSnapshot) + AdminSalesTable (receiverNameSnapshot column + CSV)
+
 ---
 
 ## Progress
@@ -107,6 +126,7 @@ Plans:
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
+| 5. Receiver Catalog | 0/5 | In progress | — |
 
 ---
 
