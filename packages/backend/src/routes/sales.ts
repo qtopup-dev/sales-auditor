@@ -406,9 +406,68 @@ salesRouter.patch('/:id', patchSaleValidation, async (req, res) => {
       });
 
       return updated;
+    } else if (field === 'receiverId') {
+      // Special case: receiverId change must also refresh receiverNameSnapshot atomically
+      // Mirror the mopId special-case above (same pattern for FK + snapshot + 2 audit entries)
+      const newReceiver = await tx.receiver.findFirst({
+        where: {
+          id: Number(rawValue),
+          organizationId: req.session.organizationId!,
+          isActive: true, // explicit — $extends NOT active in tx
+        },
+      });
+      if (!newReceiver) {
+        throw Object.assign(new Error('Receiver not found'), { statusCode: 404, code: 'NOT_FOUND' });
+      }
+
+      // Capture old values for audit — from Prisma result BEFORE update
+      const oldReceiverId = String(sale.receiverId);
+      const oldReceiverName = sale.receiverNameSnapshot;
+
+      const updated = await tx.sale.update({
+        where: { id: saleId },
+        data: {
+          receiverId: newReceiver.id,
+          receiverNameSnapshot: newReceiver.name,
+          lastEditedById: req.session.userId!,
+          lastEditedByUsername: req.session.username!,
+        },
+      });
+
+      // Two audit entries for receiverId change: receiverId + receiverNameSnapshot
+      await tx.auditLog.createMany({
+        data: [
+          {
+            organizationId: req.session.organizationId!,
+            userId: req.session.userId!,
+            userUsername: req.session.username!,
+            saleId,
+            tableName: 'sales',
+            rowId: saleId,
+            action: 'update',
+            fieldName: 'receiverId',
+            oldValue: oldReceiverId,
+            newValue: String(updated.receiverId),
+          },
+          {
+            organizationId: req.session.organizationId!,
+            userId: req.session.userId!,
+            userUsername: req.session.username!,
+            saleId,
+            tableName: 'sales',
+            rowId: saleId,
+            action: 'update',
+            fieldName: 'receiverNameSnapshot',
+            oldValue: oldReceiverName,
+            newValue: updated.receiverNameSnapshot,
+          },
+        ],
+      });
+
+      return updated;
     } else {
-      // Standard field update: receiver or notes
-      // receiver or notes — coerce to string; notes can be null/empty
+      // Standard field update: notes only
+      // notes — coerce to string; notes can be null/empty
       const coercedValue: string | null =
         field === 'notes' && rawValue === '' ? null : String(rawValue);
 
