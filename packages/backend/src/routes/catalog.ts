@@ -23,3 +23,16 @@ catalogRouter.get('/mops', async (req, res) => {
   });
   res.json(mops.map((m) => ({ id: m.id, name: m.name })));
 });
+
+// GET /api/catalog/receivers — active receivers for sales dropdowns
+// No requireRole: all authenticated users need catalog data for the receiver combobox
+// $extends softDeleteFilter applies isActive: true automatically (receiver.findMany)
+catalogRouter.get('/receivers', async (req, res) => {
+  const receivers = await prisma.receiver.findMany({
+    where: { organizationId: req.session.organizationId! },
+    orderBy: { name: 'asc' },
+  });
+  res.json(
+    receivers.map((r) => ({ id: r.id, name: r.name, accountNumber: r.accountNumber })),
+  );
+});
