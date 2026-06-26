@@ -8,11 +8,11 @@ import { useAuthStore } from '../../stores/authStore';
 
 interface EditableCellProps {
   sale: Sale;
-  field: 'productId' | 'mopId' | 'receiver' | 'notes';
+  field: 'productId' | 'mopId' | 'receiverId' | 'notes';
   displayValue: string;
 }
 
-const SELECT_FIELDS = ['productId', 'mopId'] as const;
+const SELECT_FIELDS = ['productId', 'mopId', 'receiverId'] as const;
 type SelectField = (typeof SELECT_FIELDS)[number];
 
 export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
@@ -51,6 +51,13 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
     useQuery<Array<{ id: number; name: string }>>({
       queryKey: ['catalog-mops'],
       queryFn: () => api.get('/catalog/mops').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const { data: cachedReceivers = [] } =
+    useQuery<Array<{ id: number; name: string; accountNumber: string | null }>>({
+      queryKey: ['catalog-receivers'],
+      queryFn: () => api.get('/catalog/receivers').then((r) => r.data),
       staleTime: 5 * 60 * 1000,
     });
 
@@ -130,6 +137,13 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
         .map((m) => ({ value: m.id, label: m.name }))
     );
 
+  const loadReceivers = (inputValue: string) =>
+    Promise.resolve(
+      cachedReceivers
+        .filter((r) => r.name.toLowerCase().includes(inputValue.toLowerCase()))
+        .map((r) => ({ value: r.id, label: r.name })),
+    );
+
   const handleSelectChange = (
     option: { value: number; label: string } | null,
   ) => {
@@ -172,7 +186,10 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   if (isThisCellActive) {
     // Select fields: react-select AsyncSelect with immediate-fire on change
     if (SELECT_FIELDS.includes(field as SelectField)) {
-      const loadOptions = field === 'productId' ? loadProducts : loadMops;
+      const loadOptions =
+        field === 'productId' ? loadProducts
+        : field === 'mopId' ? loadMops
+        : loadReceivers;
       return (
         <div className="min-h-[48px] py-1">
           <AsyncSelect

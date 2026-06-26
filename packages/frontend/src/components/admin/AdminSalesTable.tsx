@@ -40,7 +40,7 @@ export function downloadCSV(rows: Sale[]): void {
       productNameSnapshot: sanitizeCell(row.productNameSnapshot),
       priceSnapshot: sanitizeCell(row.priceSnapshot),
       mopNameSnapshot: sanitizeCell(row.mopNameSnapshot),
-      receiver: sanitizeCell(row.receiver),
+      receiverNameSnapshot: sanitizeCell(row.receiverNameSnapshot),
       notes: sanitizeCell(row.notes ?? ''),
       createdByUsername: sanitizeCell(row.createdByUsername),
       createdAt: row.createdAt,
@@ -53,7 +53,7 @@ export function downloadCSV(rows: Sale[]): void {
       { label: 'Product',        value: 'productNameSnapshot' },
       { label: 'Price',          value: 'priceSnapshot' },
       { label: 'MOP',            value: 'mopNameSnapshot' },
-      { label: 'Receiver',       value: 'receiver' },
+      { label: 'Receiver',       value: 'receiverNameSnapshot' },
       { label: 'Notes',          value: 'notes' },
       { label: 'Created By',     value: 'createdByUsername' },
       { label: 'Created At',     value: 'createdAt' },
@@ -116,7 +116,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         ),
       },
       {
-        accessorKey: 'receiver',
+        accessorKey: 'receiverNameSnapshot',
         header: 'Receiver',
         size: 140,
         cell: ({ getValue }) => (

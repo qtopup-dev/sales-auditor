@@ -12,7 +12,7 @@ interface AddRowFormProps {
 type AddRowFormData = {
   productId: number | null;
   mopId: number | null;
-  receiver: string;
+  receiverId: number | null;  // FK replacing free-text receiver (Phase 5)
   notes: string;
 };
 
@@ -27,21 +27,23 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
     watch,
     formState: { errors },
   } = useForm<AddRowFormData>({
-    defaultValues: { productId: null, mopId: null, receiver: '', notes: '' },
+    defaultValues: { productId: null, mopId: null, receiverId: null, notes: '' },
   });
 
   const [priceDisplay, setPriceDisplay] = useState<string>('—');
 
   type ProductOption = { value: number; label: string; price: string };
   type MopOption = { value: number; label: string };
+  type ReceiverOption = { value: number; label: string };
   const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(null);
   const [selectedMop, setSelectedMop] = useState<MopOption | null>(null);
+  const [selectedReceiver, setSelectedReceiver] = useState<ReceiverOption | null>(null);
 
   const watchedProductId = watch('productId');
   const watchedMopId = watch('mopId');
-  const watchedReceiver = watch('receiver');
+  const watchedReceiverId = watch('receiverId');
   const isFormValid =
-    watchedProductId !== null && watchedMopId !== null && watchedReceiver.trim() !== '';
+    watchedProductId !== null && watchedMopId !== null && watchedReceiverId !== null;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,7 +67,14 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
       staleTime: 5 * 60 * 1000,
     });
 
-  const isCatalogLoading = productsLoading || mopsLoading;
+  const { data: cachedReceivers = [], isLoading: receiversLoading } =
+    useQuery<Array<{ id: number; name: string; accountNumber: string | null }>>({
+      queryKey: ['catalog-receivers'],
+      queryFn: () => api.get('/catalog/receivers').then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const isCatalogLoading = productsLoading || mopsLoading || receiversLoading;
 
   const productOptions = useMemo(
     () => cachedProducts.map((p) => ({ value: p.id, label: p.name, price: p.price })),
@@ -74,6 +83,10 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
   const mopOptions = useMemo(
     () => cachedMops.map((m) => ({ value: m.id, label: m.name })),
     [cachedMops]
+  );
+  const receiverOptions = useMemo(
+    () => cachedReceivers.map((r) => ({ value: r.id, label: r.name })),
+    [cachedReceivers],
   );
 
   const loadProducts = useCallback(
@@ -90,11 +103,21 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
       ),
     [mopOptions]
   );
+  const loadReceivers = useCallback(
+    (inputValue: string) =>
+      Promise.resolve(
+        receiverOptions.filter((r) => r.label.toLowerCase().includes(inputValue.toLowerCase())),
+      ),
+    [receiverOptions],
+  );
 
   const createMutation = useMutation({
     mutationFn: (data: AddRowFormData) => api.post('/sales', data).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      setSelectedProduct(null);
+      setSelectedMop(null);
+      setSelectedReceiver(null);
       closeAddRow();
       onSaveSuccess();
     },
@@ -189,16 +212,35 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
 
         {/* Receiver (160px) */}
         <div style={{ width: '160px', padding: '0 16px', flexShrink: 0 }}>
-          <input
-            type="text"
-            disabled={isPending}
-            placeholder="Receiver name"
-            {...register('receiver', { required: 'Receiver is required' })}
-            className={`h-9 w-full border rounded-md px-3 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100 ${
-              errors.receiver
-                ? 'border-red-500'
-                : 'border-gray-300 focus:border-blue-500'
-            }`}
+          <Controller
+            name="receiverId"
+            control={control}
+            rules={{ required: 'Receiver is required' }}
+            render={({ field }) => (
+              <AsyncSelect
+                loadOptions={loadReceivers}
+                defaultOptions={receiverOptions}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                isDisabled={isPending || isCatalogLoading}
+                placeholder="Select receiver..."
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: '36px',
+                    fontSize: '14px',
+                    borderColor: errors.receiverId ? '#ef4444' : base.borderColor,
+                  }),
+                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                }}
+                onChange={(option) => {
+                  const opt = option as ReceiverOption | null;
+                  field.onChange(opt?.value ?? null);
+                  setSelectedReceiver(opt);
+                }}
+                value={selectedReceiver}
+              />
+            )}
           />
         </div>
 
