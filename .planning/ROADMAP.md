@@ -110,7 +110,7 @@ Plans:
   5. Sales rows store receiver by id (foreign key), not free text; historical display uses the stored name snapshot — consistent with how products/MOPs are handled
 **Plans:** 5 plans
 Plans:
-- [ ] 05-01-PLAN.md — [BLOCKING] Prisma schema: add Receiver model + modify Sale (receiverId FK + receiverNameSnapshot); create-only migration, inject data transform SQL, apply migration
+- [x] 05-01-PLAN.md — [BLOCKING] Prisma schema: add Receiver model + modify Sale (receiverId FK + receiverNameSnapshot); create-only migration, inject data transform SQL, apply migration
 - [ ] 05-02-PLAN.md — Shared types (new Receiver interface, Sale updated) + receiversRouter (admin CRUD + toggle) + catalog /receivers endpoint + app.ts wiring
 - [ ] 05-03-PLAN.md — sales.ts update: serializeSale, ALLOWED_PATCH_FIELDS, validators, POST handler (receiverId lookup in tx), PATCH handler receiverId branch (atomic FK + snapshot + 2 audit entries)
 - [ ] 05-04-PLAN.md — Frontend: ReceiversPage + ReceiverModal (create/edit) + /receivers route (admin-only) + "Receivers" nav link in admin sidebar
@@ -126,7 +126,7 @@ Plans:
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
-| 5. Receiver Catalog | 0/5 | In progress | — |
+| 5. Receiver Catalog | 1/5 | In progress | — |
 
 ---
 

@@ -2,21 +2,21 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: complete
-last_updated: "2026-06-25T20:48:29.515Z"
+status: unknown
+last_updated: "2026-06-26T13:20:41.297Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 4
-  total_plans: 25
-  completed_plans: 25
-  percent: 100
+  total_plans: 30
+  completed_plans: 26
+  percent: 87
 ---
 
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-06-26
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-06-25T20:48:29.512Z
+**Last session:** 2026-06-26T09:25:53Z
 
 ---
 
@@ -35,16 +35,17 @@ progress:
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
-| Current phase | 4 — Admin Dashboard + Management |
-| Phase status | Complete (6/6 plans) |
-| Overall progress | 4 of 4 phases complete |
+| Current phase | 5 — Receiver Catalog |
+| Phase status | In progress (1/5 plans complete) |
+| Overall progress | 4 of 5 phases complete |
 
 ```
-Progress: [==================] 100%
+Progress: [=================░] 87%
 Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [==========] Complete (6/6 plans complete)
 Phase 3: Sales Core         [==========] Complete (8/8 plans complete)
 Phase 4: Admin Dashboard    [==========] Complete (6/6 plans complete)
+Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans complete)
 ```
 
 ---
@@ -89,6 +90,7 @@ Phase 4: Admin Dashboard    [==========] Complete (6/6 plans complete)
 | Vite config sets root: __dirname via fileURLToPath(import.meta.url) | When invoked via `vite --config packages/frontend/vite.config.ts` from repo root, Vite resolves index.html relative to CWD; setting root to config file's directory is required |
 | errorHandler reads err.statusCode and err.code for extensibility | Phase 2 auth errors use statusCode: 401 + code: 'UNAUTHORIZED' pattern; fallback to 500/INTERNAL_ERROR |
 | express-mysql-session pool separate from Prisma mariadb adapter | MySQLStore(session) pattern with dedicated mysql2.createPool; sessions table auto-created with createDatabaseTable: true |
+| Manual migration workflow (db execute + migrate resolve) | sessions table drift blocks prisma migrate dev; use prisma db execute + prisma migrate resolve --applied for all future Phase 5+ migrations |
 
 ### Critical Pitfalls to Watch
 
@@ -104,6 +106,10 @@ Phase 4: Admin Dashboard    [==========] Complete (6/6 plans complete)
 - Prisma 7: prisma.config.ts must be at CWD root (where npx prisma runs), NOT inside prisma/ subdirectory
 - Prisma 7: generated client entry point is client.ts/client.js NOT index.js — update all imports
 - Prisma 7: seed command is migrations.seed in prisma.config.ts, NOT package.json prisma.seed
+
+### Roadmap Evolution
+
+- Phase 5 added: Receiver catalog and combobox — receivers table (id, name, optional account_number) replaces free-text receiver cell in sales sheet
 
 ### Todos
 
