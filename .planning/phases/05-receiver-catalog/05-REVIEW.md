@@ -1,6 +1,6 @@
 ---
 phase: 05-receiver-catalog
-reviewed: 2026-06-26T00:00:00Z
+reviewed: 2026-06-26T10:30:00Z
 depth: standard
 files_reviewed: 18
 files_reviewed_list:
@@ -24,105 +24,43 @@ files_reviewed_list:
   - packages/frontend/src/components/admin/AdminSalesTable.tsx
 findings:
   critical: 0
-  warning: 1
+  warning: 0
   info: 4
-  total: 5
+  total: 4
 status: issues_found
 ---
 
-# Phase 5: Code Review Report
+# Phase 05: Code Review Report (Iteration 2)
 
-**Reviewed:** 2026-06-26T00:00:00Z
+**Reviewed:** 2026-06-26T10:30:00Z
 **Depth:** standard
 **Files Reviewed:** 18
 **Status:** issues_found
 
 ## Summary
 
-Phase 5 adds the Receiver catalog end-to-end: Prisma model, migration, CRUD router, catalog endpoint, shared types, and FK-backed AsyncSelect comboboxes across all sales surfaces. The architecture rules are almost perfectly applied — `organizationId` is on every receiver row, soft-delete via `isActive` is used throughout, `receiverNameSnapshot` is set atomically at sale creation, RBAC is enforced at router level, and the `$extends` bypass (`isActive: undefined`) is used correctly in admin CRUD.
+This is the second iteration of the auto code-review loop. The previous WR-01 finding — the `PATCH /api/receivers/:id` edit endpoint calling `prisma.receiver.update` without first confirming the receiver exists and belongs to the session org — was correctly resolved. The fix adds a `findFirst` with `isActive: undefined` before the update (matching the pattern already used by the toggle endpoint), returns an explicit `404 RECEIVER_NOT_FOUND` on miss, and the subsequent `update` retains `organizationId` in the `where` clause as a defence-in-depth layer. No regressions were introduced by the fix.
 
-One warning was found: the receiver edit endpoint skips the existence check that every analogous endpoint in the codebase performs, meaning a missing-record error surfaces as a 500 instead of a proper 404. Four informational items cover a misleading comment about the soft-delete extension, a migration edge-case for databases with legacy NULL receiver data, a TypeScript `!` assertion inconsistency in `catalog.ts`, and a stale-closure lint pattern in `SalesTable.tsx`.
+All architecture rules remain respected across the reviewed files: RBAC is enforced at the backend on every route, soft-delete is correctly implemented for the Receiver model, org-isolation (`organizationId`) is present on every receiver query and every sale mutation, `receiverNameSnapshot` is copied atomically at sale creation, price snapshots use `toFixed(2)` serialization, audit logs are written in the same Prisma transaction as each sale mutation, and pessimistic UI updates are in place throughout.
 
-No critical issues were found. No architecture rules are violated.
-
-## Warnings
-
-### WR-01: `receivers.ts` PATCH /:id calls update without an existence check
-
-**File:** `packages/backend/src/routes/receivers.ts:91-101`
-
-**Issue:** The edit endpoint calls `prisma.receiver.update()` directly without first verifying the receiver exists and belongs to the session org. If the ID is absent or cross-org, Prisma throws `PrismaClientKnownRequestError P2025` ("Record to update not found"), which propagates to the global error handler. Depending on what the error handler does with P2025, this either returns a 500 or a 404 — but neither is the explicit, intentional 404 that the rest of the codebase returns.
-
-Compare: the toggle endpoint (`PATCH /:id/toggle`) correctly does a `findFirst` first and returns `res.status(404).json({ error: 'RECEIVER_NOT_FOUND' })`. The sales route also explicitly checks existence before every mutation. This endpoint is the only exception.
-
-**Fix:**
-```typescript
-receiversRouter.patch('/:id', receiverUpdateValidation, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
-    return;
-  }
-
-  const id = Number(req.params.id);
-
-  // Verify receiver exists and belongs to this org before updating
-  const existing = await prisma.receiver.findFirst({
-    where: { id, organizationId: req.session.organizationId!, isActive: undefined },
-  });
-  if (!existing) {
-    res.status(404).json({ error: 'RECEIVER_NOT_FOUND' });
-    return;
-  }
-
-  const rawAccountNumber = req.body.accountNumber as string | null | undefined;
-  const receiver = await prisma.receiver.update({
-    where: { id, organizationId: req.session.organizationId! },
-    data: {
-      name: (req.body.name as string).trim(),
-      ...(req.body.accountNumber !== undefined && {
-        accountNumber: rawAccountNumber ? rawAccountNumber.trim() : null,
-      }),
-    },
-  });
-  res.json(serializeReceiver(receiver));
-});
-```
+The four info-level items identified in iteration 1 were not addressed and remain unchanged.
 
 ## Info
 
-### IN-01: Soft-delete extension doesn't cover `receiver.findFirst`; toggle comment is misleading
+### IN-01: Soft-delete extension does not cover `receiver.findFirst`; toggle comment is misleading
 
-**File:** `packages/backend/src/lib/prisma.ts:59-65` / `packages/backend/src/routes/receivers.ts:117-119`
+**File:** `packages/backend/src/lib/prisma.ts:59-65` / `packages/backend/src/routes/receivers.ts:128-131`
 
-**Issue:** The `$extends softDeleteFilter` extension wraps `receiver.findMany` but not `receiver.findFirst`. The comment on the toggle's `findFirst` call reads:
+**Issue:** The `$extends softDeleteFilter` extension wraps `receiver.findMany` but not `receiver.findFirst`. The comment on the toggle endpoint's `findFirst` call reads "bypassing $extends default (isActive: undefined = no filter)", but there is no `findFirst` default to bypass — it was never overridden. The `isActive: undefined` in the where clause is a harmless no-op. Code behaviour is correct, but the comment misrepresents the mechanism and creates a subtle footgun: a future author adding a `prisma.receiver.findFirst` call without an explicit `isActive` filter would believe the extension guards them, when it does not.
+
+**Fix:** Either extend `receiver.findFirst` to match the `sale` model pattern (and update the toggle comment to accurately describe the bypass), or replace the misleading comment with a factual one:
 
 ```typescript
-// Fetch current state bypassing $extends default (isActive: undefined = no filter)
+// receiver.findFirst is NOT extended — no default isActive filter is applied.
+// isActive: undefined is passed here to be explicit about intent (find all, active or not).
 const current = await prisma.receiver.findFirst({
   where: { id, organizationId: req.session.organizationId!, isActive: undefined },
 ```
-
-The comment implies the `isActive: undefined` is needed to bypass the extension's `isActive: true` default. In reality, `findFirst` is not extended for receivers, so there is nothing to bypass — the `isActive: undefined` in the where clause is a harmless no-op. The code behaves correctly (it sees all receivers regardless of `isActive`), but the comment misrepresents the mechanism.
-
-This is also inconsistent with the `sale` model, where both `findMany` and `findFirst` are extended. All current receiver `findFirst` calls include explicit `isActive` filters, so there is no current bug — but the inconsistency could lead a future author to omit the explicit filter on a new `findFirst` call, believing the extension will catch it.
-
-**Fix:** Either add `findFirst` to the receiver extension (consistent with `sale`) or update the comment:
-```typescript
-// Receivers: inject isActive=true as default (catalog endpoint uses this to hide inactive)
-receiver: {
-  findMany({ args, query }) {
-    args.where = { isActive: true, ...args.where };
-    return query(args);
-  },
-  // Add findFirst for consistency with sale model, and to protect future callers
-  findFirst({ args, query }) {
-    args.where = { isActive: true, ...args.where };
-    return query(args);
-  },
-},
-```
-And update the toggle comment to accurately state that `isActive: undefined` bypasses the `isActive: true` default (once findFirst is extended).
 
 ---
 
@@ -130,55 +68,55 @@ And update the toggle comment to accurately state that `isActive: undefined` byp
 
 **File:** `packages/backend/prisma/migrations/20260626091954_add-receiver-catalog/migration.sql:31-47`
 
-**Issue:** Step 2 inserts distinct receivers only for rows `WHERE receiver IS NOT NULL AND receiver != ''`. Step 3 back-fills `receiverId` via a JOIN on `s.receiver = r.name` — rows with a NULL or empty `receiver` value won't match any receiver record, leaving their `receiverId` as NULL. Step 5 then applies `MODIFY COLUMN receiverId INTEGER NOT NULL`, which will fail with a constraint violation if any such rows exist.
+**Issue:** Step 2 inserts distinct receivers only for rows `WHERE receiver IS NOT NULL AND receiver != ''`. Step 3 back-fills `receiverId` via a JOIN on `s.receiver = r.name` — rows with a NULL or empty `receiver` value do not match any inserted receiver, leaving their `receiverId` as NULL. Step 5 (`MODIFY COLUMN receiverId INTEGER NOT NULL`) will fail with a MySQL constraint violation if any such rows exist. For a project where receiver has always been required at sale creation this is not a runtime risk. However the migration does not assert this assumption, so it would silently break on any database that has stale or improperly seeded data.
 
-For a project that has always required receiver on sale creation this is not a runtime risk (no legacy NULL rows). But the migration does not assert this assumption, so it would silently break on any database with stale or improperly seeded data.
+**Fix:** Add a pre-Step 5 assertion comment documenting the precondition, or a manual verification query to run before applying the migration:
 
-**Fix:** Add an assertion before Step 5, or add a fallback that creates a placeholder receiver for orphaned rows:
 ```sql
--- Guard: abort if any sales row is still missing a receiverId
--- (indicates legacy data with NULL/empty receiver — must be resolved manually before migration)
-SELECT IF(
-  (SELECT COUNT(*) FROM `sales` WHERE `receiverId` IS NULL) > 0,
-  RAISE(ABORT, 'Cannot enforce NOT NULL: sales rows with no receiverId exist'),
-  NULL
-);
+-- Precondition check: run this before Step 5.
+-- If this returns any rows, resolve them manually before continuing.
+SELECT id, organizationId, receiver FROM `sales`
+WHERE `receiverId` IS NULL;
 ```
-(MySQL doesn't support `RAISE` in plain SQL — this would need to be a pre-migration script or a stored procedure check. Alternatively, document it as a prerequisite in the migration comment.)
 
 ---
 
-### IN-03: `catalog.ts` omits `!` non-null assertion on `organizationId` for `/products` and `/mops`
+### IN-03: `catalog.ts` omits the `!` non-null assertion on `organizationId` for `/products` and `/mops`
 
 **File:** `packages/backend/src/routes/catalog.ts:11,21`
 
-**Issue:** The Phase 5 `/receivers` endpoint was written with `req.session.organizationId!` (line 31), but the existing `/products` and `/mops` endpoints use `req.session.organizationId` without `!` (lines 11 and 21). While `!` provides no runtime protection, Prisma treats an `undefined` value in a `where` clause as "no filter" — omitting it entirely. If `requireAuth` ever failed to populate `organizationId` in the session, the products and mops endpoints would return data across all organizations.
-
-The new `/receivers` endpoint is correctly written. The inconsistency across the three routes in the same file creates a latent risk and will cause TypeScript strict-mode warnings.
+**Issue:** The Phase 5 `/receivers` endpoint was written with `req.session.organizationId!` (line 32), but the pre-existing `/products` and `/mops` endpoints use `req.session.organizationId` without `!` (lines 11 and 21). While `!` provides no runtime protection, Prisma treats an `undefined` value in a `where` clause as "no filter" — meaning a session without `organizationId` populated would return data across all organizations. The new `/receivers` endpoint is correctly written. The inconsistency within the same file creates a latent cross-org data leak risk and produces TypeScript strict-mode warnings.
 
 **Fix:**
+
 ```typescript
-// catalog.ts lines 10-11 and 19-21
-where: { organizationId: req.session.organizationId! },  // add ! to match /receivers pattern
+// catalog.ts — add ! to match the /receivers pattern
+// Line 11
+where: { organizationId: req.session.organizationId! },
+
+// Line 21
+where: { organizationId: req.session.organizationId! },
 ```
 
 ---
 
-### IN-04: `SalesTable.tsx` `handleSaveSuccess` useCallback has empty dependency array
+### IN-04: `SalesTable.tsx` `handleSaveSuccess` `useCallback` has an empty dependency array
 
 **File:** `packages/frontend/src/components/sales/SalesTable.tsx:132-135`
 
 **Issue:**
+
 ```typescript
 const handleSaveSuccess = useCallback(
   () => virtualizer.scrollToIndex(0, { align: 'start' }),
-  []  // virtualizer is used but not listed
+  []  // virtualizer is captured but not declared as a dependency
 );
 ```
 
-`virtualizer` is captured from the enclosing scope but omitted from the dep array. In practice this is safe because `useVirtualizer` returns the same stable instance across renders (it uses internal refs). However, the exhaustive-deps lint rule flags this, and it creates a pattern inconsistency that could cause real stale-closure bugs if applied to values that do change.
+`virtualizer` is captured from the enclosing scope but omitted from the dep array. In practice this is safe because `useVirtualizer` returns the same stable instance across renders. However, the exhaustive-deps lint rule flags this, and the empty array pattern applied elsewhere to genuinely changing values would cause real stale-closure bugs.
 
 **Fix:**
+
 ```typescript
 const handleSaveSuccess = useCallback(
   () => virtualizer.scrollToIndex(0, { align: 'start' }),
@@ -188,6 +126,6 @@ const handleSaveSuccess = useCallback(
 
 ---
 
-_Reviewed: 2026-06-26T00:00:00Z_
+_Reviewed: 2026-06-26T10:30:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
