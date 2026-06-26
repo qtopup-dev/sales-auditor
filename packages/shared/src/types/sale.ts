@@ -15,7 +15,8 @@ export interface Sale {
   priceSnapshot: string;            // DECIMAL(10,2) returned as string (CLAUDE.md Rule 6)
   mopId: number;
   mopNameSnapshot: string;          // Denormalized at creation — never join to mops for display
-  receiver: string;
+  receiverId: number;               // FK to receivers table (replaces free-text receiver — Phase 5)
+  receiverNameSnapshot: string;     // Snapshot at creation — never join for display (CLAUDE.md Rule 4)
   notes: string | null;
   status: SaleStatus;               // Soft-delete field (CLAUDE.md Rule 3)
   createdById: number;
