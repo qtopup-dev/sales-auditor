@@ -8,6 +8,7 @@ import { SalesPage } from '../pages/SalesPage';
 import { UsersPage } from '../pages/UsersPage';
 import { ProductsPage } from '../pages/ProductsPage';
 import { MopsPage } from '../pages/MopsPage';
+import { ReceiversPage } from '../pages/ReceiversPage';
 
 // ─── ProtectedRoute ──────────────────────────────────────────────────────────
 // CONTEXT.md D-11: stores returnTo in location.state for post-login redirect
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
               { path: '/dashboard', element: <DashboardPage /> },
               { path: '/products', element: <ProductsPage /> },
               { path: '/mops', element: <MopsPage /> },
+              { path: '/receivers', element: <ReceiversPage /> },
               { path: '/users', element: <UsersPage /> },
             ],
           },
