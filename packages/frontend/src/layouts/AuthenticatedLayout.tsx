@@ -9,6 +9,7 @@ const ADMIN_NAV = [
   { to: '/sales', label: 'Sales' },
   { to: '/products', label: 'Products' },
   { to: '/mops', label: 'MOPs' },
+  { to: '/receivers', label: 'Receivers' },
   { to: '/users', label: 'Users' },
 ];
 
