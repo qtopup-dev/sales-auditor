@@ -42,6 +42,7 @@ model Organization {
   sales        Sale[]
   auditLogs    AuditLog[]
   inviteTokens InviteToken[]
+  receivers    Receiver[]
 
   @@map("organizations")
 }
@@ -98,6 +99,22 @@ model Mop {
   @@map("mops")
 }
 
+model Receiver {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String       @db.VarChar(255)
+  accountNumber  String?      @db.VarChar(100)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sales Sale[]
+
+  @@index([organizationId, isActive])
+  @@map("receivers")
+}
+
 model Sale {
   id                   Int          @id @default(autoincrement())
   organizationId       Int
@@ -110,7 +127,9 @@ model Sale {
   mopId                Int
   mop                  Mop          @relation(fields: [mopId], references: [id])
   mopNameSnapshot      String       @db.VarChar(255)
-  receiver             String       @db.VarChar(255)
+  receiverId           Int
+  receiver             Receiver     @relation(fields: [receiverId], references: [id])
+  receiverNameSnapshot String       @db.VarChar(255)
   notes                String?      @db.Text
   status               SaleStatus   @default(active)
   createdById          Int
@@ -128,6 +147,7 @@ model Sale {
   @@index([organizationId, createdById])
   @@index([organizationId, productId])
   @@index([organizationId, mopId])
+  @@index([organizationId, receiverId])
   @@index([organizationId, createdAt])
   @@map("sales")
 }
