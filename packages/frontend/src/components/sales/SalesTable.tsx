@@ -40,12 +40,12 @@ const columns: ColumnDef<Sale>[] = [
     },
   },
   {
-    accessorKey: 'receiver',
+    accessorKey: 'receiverNameSnapshot',
     header: 'Receiver',
     size: 160,
     cell: ({ row }) => {
       const sale = row.original;
-      return <EditableCell sale={sale} field="receiver" displayValue={sale.receiver} />;
+      return <EditableCell sale={sale} field="receiverId" displayValue={sale.receiverNameSnapshot} />;
     },
   },
   {
