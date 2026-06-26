@@ -87,9 +87,21 @@ receiversRouter.patch('/:id', receiverUpdateValidation, async (req, res) => {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
     return;
   }
+
+  const id = Number(req.params.id);
+
+  // Verify receiver exists and belongs to this org before updating
+  const existing = await prisma.receiver.findFirst({
+    where: { id, organizationId: req.session.organizationId!, isActive: undefined },
+  });
+  if (!existing) {
+    res.status(404).json({ error: 'RECEIVER_NOT_FOUND' });
+    return;
+  }
+
   const rawAccountNumber = req.body.accountNumber as string | null | undefined;
   const receiver = await prisma.receiver.update({
-    where: { id: Number(req.params.id), organizationId: req.session.organizationId! },
+    where: { id, organizationId: req.session.organizationId! },
     data: {
       name: (req.body.name as string).trim(),
       // Only update accountNumber if the field was included in the request body
