@@ -21,7 +21,8 @@ function serializeSale(sale: {
   priceSnapshot: { toFixed: (n: number) => string };
   mopId: number;
   mopNameSnapshot: string;
-  receiver: string;
+  receiverId: number;
+  receiverNameSnapshot: string;
   notes: string | null;
   status: string;
   createdById: number;
@@ -39,7 +40,8 @@ function serializeSale(sale: {
     priceSnapshot: sale.priceSnapshot.toFixed(2),
     mopId: sale.mopId,
     mopNameSnapshot: sale.mopNameSnapshot,
-    receiver: sale.receiver,
+    receiverId: sale.receiverId,
+    receiverNameSnapshot: sale.receiverNameSnapshot,
     notes: sale.notes,
     status: sale.status,
     createdById: sale.createdById,
@@ -87,7 +89,7 @@ function serializeAuditEntry(entry: {
 // ─── Allowed PATCH fields ─────────────────────────────────────────────────────
 // SECURITY (T-03-03): allowlist prevents injection of status, organizationId, createdById, etc.
 
-const ALLOWED_PATCH_FIELDS = ['productId', 'mopId', 'receiver', 'notes'] as const;
+const ALLOWED_PATCH_FIELDS = ['productId', 'mopId', 'receiverId', 'notes'] as const;
 type AllowedPatchField = (typeof ALLOWED_PATCH_FIELDS)[number];
 
 // ─── Validation arrays ────────────────────────────────────────────────────────
@@ -95,7 +97,7 @@ type AllowedPatchField = (typeof ALLOWED_PATCH_FIELDS)[number];
 const createSaleValidation = [
   body('productId').isInt({ min: 1 }).withMessage('Product is required'),
   body('mopId').isInt({ min: 1 }).withMessage('MOP is required'),
-  body('receiver').trim().notEmpty().withMessage('Receiver is required'),
+  body('receiverId').isInt({ min: 1 }).withMessage('Receiver is required'),
   body('notes').optional().isString(),
 ];
 
@@ -104,14 +106,9 @@ const patchSaleValidation = [
   body('field').isIn(ALLOWED_PATCH_FIELDS).withMessage('Invalid field'),
   body('value').exists().withMessage('Value is required'),
   body('value')
-    .if(body('field').isIn(['productId', 'mopId']))
+    .if(body('field').isIn(['productId', 'mopId', 'receiverId']))
     .isInt({ min: 1 })
-    .withMessage('productId and mopId must be positive integers'),
-  body('value')
-    .if(body('field').equals('receiver'))
-    .trim()
-    .notEmpty()
-    .withMessage('Receiver cannot be empty'),
+    .withMessage('productId, mopId, and receiverId must be positive integers'),
 ];
 
 const voidSaleValidation = [
@@ -146,10 +143,10 @@ salesRouter.post('/', createSaleValidation, async (req, res) => {
     return;
   }
 
-  const { productId, mopId, receiver, notes } = req.body as {
+  const { productId, mopId, receiverId, notes } = req.body as {
     productId: number;
     mopId: number;
-    receiver: string;
+    receiverId: number;
     notes?: string;
   };
 
@@ -177,6 +174,17 @@ salesRouter.post('/', createSaleValidation, async (req, res) => {
       throw Object.assign(new Error('MOP not found'), { statusCode: 404, code: 'NOT_FOUND' });
     }
 
+    const receiver = await tx.receiver.findFirst({
+      where: {
+        id: Number(receiverId),
+        organizationId: req.session.organizationId!,
+        isActive: true, // explicit — $extends NOT active in tx
+      },
+    });
+    if (!receiver) {
+      throw Object.assign(new Error('Receiver not found'), { statusCode: 404, code: 'NOT_FOUND' });
+    }
+
     // SALES-09 / CLAUDE.md Rule 4: copy name + price to snapshot columns
     const createdSale = await tx.sale.create({
       data: {
@@ -186,7 +194,8 @@ salesRouter.post('/', createSaleValidation, async (req, res) => {
         priceSnapshot: product.price, // Decimal field — Prisma accepts the Decimal value directly
         mopId: Number(mopId),
         mopNameSnapshot: mop.name,
-        receiver: (receiver as string).trim(),
+        receiverId: receiver.id,
+        receiverNameSnapshot: receiver.name,
         notes: notes ? (notes as string).trim() : null,
         status: 'active',
         createdById: req.session.userId!,
