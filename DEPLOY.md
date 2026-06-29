@@ -20,7 +20,7 @@ Browser
 SSH into the VPS and run:
 
 ```bash
-# Install NVM + Node.js 20 LTS
+# Install NVM + Node.js 20 LTS //
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 source ~/.bashrc
 nvm install 20
