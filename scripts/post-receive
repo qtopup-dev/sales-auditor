@@ -1,0 +1,54 @@
+#!/bin/bash
+# Git post-receive hook — runs on the VPS after every `git push prod master`
+# Installed at: /var/repo/alejinput.git/hooks/post-receive
+set -e
+
+REPO="/var/repo/alejinput.git"
+APP_DIR="/var/www/alejinput"
+BRANCH="master"
+
+echo ""
+echo "===== DEPLOY: $(date) ====="
+echo "==> Checking out $BRANCH..."
+GIT_WORK_TREE="$APP_DIR" git --git-dir="$REPO" checkout -f "$BRANCH"
+
+cd "$APP_DIR"
+
+# Load NVM — git hooks run with a minimal environment (no .bashrc)
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+
+echo "==> Node: $(node -v)  npm: $(npm -v)"
+
+# Install all dependencies (devDeps are required for tsc + vite build)
+echo "==> npm ci..."
+npm ci
+
+# Generate Prisma client (gitignored — must be regenerated every deploy)
+echo "==> prisma generate..."
+cd packages/backend
+npx prisma generate
+cd "$APP_DIR"
+
+# Compile backend (tsc) + build frontend (vite)
+echo "==> Building..."
+npm run build
+
+# Run pending migrations (safe to run — only applies new ones)
+echo "==> prisma migrate deploy..."
+cd packages/backend
+npx prisma migrate deploy
+cd "$APP_DIR"
+
+# Reload the API process (or start it for the first time)
+echo "==> Restarting API via PM2..."
+if pm2 list | grep -q "alejinput-api"; then
+  pm2 reload alejinput-api
+else
+  pm2 start ecosystem.config.cjs --env production
+fi
+pm2 save
+
+echo "===== DEPLOY DONE ====="
+echo ""

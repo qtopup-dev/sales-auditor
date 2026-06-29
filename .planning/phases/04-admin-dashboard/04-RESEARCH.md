@@ -27,7 +27,7 @@
 - **D-14:** UsersPage follows ProductsPage pattern: react-table v8, useQuery + useMutation, pessimistic per-row pending state.
 - **D-15:** Users table columns: Username | Role | Edit Rights | Status | Actions (Edit, Toggle canEdit, Reset Password).
 - **D-16:** Username editing via UserModal (pre-filled). Calls new `PATCH /api/users/:id/username`.
-- **D-17:** Invite flow: "Invite Moderator" button calls existing `POST /api/auth/invite-generate`. Modal displays generated link with "Copy Link" button.
+- **D-17:** Invite flow: "Invite Moderator" button calls existing `POST /api/auth/invite` (auth.ts line 132 — NOT `/invite-generate`). Modal displays generated link with "Copy Link" button.
 - **D-18:** Reset Password: button per row → calls existing `POST /api/users/:id/reset-password`. Modal shows temp password once with "Copy" instruction.
 - **D-19:** canEdit toggle for moderators only (not admins). Calls existing `PATCH /api/users/:id`. Per-row pending state.
 - **D-20:** New `PATCH /api/users/:id/username`. Validates: non-empty, 2–100 chars, unique within organizationId. Admin-only (usersRouter already mounts requireRole at router level). Returns updated user.
@@ -779,17 +779,19 @@ const onSubmit = async (data: { username: string }) => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **salesEditStore `openAuditDrawer` action**
+1. **salesEditStore `openAuditDrawer` action** (RESOLVED)
    - What we know: AuditDrawer reads `openAuditSaleId` from the store; `closeAuditDrawer` is confirmed in AuditDrawer.tsx
    - What's unclear: Whether `openAuditDrawer(saleId)` action exists — AuditDrawer.tsx uses `openAuditSaleId` and `closeAuditDrawer` but doesn't show how the drawer is opened
    - Recommendation: Planner should include a task to verify `salesEditStore.ts` exports `openAuditDrawer`; add it if missing
+   - **RESOLVED:** Plans 04-03 and 04-05 verified `salesEditStore.ts` exports `openAuditDrawer(saleId)`. DashboardPage uses `useSalesEditStore().openAuditDrawer(row.id)` (verified from Phase 3 store implementation).
 
-2. **InviteModal — response shape from POST /api/auth/invite-generate**
-   - What we know: The endpoint exists (CONTEXT.md D-17, app.ts auth routes)
+2. **InviteModal — response shape from POST /api/auth/invite** (RESOLVED)
+   - What we know: The endpoint exists (auth.ts line 132 — route is `/invite`, NOT `/invite-generate`; CONTEXT.md D-17 had incorrect endpoint name)
    - What's unclear: Whether the response is `{ inviteUrl: string }` or `{ token: string }` requiring frontend to construct the URL
-   - Recommendation: Planner should read `auth.ts` invite-generate handler to confirm response shape before writing InviteModal
+   - Recommendation: Planner should read `auth.ts` invite handler to confirm response shape before writing InviteModal
+   - **RESOLVED:** auth.ts line 148 confirms response is `{ inviteUrl: string }`. Endpoint is `POST /api/auth/invite` (not `/invite-generate`). Plans 04-04 and 04-06 use the correct endpoint.
 
 ---
 

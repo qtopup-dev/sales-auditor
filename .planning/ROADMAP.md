@@ -12,7 +12,7 @@
 - [x] **Phase 2: Auth + Catalogs** — Login, sessions, invite flow, roles enforcement, product catalog, MOP catalog
 - [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
-- [ ] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
+- [x] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
 
 ---
 
@@ -111,10 +111,10 @@ Plans:
 **Plans:** 5 plans
 Plans:
 - [x] 05-01-PLAN.md — [BLOCKING] Prisma schema: add Receiver model + modify Sale (receiverId FK + receiverNameSnapshot); create-only migration, inject data transform SQL, apply migration
-- [ ] 05-02-PLAN.md — Shared types (new Receiver interface, Sale updated) + receiversRouter (admin CRUD + toggle) + catalog /receivers endpoint + app.ts wiring
-- [ ] 05-03-PLAN.md — sales.ts update: serializeSale, ALLOWED_PATCH_FIELDS, validators, POST handler (receiverId lookup in tx), PATCH handler receiverId branch (atomic FK + snapshot + 2 audit entries)
-- [ ] 05-04-PLAN.md — Frontend: ReceiversPage + ReceiverModal (create/edit) + /receivers route (admin-only) + "Receivers" nav link in admin sidebar
-- [ ] 05-05-PLAN.md — Frontend: AddRowForm (AsyncSelect receiver combobox) + EditableCell (receiverId in SELECT_FIELDS) + SalesTable (receiverNameSnapshot) + AdminSalesTable (receiverNameSnapshot column + CSV)
+- [x] 05-02-PLAN.md — Shared types (new Receiver interface, Sale updated) + receiversRouter (admin CRUD + toggle) + catalog /receivers endpoint + app.ts wiring
+- [x] 05-03-PLAN.md — sales.ts update: serializeSale, ALLOWED_PATCH_FIELDS, validators, POST handler (receiverId lookup in tx), PATCH handler receiverId branch (atomic FK + snapshot + 2 audit entries)
+- [x] 05-04-PLAN.md — Frontend: ReceiversPage + ReceiverModal (create/edit) + /receivers route (admin-only) + "Receivers" nav link in admin sidebar
+- [x] 05-05-PLAN.md — Frontend: AddRowForm (AsyncSelect receiver combobox) + EditableCell (receiverId in SELECT_FIELDS) + SalesTable (receiverNameSnapshot) + AdminSalesTable (receiverNameSnapshot column + CSV)
 
 ---
 
@@ -126,7 +126,7 @@ Plans:
 | 2. Auth + Catalogs | 6/6 | Complete | 2026-06-18 |
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
-| 5. Receiver Catalog | 1/5 | In progress | — |
+| 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
 
 ---
 

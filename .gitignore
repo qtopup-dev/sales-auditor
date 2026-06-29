@@ -24,3 +24,9 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Claude Code local config (machine-specific, contains worktrees)
+.claude/
+
+# Playwright MCP browser data
+.playwright-mcp/
