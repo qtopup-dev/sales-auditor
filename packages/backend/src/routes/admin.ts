@@ -108,7 +108,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(priceSnapshot) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -117,7 +117,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(priceSnapshot) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -126,7 +126,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(priceSnapshot) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -136,7 +136,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(priceSnapshot) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
