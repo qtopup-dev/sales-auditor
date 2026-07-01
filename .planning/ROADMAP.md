@@ -2,7 +2,7 @@
 
 **Granularity:** Coarse (4 phases)
 **Coverage:** 57/57 v1 requirements mapped
-**Last updated:** 2026-06-26
+**Last updated:** 2026-07-01
 
 ---
 
@@ -13,6 +13,7 @@
 - [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 - [x] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
+- [ ] **Phase 6: Dashboard KPI Cards** — Transactions / Profit / Turnover KPI summary cards at the top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month
 
 ---
 
@@ -116,6 +117,21 @@ Plans:
 - [x] 05-04-PLAN.md — Frontend: ReceiversPage + ReceiverModal (create/edit) + /receivers route (admin-only) + "Receivers" nav link in admin sidebar
 - [x] 05-05-PLAN.md — Frontend: AddRowForm (AsyncSelect receiver combobox) + EditableCell (receiverId in SELECT_FIELDS) + SalesTable (receiverNameSnapshot) + AdminSalesTable (receiverNameSnapshot column + CSV)
 
+### Phase 6: Add dashboard KPI summary cards to admin dashboard top
+**Goal**: Admin can see period-specific KPI cards (Transactions, Profit, Turnover) at the very top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month values — giving instant snapshot of recent activity without scrolling past charts.
+**Depends on**: Phase 5
+**Requirements**: *(new feature — tracked as PHASE6-SC1 through PHASE6-SC5)*
+**Success Criteria** (what must be TRUE):
+  1. 3 KPI cards appear at the top of the admin DashboardPage (Transactions, Profit, Turnover) in a single row above the existing stats banner
+  2. Each card shows 4 time-period values: Today / Yesterday / This Month / Last Month in a 2×2 grid
+  3. KPI data is computed server-side with UTC date math; monetary values returned as strings (never float)
+  4. KpiCard component visual style matches StatCard (bg-white, border border-gray-200, rounded-md, p-6)
+  5. The existing stats banner (Total Sales / Total Revenue) and all other DashboardPage sections remain unchanged
+**Plans:** 2 plans
+Plans:
+- [ ] 06-01-PLAN.md — Backend: extend GET /api/admin/summary with 8 date-filtered $queryRaw queries (count + sum per period) and kpiData response field
+- [ ] 06-02-PLAN.md — Frontend: new KpiCard.tsx component + DashboardPage.tsx updated with KPI section and extended AdminSummary interface
+
 ---
 
 ## Progress
@@ -127,6 +143,7 @@ Plans:
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
+| 6. Dashboard KPI Cards | 0/2 | Planned | — |
 
 ---
 
