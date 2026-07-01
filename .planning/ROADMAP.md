@@ -129,7 +129,7 @@ Plans:
   5. The existing stats banner (Total Sales / Total Revenue) and all other DashboardPage sections remain unchanged
 **Plans:** 2 plans
 Plans:
-- [ ] 06-01-PLAN.md — Backend: extend GET /api/admin/summary with 8 date-filtered $queryRaw queries (count + sum per period) and kpiData response field
+- [x] 06-01-PLAN.md — Backend: extend GET /api/admin/summary with 8 date-filtered $queryRaw queries (count + sum per period) and kpiData response field
 - [ ] 06-02-PLAN.md — Frontend: new KpiCard.tsx component + DashboardPage.tsx updated with KPI section and extended AdminSummary interface
 
 ---
@@ -143,7 +143,7 @@ Plans:
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
-| 6. Dashboard KPI Cards | 0/2 | Planned | — |
+| 6. Dashboard KPI Cards | 1/2 | In progress | — |
 
 ---
 
