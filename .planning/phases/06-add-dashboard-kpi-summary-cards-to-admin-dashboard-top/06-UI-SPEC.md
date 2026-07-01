@@ -1,7 +1,8 @@
 ---
 phase: 6
 slug: add-dashboard-kpi-summary-cards-to-admin-dashboard-top
-status: draft
+status: approved
+reviewed_at: 2026-07-01
 shadcn_initialized: false
 preset: none
 created: 2026-07-01
@@ -60,13 +61,13 @@ Inherited from Phase 4. Two weights only — 400 and 600. Phase 6 adds one new r
 | Body | 14px | 400 | 1.5 | `text-sm font-normal text-gray-900` | Inherited — not used in new KpiCard elements |
 | Label | 14px | 400 | 1.4 | `text-sm font-normal text-gray-500` | KpiCard header label ("Transactions", "Profit", "Turnover") — matches StatCard label style exactly |
 | KPI sub-label | 12px | 400 | 1.3 | `text-xs font-normal text-gray-400` | Sub-period labels inside KpiCard: "Today", "Yesterday", "This Month", "Last Month" |
-| KPI value | 18px | 600 | 1.3 | `text-lg font-semibold text-gray-900` | Per-period values inside KpiCard (smaller than StatCard Display at 24px because 4 values share card space) |
+| KPI value | 20px | 600 | 1.3 | `text-xl font-semibold text-gray-900` | Per-period values inside KpiCard (smaller than StatCard Display at 24px because 4 values share card space) |
 | Heading | 20px | 600 | 1.3 | `text-xl font-semibold text-gray-900` | Inherited — "Dashboard" page title, unchanged |
 | Display | 24px | 600 | 1.2 | `text-2xl font-semibold text-gray-900` | Inherited — existing StatCard values (Total Sales, Total Revenue), unchanged |
 
 **No weight 500 (`font-medium`) anywhere in Phase 6.** All elements use 400 or 600.
 
-**KPI value vs Display distinction:** KpiCard values use 18px/600 (text-lg) not 24px/600 (text-2xl). The smaller size is intentional — a single KpiCard card displays 4 values in a 2×2 grid and 24px would crowd the layout. The StatCard Display size at 24px remains reserved for the all-time totals (Total Sales, Total Revenue) which occupy their own single-value cards below the KPI section.
+**KPI value vs Display distinction:** KpiCard values use 20px/600 (text-xl) not 24px/600 (text-2xl). The smaller size is intentional — a single KpiCard card displays 4 values in a 2×2 grid and 24px would crowd the layout. The StatCard Display size at 24px remains reserved for the all-time totals (Total Sales, Total Revenue) which occupy their own single-value cards below the KPI section.
 
 ---
 
@@ -112,6 +113,8 @@ Phase 6 inserts a new KPI section at the VERY TOP of DashboardPage, ABOVE the ex
 [AuditDrawer — right slide-in]                                               UNCHANGED
 [VoidConfirmDialog — modal overlay]                                          UNCHANGED
 ```
+
+**Focal point:** The KPI section at the top of the page is the primary visual entry point. The three equal-weight KpiCards establish the opening visual rhythm, with the Transactions card (leftmost) as the natural reading start.
 
 **KPI section layout:** `grid grid-cols-3 gap-6 mb-8`
 - Card order left-to-right: Transactions | Profit | Turnover
@@ -217,7 +220,7 @@ Each period cell:
 ```
 [div — flex flex-col]
   [p — text-xs font-normal text-gray-400 mb-1]   ← sub-period label
-  [p — text-lg font-semibold text-gray-900]       ← value (or skeleton)
+  [p — text-xl font-semibold text-gray-900]       ← value (or skeleton)
 ```
 
 **Exact Tailwind for card shell:** `bg-white border border-gray-200 rounded-md p-6` — identical to StatCard.
@@ -263,7 +266,7 @@ When `loading = true`, render the 4 animate-pulse skeleton blocks in place of th
     [div — animate-pulse bg-gray-200 h-6 rounded w-20]   ← skeleton
 ```
 
-Skeleton height: `h-6` (24px) — matches the line height of the text-lg value it replaces.
+Skeleton height: `h-6` (24px) — matches the approximate line height of the text-xl value it replaces.
 Skeleton width for Today/Yesterday: `w-16` (64px).
 Skeleton width for This Month/Last Month: `w-20` (80px) — slightly wider to suggest larger monthly totals.
 
@@ -361,11 +364,11 @@ No third-party shadcn registries. No registry vetting gate required. All depende
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-07-01
