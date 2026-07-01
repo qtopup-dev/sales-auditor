@@ -13,7 +13,7 @@
 - [x] **Phase 3: Sales Core** — The main product: inline-edit sales sheet, add row, void, full audit log (transactional)
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 - [x] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
-- [ ] **Phase 6: Dashboard KPI Cards** — Transactions / Profit / Turnover KPI summary cards at the top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month
+- [x] **Phase 6: Dashboard KPI Cards** — Transactions / Profit / Turnover KPI summary cards at the top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month
 
 ---
 
@@ -130,7 +130,7 @@ Plans:
 **Plans:** 2 plans
 Plans:
 - [x] 06-01-PLAN.md — Backend: extend GET /api/admin/summary with 8 date-filtered $queryRaw queries (count + sum per period) and kpiData response field
-- [ ] 06-02-PLAN.md — Frontend: new KpiCard.tsx component + DashboardPage.tsx updated with KPI section and extended AdminSummary interface
+- [x] 06-02-PLAN.md — Frontend: new KpiCard.tsx component + DashboardPage.tsx updated with KPI section and extended AdminSummary interface
 
 ---
 
@@ -143,7 +143,7 @@ Plans:
 | 3. Sales Core | 8/8 | Complete | 2026-06-25 |
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
-| 6. Dashboard KPI Cards | 1/2 | In progress | — |
+| 6. Dashboard KPI Cards | 2/2 | Complete | 2026-07-01 |
 
 ---
 
