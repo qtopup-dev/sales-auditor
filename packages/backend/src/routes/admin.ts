@@ -25,8 +25,11 @@ adminRouter.use(requireRole('admin'));
 adminRouter.get('/summary', async (req, res) => {
   const organizationId = req.session.organizationId!;
 
-  const [totalCount, revenueResult, productBreakdown, mopBreakdown, rawTrend] =
-    await Promise.all([
+  const [
+    totalCount, revenueResult, productBreakdown, mopBreakdown, rawTrend,
+    txToday, txYesterday, txThisMonth, txLastMonth,
+    sumToday, sumYesterday, sumThisMonth, sumLastMonth,
+  ] = await Promise.all([
       // Count all sales regardless of status (active and voided)
       prisma.sale.count({
         where: { organizationId, status: { in: ['active', 'void'] } },
@@ -62,7 +65,96 @@ adminRouter.get('/summary', async (req, res) => {
         GROUP BY DATE(createdAt)
         ORDER BY date ASC
       `,
+      // ── KPI: Transaction counts (active-only, D-01) ─────────────────────────────
+      // BigInt warning: COUNT(*) returns bigint — Number() coercion required before JSON serialization
+      // Rule 7: CURDATE() operates in UTC because DB connection is ?timezone=UTC
+      // Rule 8: soft-delete middleware does not intercept $queryRaw — explicit status filter required
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) AS count
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status = 'active'
+          AND DATE(createdAt) = CURDATE()
+      `,
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) AS count
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status = 'active'
+          AND DATE(createdAt) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+      `,
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) AS count
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status = 'active'
+          AND YEAR(createdAt) = YEAR(CURDATE())
+          AND MONTH(createdAt) = MONTH(CURDATE())
+      `,
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) AS count
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status = 'active'
+          AND YEAR(createdAt) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+          AND MONTH(createdAt) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+      `,
+      // ── KPI: Profit (active-only, D-02) + Turnover (active+void, D-03) per period ─
+      // Single query per period returns both values via CASE WHEN.
+      // profitSum = SUM WHERE active; turnoverSum = SUM WHERE active OR void.
+      // SUM returns NULL when no rows match — toMoneyStr handles null → '0.00'.
+      // Decimal/string coercion: $queryRaw returns DECIMAL column as Prisma.Decimal or string
+      // depending on driver version — toMoneyStr handles both via .toFixed() duck-type check.
+      prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
+        SELECT
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
+          SUM(priceSnapshot) AS turnoverSum
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status IN ('active', 'void')
+          AND DATE(createdAt) = CURDATE()
+      `,
+      prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
+        SELECT
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
+          SUM(priceSnapshot) AS turnoverSum
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status IN ('active', 'void')
+          AND DATE(createdAt) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+      `,
+      prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
+        SELECT
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
+          SUM(priceSnapshot) AS turnoverSum
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status IN ('active', 'void')
+          AND YEAR(createdAt) = YEAR(CURDATE())
+          AND MONTH(createdAt) = MONTH(CURDATE())
+      `,
+      prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
+        SELECT
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
+          SUM(priceSnapshot) AS turnoverSum
+        FROM sales
+        WHERE organizationId = ${organizationId}
+          AND status IN ('active', 'void')
+          AND YEAR(createdAt) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+          AND MONTH(createdAt) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+      `,
     ]);
+
+  // toMoneyStr: converts $queryRaw SUM result to "NNN.NN" string.
+  // Prisma.Decimal has .toFixed(); mysql2 raw may return string — Number(v).toFixed(2) handles both.
+  // Rule 6: never return monetary values as JS float — always string with 2 decimal places.
+  const toMoneyStr = (v: unknown): string => {
+    if (v == null) return '0.00';
+    if (typeof (v as { toFixed?: unknown }).toFixed === 'function') {
+      return (v as { toFixed: (n: number) => string }).toFixed(2);
+    }
+    return Number(v).toFixed(2);
+  };
 
   res.json({
     totalCount,
@@ -84,5 +176,25 @@ adminRouter.get('/summary', async (req, res) => {
       name: r.mopNameSnapshot,
       count: r._count._all,
     })),
+    kpiData: {
+      transactions: {
+        today:     Number(txToday[0]?.count ?? 0),
+        yesterday: Number(txYesterday[0]?.count ?? 0),
+        thisMonth: Number(txThisMonth[0]?.count ?? 0),
+        lastMonth: Number(txLastMonth[0]?.count ?? 0),
+      },
+      profit: {
+        today:     toMoneyStr(sumToday[0]?.profitSum),
+        yesterday: toMoneyStr(sumYesterday[0]?.profitSum),
+        thisMonth: toMoneyStr(sumThisMonth[0]?.profitSum),
+        lastMonth: toMoneyStr(sumLastMonth[0]?.profitSum),
+      },
+      turnover: {
+        today:     toMoneyStr(sumToday[0]?.turnoverSum),
+        yesterday: toMoneyStr(sumYesterday[0]?.turnoverSum),
+        thisMonth: toMoneyStr(sumThisMonth[0]?.turnoverSum),
+        lastMonth: toMoneyStr(sumLastMonth[0]?.turnoverSum),
+      },
+    },
   });
 });
