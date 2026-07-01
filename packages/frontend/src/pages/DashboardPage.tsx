@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { Sale, Product, Mop, User } from '@alejinput/shared';
 import { api } from '../lib/axios';
 import { StatCard } from '../components/admin/StatCard';
+import { KpiCard } from '../components/admin/KpiCard';
 import { SalesCharts } from '../components/admin/SalesCharts';
 import { SalesFilterBar, type FilterState, applyFilters } from '../components/admin/SalesFilterBar';
 import { AdminSalesTable, downloadCSV } from '../components/admin/AdminSalesTable';
@@ -15,12 +16,32 @@ import { AuditDrawer } from '../components/sales/AuditDrawer';
 import { VoidConfirmDialog } from '../components/sales/VoidConfirmDialog';
 import { useSalesEditStore } from '../stores/salesEditStore';
 
+// Extended in Phase 6 to include kpiData — D-05, D-06, D-07
+interface KpiPeriodCount {
+  today: number;
+  yesterday: number;
+  thisMonth: number;
+  lastMonth: number;
+}
+
+interface KpiPeriodMoney {
+  today: string;
+  yesterday: string;
+  thisMonth: string;
+  lastMonth: string;
+}
+
 interface AdminSummary {
   totalCount: number;
   totalRevenue: string;
   trendData: Array<{ date: string; count: number }>;
   productBreakdown: Array<{ name: string; count: number; revenue: string }>;
   mopBreakdown: Array<{ name: string; count: number }>;
+  kpiData: {
+    transactions: KpiPeriodCount;
+    profit: KpiPeriodMoney;
+    turnover: KpiPeriodMoney;
+  };
 }
 
 // ADMIN-01 through ADMIN-12
@@ -99,6 +120,29 @@ export function DashboardPage() {
         >
           {csvExporting ? 'Exporting...' : 'Export CSV'}
         </button>
+      </div>
+
+      {/* KPI summary cards — D-06, D-07: period-specific KPIs above all-time stats */}
+      {/* grid-cols-3: Transactions | Profit | Turnover left-to-right */}
+      {/* mb-8: 32px gap separating KPI section from stats banner below */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        <KpiCard
+          label="Transactions"
+          periods={summary?.kpiData?.transactions ?? { today: 0, yesterday: 0, thisMonth: 0, lastMonth: 0 }}
+          loading={summaryLoading}
+        />
+        <KpiCard
+          label="Profit"
+          periods={summary?.kpiData?.profit ?? { today: '0.00', yesterday: '0.00', thisMonth: '0.00', lastMonth: '0.00' }}
+          loading={summaryLoading}
+          isCurrency
+        />
+        <KpiCard
+          label="Turnover"
+          periods={summary?.kpiData?.turnover ?? { today: '0.00', yesterday: '0.00', thisMonth: '0.00', lastMonth: '0.00' }}
+          loading={summaryLoading}
+          isCurrency
+        />
       </div>
 
       {/* Stats banner — D-09: NOT affected by filter state */}
