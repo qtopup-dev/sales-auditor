@@ -104,7 +104,9 @@ export function DashboardPage() {
   const userOptions = users.map((u) => ({ id: u.id, username: u.username }));
 
   // Revenue label: string concat only — no float arithmetic (CLAUDE.md Rule 6)
-  const revenueValue = summary ? '₱' + summary.totalRevenue : '—';
+  const revenueValue = summary
+    ? '₱' + summary.totalRevenue.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    : '—';
   const totalSalesValue = summary ? String(summary.totalCount) : '—';
 
   return (

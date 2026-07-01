@@ -4,6 +4,13 @@
 // Shell matches StatCard: bg-white border border-gray-200 rounded-md p-6
 // Loading skeleton: h-6 (text-xl line height); w-16 today/yesterday, w-20 month slots
 
+// Pure string manipulation — no float conversion (Rule 6)
+function addThousandsSep(moneyStr: string): string {
+  const [int, dec] = moneyStr.split('.');
+  const withCommas = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return dec !== undefined ? `${withCommas}.${dec}` : withCommas;
+}
+
 interface KpiPeriods {
   today: string | number;
   yesterday: string | number;
@@ -44,7 +51,7 @@ export function KpiCard({ label, periods, loading = false, isCurrency = false }:
               // text-xl font-semibold (not text-2xl — 4 values share card space per UI-SPEC §Typography)
               // isCurrency: string concat only — Rule 6 prohibits parseFloat on monetary values
               <p className="text-xl font-semibold text-gray-900">
-                {isCurrency ? '₱' + String(periods[key]) : String(periods[key])}
+                {isCurrency ? '₱' + addThousandsSep(String(periods[key])) : String(periods[key])}
               </p>
             )}
           </div>
