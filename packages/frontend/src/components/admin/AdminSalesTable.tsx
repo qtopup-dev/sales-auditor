@@ -3,13 +3,15 @@
 // ADMIN-07/08/09: downloadCSV with injection sanitization and BOM
 // ADMIN-12: Audit button opens AuditDrawer via useSalesEditStore().openAuditDrawer
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
+  getPaginationRowModel,
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
+import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
 import { Parser } from '@json2csv/plainjs';
 import type { Sale } from '@alejinput/shared';
 import { useSalesEditStore } from '../../stores/salesEditStore';
@@ -87,6 +89,16 @@ interface AdminSalesTableProps {
 
 export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps) {
   const { openAuditDrawer } = useSalesEditStore();
+
+  const [pageSizeOption, setPageSizeOption] = useState<PageSizeOption>(25);
+  const [pageIndex, setPageIndex] = useState(0);
+  const effectivePageSize = pageSizeOption === 'all' ? Math.max(rows.length, 1) : pageSizeOption;
+  const effectivePageIndex = pageSizeOption === 'all' ? 0 : pageIndex;
+
+  const handlePageSizeChange = (size: PageSizeOption) => {
+    setPageSizeOption(size);
+    setPageIndex(0);
+  };
 
   const columns = useMemo<ColumnDef<Sale>[]>(
     () => [
@@ -231,7 +243,19 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
     [onVoid, openAuditDrawer],
   );
 
-  const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: { pagination: { pageIndex: effectivePageIndex, pageSize: effectivePageSize } },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function'
+        ? updater({ pageIndex: effectivePageIndex, pageSize: effectivePageSize })
+        : updater;
+      setPageIndex(next.pageIndex);
+    },
+  });
 
   if (loading) {
     return <p className="text-sm text-gray-500">Loading sales...</p>;
@@ -248,7 +272,8 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
 
   return (
     <div className="border border-gray-200 rounded-md overflow-hidden">
-      <table className="w-full">
+      <div className="overflow-x-auto">
+        <table className="w-full">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200">
@@ -285,7 +310,18 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
             );
           })}
         </tbody>
-      </table>
+        </table>
+      </div>
+      <PaginationFooter
+        pageSize={pageSizeOption}
+        pageIndex={effectivePageIndex}
+        totalRows={rows.length}
+        onPageSizeChange={handlePageSizeChange}
+        canPrev={table.getCanPreviousPage()}
+        canNext={table.getCanNextPage()}
+        onPrev={() => table.previousPage()}
+        onNext={() => table.nextPage()}
+      />
     </div>
   );
 }

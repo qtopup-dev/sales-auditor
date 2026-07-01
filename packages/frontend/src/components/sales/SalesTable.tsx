@@ -1,11 +1,11 @@
-import { useRef, useCallback } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
+import { useState } from 'react';
+import { useReactTable, getCoreRowModel, getPaginationRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
 import type { Sale } from '@alejinput/shared';
 import { useAuthStore } from '../../stores/authStore';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { AddRowForm } from './AddRowForm';
 import { EditableCell } from './EditableCell';
+import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
 
 const columns: ColumnDef<Sale>[] = [
   {
@@ -106,100 +106,95 @@ const columns: ColumnDef<Sale>[] = [
 ];
 
 export function SalesTable({ sales }: { sales: Sale[] }) {
-  const parentRef = useRef<HTMLDivElement>(null);
   const isAddRowOpen = useSalesEditStore((s) => s.isAddRowOpen);
+
+  const [pageSizeOption, setPageSizeOption] = useState<PageSizeOption>(25);
+  const [pageIndex, setPageIndex] = useState(0);
+  const effectivePageSize = pageSizeOption === 'all' ? Math.max(sales.length, 1) : pageSizeOption;
+  const effectivePageIndex = pageSizeOption === 'all' ? 0 : pageIndex;
+
+  const handlePageSizeChange = (size: PageSizeOption) => {
+    setPageSizeOption(size);
+    setPageIndex(0);
+  };
 
   const table = useReactTable({
     data: sales,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: { pagination: { pageIndex: effectivePageIndex, pageSize: effectivePageSize } },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function'
+        ? updater({ pageIndex: effectivePageIndex, pageSize: effectivePageSize })
+        : updater;
+      setPageIndex(next.pageIndex);
+    },
   });
 
-  const { rows: tableRows } = table.getRowModel();
-
-  const virtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 56,
-    initialRect: { width: 0, height: 600 },
-    measureElement:
-      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
-        ? (el) => el?.getBoundingClientRect().height
-        : undefined,
-    overscan: 3,
-  });
-
-  const handleSaveSuccess = useCallback(
-    () => virtualizer.scrollToIndex(0, { align: 'start' }),
-    []
-  );
-
-  const virtualItems = virtualizer.getVirtualItems();
-  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
-  const paddingBottom =
-    virtualItems.length > 0
-      ? virtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
-      : 0;
+  const handleSaveSuccess = () => setPageIndex(0);
 
   return (
-    <div ref={parentRef} className="overflow-auto h-full">
-      <table className="w-full border-collapse" style={{ minWidth: '1160px' }}>
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-4 py-3 text-sm font-normal text-gray-500 text-left" style={{ width: header.column.getSize() }}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {isAddRowOpen && (
-            <tr className="bg-gray-100 border-b border-blue-200">
-              <td colSpan={columns.length} className="p-0">
-                <AddRowForm onSaveSuccess={handleSaveSuccess} />
-              </td>
-            </tr>
-          )}
-          {paddingTop > 0 && (
-            <tr style={{ height: paddingTop }}>
-              <td colSpan={columns.length} />
-            </tr>
-          )}
-          {virtualItems.map((virtualItem) => {
-            const row = tableRows[virtualItem.index];
-            const sale = row.original;
-            const isVoidedRow = sale.status === 'void';
-
-            return (
-              <tr
-                key={virtualItem.key}
-                data-index={virtualItem.index}
-                ref={virtualizer.measureElement}
-                className={
-                  isVoidedRow
-                    ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
-                    : 'bg-white border-b border-gray-200 hover:bg-gray-50'
-                }
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-2 text-sm text-gray-900" style={{ width: cell.column.getSize() }}
-                    onClick={cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+    <div className="flex flex-col h-full">
+      <div className="overflow-auto flex-1 min-h-0">
+        <table className="w-full border-collapse" style={{ minWidth: '1160px' }}>
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} className="px-4 py-3 text-sm font-normal text-gray-500 text-left" style={{ width: header.column.getSize() }}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
                 ))}
               </tr>
-            );
-          })}
-          {paddingBottom > 0 && (
-            <tr style={{ height: paddingBottom }}>
-              <td colSpan={columns.length} />
-            </tr>
-          )}
-        </tbody>
-      </table>
+            ))}
+          </thead>
+          <tbody>
+            {isAddRowOpen && (
+              <tr className="bg-gray-100 border-b border-blue-200">
+                <td colSpan={columns.length} className="p-0">
+                  <AddRowForm onSaveSuccess={handleSaveSuccess} />
+                </td>
+              </tr>
+            )}
+            {table.getRowModel().rows.map((row) => {
+              const sale = row.original;
+              const isVoidedRow = sale.status === 'void';
+              return (
+                <tr
+                  key={row.id}
+                  className={
+                    isVoidedRow
+                      ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
+                      : 'bg-white border-b border-gray-200 hover:bg-gray-50'
+                  }
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="px-4 py-2 text-sm text-gray-900"
+                      style={{ width: cell.column.getSize() }}
+                      onClick={cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <PaginationFooter
+        pageSize={pageSizeOption}
+        pageIndex={effectivePageIndex}
+        totalRows={sales.length}
+        onPageSizeChange={handlePageSizeChange}
+        canPrev={table.getCanPreviousPage()}
+        canNext={table.getCanNextPage()}
+        onPrev={() => table.previousPage()}
+        onNext={() => table.nextPage()}
+      />
     </div>
   );
 }
