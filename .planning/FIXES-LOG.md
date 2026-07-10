@@ -77,6 +77,6 @@ systemctl restart lsws
 
 **Fix:** `packages/frontend/src/lib/axios.ts` — also skip the redirect when `currentPath.startsWith('/invite/')`.
 
-**Commit:** _(pushed same session as the OLS fix above — see git log for exact hash)_
+**Commit:** `1989f4c` — `fix(frontend): exempt /invite/:token from 401 redirect-to-login interceptor`
 
 **Pattern to remember:** any future public/unauthenticated route added to `router/index.tsx` needs the same exemption added to this interceptor, or it'll suffer the identical bounce-to-login bug from the `/auth/me` bootstrap call.
