@@ -1,6 +1,6 @@
 # Deployment Guide
 
-**Stack:** Docker Compose (mysql + backend + frontend) + aaPanel/OpenLiteSpeed (domain + SSL only)
+**Stack:** Docker Compose (mysql + backend + frontend) + Cloudflare (proxied DNS + TLS) + aaPanel/OpenLiteSpeed (origin reverse proxy)
 **Strategy:** Push to `master` on GitHub → GitHub Actions SSHes into the VPS → `git pull` + `docker compose build/up`
 
 ## Architecture
@@ -11,10 +11,11 @@ flowchart TD
     GH -->|triggers on push to master| GA[GitHub Actions]
     GA -->|SSH: git pull + docker compose build/up| VPSHost
 
-    Browser[Browser] -->|https://audit.quickyx.xyz| OLS
+    Browser[Browser] -->|https://audit.quickyx.xyz| CF["Cloudflare edge<br/>proxied DNS record + TLS termination"]
+    CF -->|HTTPS, Cloudflare Origin Certificate| OLS
 
     subgraph VPSHost["VPS — aaPanel, Ubuntu 20"]
-        OLS["aaPanel OpenLiteSpeed<br/>domain + Let's Encrypt SSL"]
+        OLS["aaPanel OpenLiteSpeed<br/>reverse proxy only — no cert issuance here"]
 
         subgraph DockerNet["docker-compose.prod.yml network"]
             FE["frontend container<br/>nginx:alpine · 127.0.0.1:8080→80<br/>serves dist/, proxies /api/*"]
@@ -28,7 +29,9 @@ flowchart TD
     end
 ```
 
-Only `aaPanel OpenLiteSpeed` is exposed to the internet (for the domain + free SSL). Everything else — frontend, backend, MySQL — runs inside a private Docker network and is never reachable directly from outside the VPS.
+The DNS record for `audit.quickyx.xyz` is **proxied through Cloudflare** (orange cloud) — Cloudflare terminates the real client TLS connection. Since Cloudflare's SSL/TLS mode is Full (strict), aaPanel's OpenLiteSpeed must present a certificate Cloudflare trusts for the origin hop; a **Cloudflare Origin Certificate** is used for this instead of Let's Encrypt (Let's Encrypt's ACME HTTP-01 challenge is unreliable behind a proxied Cloudflare record). Everything past OpenLiteSpeed — frontend, backend, MySQL — runs inside a private Docker network and is never reachable directly from outside the VPS.
+
+**Multi-hop `X-Forwarded-Proto` chain:** Cloudflare → aaPanel/OpenLiteSpeed → nginx (frontend container) → backend. Each hop must pass through (not overwrite) the `X-Forwarded-Proto` header it receives. `nginx.conf` already does this correctly. The session cookie uses `secure: true` in production — if any hop in this chain breaks it, logins will appear to succeed (200 OK) but the session will silently never persist. Always verify with an actual login after any change to this chain.
 
 ---
 
@@ -125,7 +128,21 @@ Seed the database (first time only):
 docker compose -f docker-compose.prod.yml run --rm backend npx prisma db seed
 ```
 
-### F. aaPanel — Reverse Proxy + SSL
+### F. DNS — Cloudflare
+
+Cloudflare → **DNS** → Add record:
+| Field | Value |
+|---|---|
+| Type | `A` |
+| Name | `audit` |
+| Content | VPS public IP |
+| Proxy status | **Proxied** (orange cloud) |
+
+Confirm Cloudflare → **SSL/TLS → Overview** is set to **Full** or **Full (strict)** — this requires the origin (aaPanel) to present a certificate Cloudflare trusts, which is what step H sets up.
+
+⚠️ Do **not** use a Cloudflare Tunnel for this domain — the app is exposed via a plain proxied DNS record + aaPanel reverse proxy, not `cloudflared`.
+
+### G. aaPanel — Add Site + Reverse Proxy
 
 In aaPanel → **Website** → **Add Site**:
 - Domain: `audit.quickyx.xyz`
@@ -138,7 +155,15 @@ In aaPanel → **Website** → **Add Site**:
 | Target URL | `http://127.0.0.1:8080` |
 | Proxy directory | `/` |
 
-**SSL**: Website → your domain → **SSL** → Let's Encrypt → one-click issue (after DNS points at the VPS).
+### H. SSL — Cloudflare Origin Certificate
+
+Because the DNS record is proxied (step F) and Cloudflare's SSL mode is Full/Full (strict), aaPanel's one-click Let's Encrypt is unreliable here (Cloudflare's proxy can interfere with the ACME HTTP-01 challenge). Use a Cloudflare Origin Certificate instead — it's trusted by Cloudflare specifically for this hop, valid ~15 years, no renewal hassle:
+
+1. Cloudflare → **SSL/TLS → Origin Server** → **Create Certificate** → hostname `audit.quickyx.xyz`, defaults are fine → copy the certificate and private key (the key is shown once — save it).
+2. aaPanel → Website → `audit.quickyx.xyz` → **SSL** → **Other Certificate** (not Let's Encrypt) → paste the certificate into the cert field, the private key into the key field → Deploy.
+3. Confirm port 443 is open in aaPanel's own Security/firewall panel (separate from the OS firewall).
+
+Verify by logging in at `https://audit.quickyx.xyz` and confirming the session persists (e.g. `GET /api/auth/me` returns your user, not 401) — this exercises the full `X-Forwarded-Proto` chain described above.
 
 ---
 
