@@ -9,12 +9,12 @@ export const adminRouter = Router();
 adminRouter.use(requireRole('admin'));
 
 // ─── GET /api/admin/summary ───────────────────────────────────────────────────
-// Returns aggregated dashboard stats:
-//   totalCount     — number of all sales (active + void) in org
+// Returns aggregated dashboard stats — all figures are active-only (voided sales excluded):
+//   totalCount     — number of active sales in org
 //   totalRevenue   — sum of active sale prices as string "NNN.NN" (CLAUDE.md Rule 6)
-//   trendData      — [{date, count}] grouped by DATE(createdAt) via $queryRaw
-//   productBreakdown — [{name, count, revenue}] grouped by productNameSnapshot
-//   mopBreakdown   — [{name, count}] grouped by mopNameSnapshot
+//   trendData      — [{date, count}] grouped by DATE(createdAt) via $queryRaw, active-only
+//   productBreakdown — [{name, count, revenue}] grouped by productNameSnapshot, active-only
+//   mopBreakdown   — [{name, count}] grouped by mopNameSnapshot, active-only
 //
 // NOTE: prisma.sale.count and prisma.sale.aggregate are NOT intercepted by $extends softDeleteFilter
 // ($extends only intercepts findMany/findFirst for sale). Add explicit status filter per CLAUDE.md Rule 8.
@@ -30,9 +30,10 @@ adminRouter.get('/summary', async (req, res) => {
     txToday, txYesterday, txThisMonth, txLastMonth,
     sumToday, sumYesterday, sumThisMonth, sumLastMonth,
   ] = await Promise.all([
-      // Count all sales regardless of status (active and voided)
+      // Count active sales only — voided sales must not count toward "Total Sales"
+      // (matches totalRevenue/KPI queries below; a voided sale is not a completed sale)
       prisma.sale.count({
-        where: { organizationId, status: { in: ['active', 'void'] } },
+        where: { organizationId, status: 'active' },
       }),
       // Revenue only from active sales (voided sales excluded from revenue)
       prisma.sale.aggregate({
@@ -40,28 +41,31 @@ adminRouter.get('/summary', async (req, res) => {
         where: { organizationId, status: 'active' },
       }),
       // Product breakdown: group by snapshot name (not product ID join — CLAUDE.md Rule 4)
+      // Active-only — voided sales must not count toward chart breakdowns
       prisma.sale.groupBy({
         by: ['productNameSnapshot'],
         _count: { _all: true },
         _sum: { priceSnapshot: true },
-        where: { organizationId, status: { in: ['active', 'void'] } },
+        where: { organizationId, status: 'active' },
         orderBy: { _count: { productNameSnapshot: 'desc' } },
       }),
       // MOP breakdown: group by snapshot name (not mop ID join — CLAUDE.md Rule 4)
+      // Active-only — voided sales must not count toward chart breakdowns
       prisma.sale.groupBy({
         by: ['mopNameSnapshot'],
         _count: { _all: true },
-        where: { organizationId, status: { in: ['active', 'void'] } },
+        where: { organizationId, status: 'active' },
         orderBy: { _count: { mopNameSnapshot: 'desc' } },
       }),
       // Trend data: DATE() grouping requires $queryRaw — Prisma groupBy cannot group by expressions
       // BigInt warning: MySQL COUNT(*) returns bigint — must call Number() before JSON serialization
       // Table name: @@map("sales") in schema.prisma — use `sales` (plural lowercase)
+      // Active-only — voided sales must not count toward the trend chart
       prisma.$queryRaw<{ date: string; count: bigint }[]>`
         SELECT DATE(createdAt) AS date, COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
-          AND status IN ('active', 'void')
+          AND status = 'active'
         GROUP BY DATE(createdAt)
         ORDER BY date ASC
       `,
