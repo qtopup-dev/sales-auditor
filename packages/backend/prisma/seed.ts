@@ -3,7 +3,7 @@
 // IMPORTANT: import 'dotenv/config' MUST be first — Prisma 7 does not auto-load .env
 import 'dotenv/config';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { PrismaClient } from '../generated/prisma/client.js';
+import { PrismaClient } from '../src/generated/prisma/client.js';
 import bcrypt from 'bcrypt';
 
 const adapter = new PrismaMariaDb({

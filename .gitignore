@@ -9,7 +9,7 @@ dist/
 packages/*/dist/
 
 # Prisma generated client
-packages/backend/generated/
+packages/backend/src/generated/
 
 # Logs
 *.log

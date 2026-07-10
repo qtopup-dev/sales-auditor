@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
@@ -60,7 +60,7 @@ const productCreateValidation = [
     .isDecimal({ decimal_digits: '0,2' }).withMessage('Enter a valid price (e.g., 10.00)'),
 ];
 
-productsRouter.post('/', productCreateValidation, async (req, res) => {
+productsRouter.post('/', productCreateValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -91,7 +91,7 @@ const productUpdateValidation = [
     .isDecimal({ decimal_digits: '0,2' }).withMessage('Enter a valid price (e.g., 10.00)'),
 ];
 
-productsRouter.patch('/:id', productUpdateValidation, async (req, res) => {
+productsRouter.patch('/:id', productUpdateValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -125,7 +125,7 @@ productsRouter.patch('/:id', productUpdateValidation, async (req, res) => {
 productsRouter.patch(
   '/:id/toggle',
   [param('id').isInt({ min: 1 }).withMessage('Invalid product ID')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });

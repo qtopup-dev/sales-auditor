@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -53,7 +53,7 @@ usersRouter.patch(
       .isLength({ min: 2, max: 100 })
       .withMessage('Username must be 2–100 characters'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -105,7 +105,7 @@ usersRouter.patch(
 usersRouter.patch(
   '/:id',
   [param('id').isInt({ min: 1 }).withMessage('Invalid user ID'), body('canEdit').isBoolean().withMessage('canEdit must be a boolean')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -157,7 +157,7 @@ usersRouter.patch(
 usersRouter.post(
   '/:id/reset-password',
   [param('id').isInt({ min: 1 }).withMessage('Invalid user ID')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });

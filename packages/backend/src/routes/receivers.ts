@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
@@ -53,7 +53,7 @@ const receiverCreateValidation = [
     .withMessage('Account Number must be 100 characters or less'),
 ];
 
-receiversRouter.post('/', receiverCreateValidation, async (req, res) => {
+receiversRouter.post('/', receiverCreateValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -81,7 +81,7 @@ const receiverUpdateValidation = [
     .withMessage('Account Number must be 100 characters or less'),
 ];
 
-receiversRouter.patch('/:id', receiverUpdateValidation, async (req, res) => {
+receiversRouter.patch('/:id', receiverUpdateValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -118,7 +118,7 @@ receiversRouter.patch('/:id', receiverUpdateValidation, async (req, res) => {
 receiversRouter.patch(
   '/:id/toggle',
   [param('id').isInt({ min: 1 }).withMessage('Invalid receiver ID')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });

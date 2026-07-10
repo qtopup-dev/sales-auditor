@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
@@ -136,7 +136,7 @@ salesRouter.get('/', async (req, res) => {
 // SALES-14: product, mop, receiver are required
 // AUDIT-01/02: audit 'create' record in same Prisma transaction (AUDIT-02 hard constraint)
 
-salesRouter.post('/', createSaleValidation, async (req, res) => {
+salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -231,7 +231,7 @@ salesRouter.post('/', createSaleValidation, async (req, res) => {
 // AUDIT-01/02: audit 'update' record in same transaction
 // D-09: one field per PATCH; productId change also atomically updates snapshots
 
-salesRouter.patch('/:id', patchSaleValidation, async (req, res) => {
+salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -516,7 +516,7 @@ salesRouter.post(
   '/:id/void',
   requireRole('admin'),
   voidSaleValidation,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });

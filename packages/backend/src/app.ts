@@ -72,7 +72,10 @@ export function createApp(): Express {
       checkExpirationInterval: 900_000, // check every 15 minutes
       connectionLimit: 5,
     },
-    sessionPool,
+    // express-mysql-session's bundled types pin an older, separate copy of mysql2 in its own
+    // dependency tree, so its Pool type is structurally incompatible with the top-level mysql2
+    // Pool type here even though both are the same class at runtime. Safe to cast.
+    sessionPool as unknown as ConstructorParameters<typeof MySQLSessionStore>[1],
   );
 
   app.use(

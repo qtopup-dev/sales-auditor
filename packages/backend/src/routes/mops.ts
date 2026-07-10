@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
@@ -48,7 +48,7 @@ mopsRouter.get('/', async (_req, res) => {
 mopsRouter.post(
   '/',
   [body('name').trim().notEmpty().withMessage('Payment Method Name is required')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -70,7 +70,7 @@ mopsRouter.patch(
     param('id').isInt({ min: 1 }).withMessage('Invalid MOP ID'),
     body('name').trim().notEmpty().withMessage('Payment Method Name is required'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -91,7 +91,7 @@ mopsRouter.patch(
 mopsRouter.patch(
   '/:id/toggle',
   [param('id').isInt({ min: 1 }).withMessage('Invalid MOP ID')],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -32,7 +32,7 @@ const registerValidation = [
 // SECURITY: session.regenerate() before setting userId prevents session fixation
 // SECURITY: generic 'INVALID_CREDENTIALS' error prevents username enumeration
 
-authRouter.post('/login', loginValidation, async (req, res) => {
+authRouter.post('/login', loginValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
@@ -157,7 +157,7 @@ authRouter.post('/invite', requireAuth, requireRole('admin'), async (req, res) =
 // Frontend uses this to decide whether to render the form or the expired-state card
 
 authRouter.get('/invite/:token', async (req, res) => {
-  const tokenHash = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const tokenHash = crypto.createHash('sha256').update(req.params.token as string).digest('hex');
   const invite = await prisma.inviteToken.findUnique({ where: { tokenHash } });
 
   if (!invite || invite.usedAt !== null || invite.expiresAt < new Date()) {
@@ -172,14 +172,14 @@ authRouter.get('/invite/:token', async (req, res) => {
 // AUTH-05: register via invite link — consumes token (sets usedAt) + creates user
 // AUTH-06: validates token not used and not expired before consuming
 
-authRouter.post('/invite/:token', registerValidation, async (req, res) => {
+authRouter.post('/invite/:token', registerValidation, async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
     return;
   }
 
-  const tokenHash = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const tokenHash = crypto.createHash('sha256').update(req.params.token as string).digest('hex');
   const { username, password } = req.body as { username: string; password: string };
 
   // WR-01: Hash BEFORE opening the transaction — bcrypt with cost 12 takes ~100-300ms of CPU

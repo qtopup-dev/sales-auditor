@@ -20,7 +20,11 @@ COPY packages/backend packages/backend
 WORKDIR /app/packages/backend
 
 # prisma.config.ts requires the CWD to be packages/backend for both generate and migrate.
-RUN npx prisma generate
+# `generate` doesn't connect to a database, but prisma.config.ts eagerly calls env('DATABASE_URL')
+# on every CLI invocation and throws if it's unresolved — so a dummy value scoped to this one
+# RUN step satisfies that check. The real DATABASE_URL is injected at container runtime via
+# docker-compose's env_file and overrides this build-time placeholder.
+RUN DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder" npx prisma generate
 RUN npm run build
 
 ENV NODE_ENV=production

@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "Node16",
     "moduleResolution": "node16",
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src/**/*", "prisma/seed.ts", "prisma/prisma.config.ts"]
+  "include": ["src/**/*"]
 }
