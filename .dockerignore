@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+**/dist
+packages/backend/generated
+.git
+.env
+.env.*
+!.env.example
+.planning
+.claude
+.playwright-mcp
+*.log

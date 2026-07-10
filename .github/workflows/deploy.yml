@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into VPS and redeploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            cd /var/www/alejinput
+
+            echo "==> Fetching master..."
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "==> Building images..."
+            docker compose -f docker-compose.prod.yml build
+
+            echo "==> Running pending migrations..."
+            docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate deploy
+
+            echo "==> Starting containers..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo "==> Pruning old images..."
+            docker image prune -f
+
+            echo "==> Deploy complete."
