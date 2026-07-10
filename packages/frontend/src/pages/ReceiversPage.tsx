@@ -27,7 +27,8 @@ export function ReceiversPage() {
   const toggleMutation = useMutation({
     mutationFn: (receiverId: number) => {
       setPendingToggleId(receiverId);
-      return api.patch<Receiver>(`/receivers/${receiverId}/toggle`).then((r) => r.data);
+      // Empty body required: some proxy layers in the deploy chain mishandle bodyless PATCH requests
+      return api.patch<Receiver>(`/receivers/${receiverId}/toggle`, {}).then((r) => r.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receivers'] });

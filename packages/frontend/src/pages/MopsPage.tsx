@@ -29,7 +29,8 @@ export function MopsPage() {
   const toggleMutation = useMutation({
     mutationFn: (mopId: number) => {
       setPendingToggleId(mopId);
-      return api.patch<Mop>(`/mops/${mopId}/toggle`).then((r) => r.data);
+      // Empty body required: some proxy layers in the deploy chain mishandle bodyless PATCH requests
+      return api.patch<Mop>(`/mops/${mopId}/toggle`, {}).then((r) => r.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mops'] });

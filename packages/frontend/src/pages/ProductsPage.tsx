@@ -31,7 +31,8 @@ export function ProductsPage() {
   const toggleMutation = useMutation({
     mutationFn: (productId: number) => {
       setPendingToggleId(productId);
-      return api.patch<Product>(`/products/${productId}/toggle`).then((r) => r.data);
+      // Empty body required: some proxy layers in the deploy chain mishandle bodyless PATCH requests
+      return api.patch<Product>(`/products/${productId}/toggle`, {}).then((r) => r.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
