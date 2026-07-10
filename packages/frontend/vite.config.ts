@@ -30,7 +30,10 @@ export default defineConfig({
     },
   },
   server: {
+    host: '0.0.0.0',
+
     port: 5173, // Matches CLIENT_ORIGIN in .env and .env.example
+    allowedHosts: ['audit.quickyx.xyz'],
     proxy: {
       // Proxy all /api/* requests to the backend Express server
       // This means fetch('/api/health') in the frontend hits http://localhost:3001/health

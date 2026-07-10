@@ -35,6 +35,11 @@ export function createApp(): Express {
 
   const app = express();
 
+  // Trust the local reverse proxy (OpenLiteSpeed / Cloudflare Tunnel) so req.protocol
+  // reflects X-Forwarded-Proto instead of always reporting 'http'. Single hop (OLS on
+  // the same VPS), so trust exactly one proxy rather than a blanket `true`.
+  app.set('trust proxy', 1);
+
   // 1. Security headers — helmet MUST be registered before all routes
   app.use(helmet());
 

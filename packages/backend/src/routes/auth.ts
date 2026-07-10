@@ -144,8 +144,11 @@ authRouter.post('/invite', requireAuth, requireRole('admin'), async (req, res) =
     },
   });
 
-  const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
-  res.status(201).json({ inviteUrl: `${clientOrigin}/invite/${rawToken}` });
+  // Derived from the incoming request (not CLIENT_ORIGIN) so the link is always correct
+  // regardless of which domain/tunnel it was reached through (e.g. Cloudflare Tunnel).
+  // Requires app.set('trust proxy', ...) so req.protocol reflects X-Forwarded-Proto.
+  const origin = `${req.protocol}://${req.get('host')}`;
+  res.status(201).json({ inviteUrl: `${origin}/invite/${rawToken}` });
 });
 
 // ─── GET /api/auth/invite/:token ─────────────────────────────────────────────
