@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../lib/axios';
 import { queryClient } from '../lib/queryClient';
+import { ClockControl } from '../components/shift/ClockControl';
 
 // Admin nav items per CONTEXT.md D-04 and UI-SPEC.md §AuthenticatedLayout
 const ADMIN_NAV = [
@@ -11,10 +12,14 @@ const ADMIN_NAV = [
   { to: '/mops', label: 'MOPs' },
   { to: '/receivers', label: 'Receivers' },
   { to: '/users', label: 'Users' },
+  { to: '/shifts', label: 'Shifts' },
 ];
 
 // Moderator nav items per CONTEXT.md D-04 (ROLES-07: only Sales Sheet visible)
-const MODERATOR_NAV = [{ to: '/sales', label: 'Sales Sheet' }];
+const MODERATOR_NAV = [
+  { to: '/sales', label: 'Sales Sheet' },
+  { to: '/shift-history', label: 'Shift History' },
+];
 
 export function AuthenticatedLayout() {
   const { user, setUser } = useAuthStore();
@@ -55,6 +60,8 @@ export function AuthenticatedLayout() {
             </NavLink>
           ))}
         </nav>
+
+        {user?.role === 'moderator' && <ClockControl />}
 
         {/* Bottom: username + logout */}
         <div className="px-4 py-4 border-t border-gray-200">
