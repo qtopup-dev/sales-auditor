@@ -336,3 +336,45 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
 
   res.json({ date, tabs });
 });
+
+// ─── POST /api/admin/shifts/:id/force-clock-out ───────────────────────────────
+// D-16: admin overrides another moderator's still-open shift. Admin-only via the router-level
+// requireRole('admin') gate (line 9) — never reachable by a moderator session, including for
+// their own shift (moderators use POST /api/shifts/clock-out for that, per Plan 02).
+// D-04/D-06: no audit log entry (out of scope per D-06); sales data is completely unaffected —
+// only the shift's clockOutAt changes.
+adminRouter.post(
+  '/shifts/:id/force-clock-out',
+  [param('id').isInt({ min: 1 }).withMessage('Invalid shift ID')],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+      return;
+    }
+
+    const id = Number(req.params.id);
+    const organizationId = req.session.organizationId!;
+
+    const shift = await prisma.shift.findFirst({
+      where: { id, organizationId, clockOutAt: null },
+    });
+    if (!shift) {
+      res.status(404).json({ error: 'SHIFT_NOT_FOUND' });
+      return;
+    }
+
+    const updated = await prisma.shift.update({
+      where: { id },
+      data: { clockOutAt: new Date() },
+    });
+
+    res.json({
+      id: updated.id,
+      organizationId: updated.organizationId,
+      userId: updated.userId,
+      clockInAt: updated.clockInAt.toISOString(),
+      clockOutAt: updated.clockOutAt!.toISOString(),
+    });
+  },
+);
