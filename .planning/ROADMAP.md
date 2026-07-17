@@ -143,7 +143,7 @@ Plans:
   3. A moderator can view their own Shift History page: past shifts newest-first with clock-in/out times, duration, and per-shift active-sales count/revenue
   4. An admin can view the Shifts oversight page: pick a date, see one Excel-style tab per moderator who had a shift that day (multiple sessions same day merged into one tab), and view that moderator's totals + read-only sales rows for the day
   5. An admin can force-clock-out a moderator's still-open shift (visible only when viewing today), which closes the shift without affecting any sales data; voided rows are excluded from all shift totals everywhere but remain visible with existing strikethrough treatment
-**Plans:** 8 plans
+**Plans:** 9 plans (8 executed + 1 gap-closure)
 Plans:
 - [ ] 07-01-PLAN.md — [BLOCKING] Prisma schema: Shift model + Sale.shiftId nullable FK, manual migration (db execute + migrate resolve), DB-level openLock race guard
 - [ ] 07-02-PLAN.md — Shared types (Shift, ShiftWithTotals, Sale.shiftId) + shiftsRouter (clock-in, clock-out, current, history) + app.ts wiring
@@ -153,6 +153,7 @@ Plans:
 - [ ] 07-06-PLAN.md — Frontend: ShiftHistoryTable + ShiftHistoryPage + /shift-history route
 - [ ] 07-07-PLAN.md — Frontend: AuthenticatedLayout (ClockControl + nav) + SalesPage (role-branched shift-gating)
 - [ ] 07-08-PLAN.md — Frontend: AdminShiftTabs + AdminShiftsPage + /shifts route
+- [ ] 07-09-PLAN.md — [GAP CLOSURE] shifts.ts: mount router-level requireRole('moderator') (CLAUDE.md Rule 9 backend RBAC enforcement) + correct app.ts mount comment
 **UI hint**: yes
 
 ---
