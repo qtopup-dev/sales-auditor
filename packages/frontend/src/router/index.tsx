@@ -9,6 +9,7 @@ import { UsersPage } from '../pages/UsersPage';
 import { ProductsPage } from '../pages/ProductsPage';
 import { MopsPage } from '../pages/MopsPage';
 import { ReceiversPage } from '../pages/ReceiversPage';
+import { ShiftHistoryPage } from '../pages/ShiftHistoryPage';
 
 // ─── ProtectedRoute ──────────────────────────────────────────────────────────
 // CONTEXT.md D-11: stores returnTo in location.state for post-login redirect
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
         children: [
           // Moderator route — accessible to both roles
           { path: '/sales', element: <SalesPage /> },
+          { path: '/shift-history', element: <ShiftHistoryPage /> },
 
           // Admin-only routes — ProtectedRoute with requiredRole='admin'
           {
