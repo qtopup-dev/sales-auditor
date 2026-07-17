@@ -2,7 +2,7 @@
 
 **Granularity:** Coarse (4 phases)
 **Coverage:** 57/57 v1 requirements mapped
-**Last updated:** 2026-07-01
+**Last updated:** 2026-07-18
 
 ---
 
@@ -14,6 +14,7 @@
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 - [x] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
 - [x] **Phase 6: Dashboard KPI Cards** — Transactions / Profit / Turnover KPI summary cards at the top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month
+- [ ] **Phase 7: Moderator Shift Clock In/Out** — Clock in/out shifts, per-shift sales view reset, shift history page, admin Shifts oversight page with force-clock-out
 
 ---
 
@@ -132,6 +133,28 @@ Plans:
 - [x] 06-01-PLAN.md — Backend: extend GET /api/admin/summary with 8 date-filtered $queryRaw queries (count + sum per period) and kpiData response field
 - [x] 06-02-PLAN.md — Frontend: new KpiCard.tsx component + DashboardPage.tsx updated with KPI section and extended AdminSummary interface
 
+### Phase 7: Moderator Shift Clock In/Out
+**Goal**: Moderators can clock in/out of shifts; while clocked in, their Sales Sheet resets to show only the current shift's rows with a live count + revenue totals banner, and Add Row is gated on having an active shift. Moderators get a Shift History page of their own past shifts. Admins get a "Shifts" oversight page: a date-scoped, tabbed view (one tab per moderator, Excel-sheet-tab style) showing every moderator's sales for a selected day, with a force-clock-out action on any still-open shift when viewing today.
+**Depends on**: Phase 6
+**Requirements**: *(new feature beyond v1 requirements — no REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-17)*
+**Success Criteria** (what must be TRUE):
+  1. A moderator can clock in (single click, no confirmation) and clock out (confirm dialog); at most one open shift can ever exist per moderator, enforced server-side including under concurrent double-click (DB-level race guard)
+  2. While clocked in, a moderator's Sales Sheet shows ONLY the current shift's rows (a true reset, not a client-side filter) with a live Sales/Revenue totals banner above the table; Add Row is disabled with a tooltip when not clocked in; an admin's Sales Sheet is completely unaffected (admins never have shifts)
+  3. A moderator can view their own Shift History page: past shifts newest-first with clock-in/out times, duration, and per-shift active-sales count/revenue
+  4. An admin can view the Shifts oversight page: pick a date, see one Excel-style tab per moderator who had a shift that day (multiple sessions same day merged into one tab), and view that moderator's totals + read-only sales rows for the day
+  5. An admin can force-clock-out a moderator's still-open shift (visible only when viewing today), which closes the shift without affecting any sales data; voided rows are excluded from all shift totals everywhere but remain visible with existing strikethrough treatment
+**Plans:** 8 plans
+Plans:
+- [ ] 07-01-PLAN.md — [BLOCKING] Prisma schema: Shift model + Sale.shiftId nullable FK, manual migration (db execute + migrate resolve), DB-level openLock race guard
+- [ ] 07-02-PLAN.md — Shared types (Shift, ShiftWithTotals, Sale.shiftId) + shiftsRouter (clock-in, clock-out, current, history) + app.ts wiring
+- [ ] 07-03-PLAN.md — sales.ts: shiftId lookup at creation (role-gated D-03/D-05) + ownership-checked shiftId query scoping on GET
+- [ ] 07-04-PLAN.md — admin.ts: GET /shifts?date= (per-moderator merge) + POST /shifts/:id/force-clock-out
+- [ ] 07-05-PLAN.md — Frontend: shiftStore, ClockControl, ClockOutConfirmDialog, ForceClockOutConfirmDialog, ShiftTotalsBanner
+- [ ] 07-06-PLAN.md — Frontend: ShiftHistoryTable + ShiftHistoryPage + /shift-history route
+- [ ] 07-07-PLAN.md — Frontend: AuthenticatedLayout (ClockControl + nav) + SalesPage (role-branched shift-gating)
+- [ ] 07-08-PLAN.md — Frontend: AdminShiftTabs + AdminShiftsPage + /shifts route
+**UI hint**: yes
+
 ---
 
 ## Progress
@@ -144,6 +167,7 @@ Plans:
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
 | 6. Dashboard KPI Cards | 2/2 | Complete | 2026-07-01 |
+| 7. Moderator Shift Clock In/Out | 0/8 | Planned | — |
 
 ---
 
@@ -231,3 +255,4 @@ Plans:
 | USERS-04 | Phase 4 |
 | USERS-05 | Phase 4 |
 | USERS-06 | Phase 4 |
+</content>
