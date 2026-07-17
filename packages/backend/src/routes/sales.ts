@@ -23,6 +23,7 @@ function serializeSale(sale: {
   mopNameSnapshot: string;
   receiverId: number;
   receiverNameSnapshot: string;
+  shiftId: number | null;
   notes: string | null;
   status: string;
   createdById: number;
@@ -42,6 +43,7 @@ function serializeSale(sale: {
     mopNameSnapshot: sale.mopNameSnapshot,
     receiverId: sale.receiverId,
     receiverNameSnapshot: sale.receiverNameSnapshot,
+    shiftId: sale.shiftId,
     notes: sale.notes,
     status: sale.status,
     createdById: sale.createdById,
@@ -119,12 +121,41 @@ const voidSaleValidation = [
 // SALES-01: all rows newest-first
 // SALES-15: include voided rows — override $extends default with explicit status key
 
-salesRouter.get('/', async (req, res) => {
+salesRouter.get('/', async (req: Request, res: Response) => {
+  const organizationId = req.session.organizationId!;
+
+  const where: {
+    organizationId: number;
+    status: { in: ('active' | 'void')[] };
+    shiftId?: number;
+  } = {
+    organizationId,
+    status: { in: ['active', 'void'] }, // override $extends default — include voided rows (SALES-15)
+  };
+
+  // D-11: optional shift-scoping for the moderator's per-shift Sales Sheet view.
+  // SECURITY (security_context): a moderator must never read another moderator's
+  // shift-scoped sales by guessing/passing a foreign shiftId — verify ownership before scoping.
+  if (req.query.shiftId !== undefined) {
+    const shiftId = Number(req.query.shiftId);
+    if (!Number.isInteger(shiftId) || shiftId < 1) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: [{ msg: 'Invalid shiftId' }] });
+      return;
+    }
+    const shift = await prisma.shift.findFirst({ where: { id: shiftId, organizationId } });
+    if (!shift) {
+      res.status(404).json({ error: 'NOT_FOUND' });
+      return;
+    }
+    if (req.session.role !== 'admin' && shift.userId !== req.session.userId!) {
+      res.status(403).json({ error: 'FORBIDDEN' });
+      return;
+    }
+    where.shiftId = shiftId;
+  }
+
   const sales = await prisma.sale.findMany({
-    where: {
-      organizationId: req.session.organizationId!,
-      status: { in: ['active', 'void'] }, // override $extends default — include voided rows (SALES-15)
-    },
+    where,
     orderBy: { createdAt: 'desc' }, // newest-first (SALES-01)
   });
   res.json(sales.map(serializeSale));
@@ -185,6 +216,19 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
       throw Object.assign(new Error('Receiver not found'), { statusCode: 404, code: 'NOT_FOUND' });
     }
 
+    // D-03/D-05: Add Row requires an active shift ONLY for moderators — admins retain their
+    // existing (pre-Phase-7) capability to create a sale directly with shiftId: null.
+    let shiftId: number | null = null;
+    if (req.session.role === 'moderator') {
+      const activeShift = await tx.shift.findFirst({
+        where: { organizationId: req.session.organizationId!, userId: req.session.userId!, clockOutAt: null },
+      });
+      if (!activeShift) {
+        throw Object.assign(new Error('No active shift'), { statusCode: 400, code: 'NO_ACTIVE_SHIFT' });
+      }
+      shiftId = activeShift.id;
+    }
+
     // SALES-09 / CLAUDE.md Rule 4: copy name + price to snapshot columns
     const createdSale = await tx.sale.create({
       data: {
@@ -196,6 +240,7 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
         mopNameSnapshot: mop.name,
         receiverId: receiver.id,
         receiverNameSnapshot: receiver.name,
+        shiftId,
         notes: notes ? (notes as string).trim() : null,
         status: 'active',
         createdById: req.session.userId!,
