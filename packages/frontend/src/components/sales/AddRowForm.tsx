@@ -7,7 +7,14 @@ import { useSalesEditStore } from '../../stores/salesEditStore';
 
 interface AddRowFormProps {
   onSaveSuccess: () => void;
+  // Actual rendered <th> widths from SalesTable, in column order (Product, Price, MOP,
+  // Receiver, Notes, Date Edited, Actions) — the table stretches to fill its container
+  // (w-full), so these can differ from the columns' declared `size` values. Falls back to
+  // the declared sizes until the first measurement lands (avoids a flash of 0-width fields).
+  columnWidths: number[] | null;
 }
+
+const DEFAULT_COLUMN_WIDTHS = [200, 100, 180, 160, 160, 140, 120];
 
 type AddRowFormData = {
   productId: number | null;
@@ -16,7 +23,9 @@ type AddRowFormData = {
   notes: string;
 };
 
-export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
+export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
+  const [productW, priceW, mopW, receiverW, notesW, dateEditedW, actionsW] =
+    columnWidths ?? DEFAULT_COLUMN_WIDTHS;
   const queryClient = useQueryClient();
   const closeAddRow = useSalesEditStore((s) => s.closeAddRow);
 
@@ -132,8 +141,8 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
       className="w-full"
     >
       <div className="flex items-start px-0 py-2 gap-0 w-full">
-        {/* Product (200px) */}
-        <div style={{ width: '200px', padding: '0 16px', flexShrink: 0 }}>
+        {/* Product */}
+        <div style={{ width: productW, padding: '0 16px', flexShrink: 0 }}>
           <Controller
             name="productId"
             control={control}
@@ -170,9 +179,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           />
         </div>
 
-        {/* Price (100px) — read-only auto-populated */}
+        {/* Price — read-only auto-populated */}
         <div
-          style={{ width: '100px', padding: '0 16px', flexShrink: 0 }}
+          style={{ width: priceW, padding: '0 16px', flexShrink: 0 }}
           className="flex items-center justify-end"
         >
           <span className="block text-right text-sm font-normal text-gray-400 pt-2">
@@ -180,8 +189,8 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           </span>
         </div>
 
-        {/* MOP (180px) */}
-        <div style={{ width: '180px', padding: '0 16px', flexShrink: 0 }}>
+        {/* MOP */}
+        <div style={{ width: mopW, padding: '0 16px', flexShrink: 0 }}>
           <Controller
             name="mopId"
             control={control}
@@ -217,8 +226,8 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           />
         </div>
 
-        {/* Receiver (160px) */}
-        <div style={{ width: '160px', padding: '0 16px', flexShrink: 0 }}>
+        {/* Receiver */}
+        <div style={{ width: receiverW, padding: '0 16px', flexShrink: 0 }}>
           <Controller
             name="receiverId"
             control={control}
@@ -254,8 +263,8 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           />
         </div>
 
-        {/* Notes (160px) — matches SalesTable's Notes column size exactly */}
-        <div style={{ width: '160px', padding: '0 16px', flexShrink: 0 }}>
+        {/* Notes */}
+        <div style={{ width: notesW, padding: '0 16px', flexShrink: 0 }}>
           <textarea
             disabled={isPending}
             placeholder="Notes (optional)"
@@ -265,17 +274,17 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           />
         </div>
 
-        {/* Date Edited (140px) — empty on new row */}
+        {/* Date Edited — empty on new row */}
         <div
-          style={{ width: '140px', padding: '0 16px', flexShrink: 0 }}
+          style={{ width: dateEditedW, padding: '0 16px', flexShrink: 0 }}
           className="flex items-center"
         >
           <span className="text-sm font-normal text-gray-400">—</span>
         </div>
 
-        {/* Actions (120px) */}
+        {/* Actions */}
         <div
-          style={{ width: '120px', padding: '0 16px', flexShrink: 0 }}
+          style={{ width: actionsW, padding: '0 16px', flexShrink: 0 }}
           className="flex flex-col gap-1 items-start"
         >
           <button

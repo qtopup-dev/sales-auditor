@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReactTable, getCoreRowModel, getPaginationRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
 import type { Sale } from '@alejinput/shared';
 import { useAuthStore } from '../../stores/authStore';
@@ -108,6 +108,28 @@ const columns: ColumnDef<Sale>[] = [
 export function SalesTable({ sales }: { sales: Sale[] }) {
   const isAddRowOpen = useSalesEditStore((s) => s.isAddRowOpen);
 
+  // Table stretches to fill its container (w-full), so declared column `size` values
+  // (used for the initial layout ratio) don't match the actual rendered pixel widths.
+  // Measure the real <th> widths so AddRowForm's fields can match them exactly,
+  // re-measuring on resize since table-layout: fixed redistributes width proportionally.
+  const headerRowRef = useRef<HTMLTableRowElement>(null);
+  const [columnWidths, setColumnWidths] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    const headerRow = headerRowRef.current;
+    if (!headerRow) return;
+
+    const measure = () => {
+      const widths = Array.from(headerRow.children).map((th) => th.getBoundingClientRect().width);
+      setColumnWidths(widths);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(headerRow);
+    return () => observer.disconnect();
+  }, []);
+
   const [pageSizeOption, setPageSizeOption] = useState<PageSizeOption>(25);
   const [pageIndex, setPageIndex] = useState(0);
   const effectivePageSize = pageSizeOption === 'all' ? Math.max(sales.length, 1) : pageSizeOption;
@@ -137,10 +159,10 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
   return (
     <div className="flex flex-col h-full">
       <div className="overflow-auto flex-1 min-h-0">
-        <table className="border-collapse" style={{ width: '1060px', tableLayout: 'fixed' }}>
+        <table className="w-full border-collapse" style={{ minWidth: '1060px', tableLayout: 'fixed' }}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
+              <tr key={headerGroup.id} ref={headerRowRef} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 text-sm font-normal text-gray-500 text-left" style={{ width: header.column.getSize() }}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -153,7 +175,7 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
             {isAddRowOpen && (
               <tr className="bg-gray-100 border-b border-blue-200">
                 <td colSpan={columns.length} className="p-0">
-                  <AddRowForm onSaveSuccess={handleSaveSuccess} />
+                  <AddRowForm onSaveSuccess={handleSaveSuccess} columnWidths={columnWidths} />
                 </td>
               </tr>
             )}
