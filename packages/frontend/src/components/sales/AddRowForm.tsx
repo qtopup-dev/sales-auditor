@@ -115,6 +115,7 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
     mutationFn: (data: AddRowFormData) => api.post('/sales', data).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['current-shift'] });
       setSelectedProduct(null);
       setSelectedMop(null);
       setSelectedReceiver(null);
