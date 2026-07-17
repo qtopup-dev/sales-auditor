@@ -43,6 +43,7 @@ model Organization {
   auditLogs    AuditLog[]
   inviteTokens InviteToken[]
   receivers    Receiver[]
+  shifts       Shift[]
 
   @@map("organizations")
 }
@@ -63,6 +64,7 @@ model User {
   salesEdited   Sale[]        @relation("LastEditedBy")
   auditLogs     AuditLog[]
   inviteTokens  InviteToken[] @relation("CreatedByUser")
+  shifts        Shift[]
 
   @@unique([organizationId, username])
   @@map("users")
@@ -115,6 +117,30 @@ model Receiver {
   @@map("receivers")
 }
 
+model Shift {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         Int
+  user           User         @relation(fields: [userId], references: [id])
+  clockInAt      DateTime     @default(now())
+  clockOutAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sales Sale[]
+
+  // NOTE: an additional `openLock` generated column + unique index exists in the DB
+  // (added by the migration in Task 2) to enforce "at most one open shift per moderator"
+  // at the DB layer — it is intentionally NOT declared here, same precedent as the
+  // unmanaged `sessions` table documented at the bottom of this file. Prisma never reads
+  // or writes that column; it exists purely as a race-safety guard (security_context T-07-01).
+
+  @@index([organizationId, userId])
+  @@index([organizationId, clockInAt])
+  @@map("shifts")
+}
+
 model Sale {
   id                   Int          @id @default(autoincrement())
   organizationId       Int
@@ -130,6 +156,8 @@ model Sale {
   receiverId           Int
   receiver             Receiver     @relation(fields: [receiverId], references: [id])
   receiverNameSnapshot String       @db.VarChar(255)
+  shiftId              Int?
+  shift                Shift?       @relation(fields: [shiftId], references: [id])
   notes                String?      @db.Text
   status               SaleStatus   @default(active)
   createdById          Int
@@ -148,6 +176,7 @@ model Sale {
   @@index([organizationId, productId])
   @@index([organizationId, mopId])
   @@index([organizationId, receiverId])
+  @@index([organizationId, shiftId])
   @@index([organizationId, createdAt])
   @@map("sales")
 }
