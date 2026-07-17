@@ -31,3 +31,15 @@ export function phTodayString(): string {
     day: '2-digit',
   }).format(new Date());
 }
+
+// e.g. "Saturday July 18, 2026"
+export function formatLongDatePH(date: Date = new Date()): string {
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone: PH_TIME_ZONE, weekday: 'long' }).format(date);
+  const monthDayYear = new Intl.DateTimeFormat('en-US', {
+    timeZone: PH_TIME_ZONE,
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+  return `${weekday} ${monthDayYear}`;
+}

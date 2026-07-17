@@ -8,6 +8,7 @@ import { AuditDrawer } from '../components/sales/AuditDrawer';
 import { VoidConfirmDialog } from '../components/sales/VoidConfirmDialog';
 import { ClockOutConfirmDialog } from '../components/shift/ClockOutConfirmDialog';
 import { ShiftTotalsBanner } from '../components/shift/ShiftTotalsBanner';
+import { formatLongDatePH } from '../lib/shiftTime';
 
 interface CurrentShiftWithTotals {
   id: number;
@@ -65,7 +66,12 @@ export function SalesPage() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Sales Sheet</h1>
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Sales Sheet</h1>
+          {isModerator && (
+            <p className="text-sm font-normal text-gray-500 mt-1">{formatLongDatePH()}</p>
+          )}
+        </div>
         <button
           type="button"
           disabled={addRowDisabled}
