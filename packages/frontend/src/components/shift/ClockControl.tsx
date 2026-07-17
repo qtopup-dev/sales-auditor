@@ -1,24 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
 import { useShiftStore } from '../../stores/shiftStore';
+import { formatClockTime } from '../../lib/shiftTime';
 
 interface CurrentShift {
   id: number;
   clockInAt: string; // ISO 8601 UTC
-}
-
-// D-08: 12-hour AM/PM display derived from UTC hour/minute components (NOT browser-local time)
-// — keeps CLAUDE.md Rule 7 (UTC everywhere) while satisfying the human-readable format.
-// This is the ONE exception to the app's 24-hour UTC table-column convention (UI-SPEC.md
-// §Component Contract: ClockControl §Time Display) — justified because this is a glanceable
-// sidebar status readout, not an audit-grade record.
-function formatClockTime(iso: string): string {
-  const d = new Date(iso);
-  let hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-  return `${hours}:${minutes} ${ampm}`;
 }
 
 // D-07: mirrors the existing username/logout block shell exactly (AuthenticatedLayout.tsx).

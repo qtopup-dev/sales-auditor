@@ -10,6 +10,7 @@ import {
   type ColumnDef,
 } from '@tanstack/react-table';
 import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
+import { formatClockTime, formatShiftDate } from '../../lib/shiftTime';
 
 interface ShiftHistoryEntry {
   id: number;
@@ -17,21 +18,6 @@ interface ShiftHistoryEntry {
   clockOutAt: string | null;
   activeSalesCount: number;
   activeSalesRevenue: string;
-}
-
-// Same 12-hour UTC-derived format used by ClockControl (D-08) — duplicated locally to keep
-// this component independent of Plan 05's file (both plans run in the same wave).
-function formatClockTime(iso: string): string {
-  const d = new Date(iso);
-  let hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-  return `${hours}:${minutes} ${ampm}`;
-}
-
-function formatShiftDate(iso: string): string {
-  return iso.slice(0, 10); // YYYY-MM-DD, UTC calendar date of clockInAt
 }
 
 // New utility — no existing precedent in the codebase (only formatDateTime for absolute

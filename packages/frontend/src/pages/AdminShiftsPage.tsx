@@ -5,6 +5,7 @@ import { AdminShiftTabs } from '../components/shift/AdminShiftTabs';
 import { ShiftTotalsBanner } from '../components/shift/ShiftTotalsBanner';
 import { ForceClockOutConfirmDialog } from '../components/shift/ForceClockOutConfirmDialog';
 import { useShiftStore } from '../stores/shiftStore';
+import { phTodayString } from '../lib/shiftTime';
 
 interface AdminShiftSaleRow {
   id: number;
@@ -36,17 +37,13 @@ function formatDateTime(iso: string): string {
   return iso.replace('T', ' ').slice(0, 16);
 }
 
-function todayString(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 // D-15: admin-only oversight page — read-only (no Void/Audit here, use DashboardPage/SalesPage).
 export function AdminShiftsPage() {
-  const [selectedDate, setSelectedDate] = useState<string>(todayString());
+  const [selectedDate, setSelectedDate] = useState<string>(phTodayString());
   const [activeShiftId, setActiveShiftId] = useState<number | null>(null);
   const { openForceClockOutDialog } = useShiftStore();
 
-  const isToday = selectedDate === todayString();
+  const isToday = selectedDate === phTodayString();
 
   // D-17: poll every 45s while viewing today; static (no polling) for past dates.
   const { data, isLoading } = useQuery<AdminShiftsResponse>({
