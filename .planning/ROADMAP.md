@@ -14,7 +14,7 @@
 - [x] **Phase 4: Admin Dashboard + Management** — All-sales view, filters, charts, CSV export, user management
 - [x] **Phase 5: Receiver Catalog** — Receivers table (id, name, optional account number) and combobox replacing free-text receiver cell in sales sheet
 - [x] **Phase 6: Dashboard KPI Cards** — Transactions / Profit / Turnover KPI summary cards at the top of the admin dashboard, each showing Today / Yesterday / This Month / Last Month
-- [ ] **Phase 7: Moderator Shift Clock In/Out** — Clock in/out shifts, per-shift sales view reset, shift history page, admin Shifts oversight page with force-clock-out
+- [x] **Phase 7: Moderator Shift Clock In/Out** — Clock in/out shifts, per-shift sales view reset, shift history page, admin Shifts oversight page with force-clock-out
 
 ---
 
@@ -145,15 +145,15 @@ Plans:
   5. An admin can force-clock-out a moderator's still-open shift (visible only when viewing today), which closes the shift without affecting any sales data; voided rows are excluded from all shift totals everywhere but remain visible with existing strikethrough treatment
 **Plans:** 9 plans (8 executed + 1 gap-closure)
 Plans:
-- [ ] 07-01-PLAN.md — [BLOCKING] Prisma schema: Shift model + Sale.shiftId nullable FK, manual migration (db execute + migrate resolve), DB-level openLock race guard
-- [ ] 07-02-PLAN.md — Shared types (Shift, ShiftWithTotals, Sale.shiftId) + shiftsRouter (clock-in, clock-out, current, history) + app.ts wiring
-- [ ] 07-03-PLAN.md — sales.ts: shiftId lookup at creation (role-gated D-03/D-05) + ownership-checked shiftId query scoping on GET
-- [ ] 07-04-PLAN.md — admin.ts: GET /shifts?date= (per-moderator merge) + POST /shifts/:id/force-clock-out
-- [ ] 07-05-PLAN.md — Frontend: shiftStore, ClockControl, ClockOutConfirmDialog, ForceClockOutConfirmDialog, ShiftTotalsBanner
-- [ ] 07-06-PLAN.md — Frontend: ShiftHistoryTable + ShiftHistoryPage + /shift-history route
-- [ ] 07-07-PLAN.md — Frontend: AuthenticatedLayout (ClockControl + nav) + SalesPage (role-branched shift-gating)
-- [ ] 07-08-PLAN.md — Frontend: AdminShiftTabs + AdminShiftsPage + /shifts route
-- [ ] 07-09-PLAN.md — [GAP CLOSURE] shifts.ts: mount router-level requireRole('moderator') (CLAUDE.md Rule 9 backend RBAC enforcement) + correct app.ts mount comment
+- [x] 07-01-PLAN.md — [BLOCKING] Prisma schema: Shift model + Sale.shiftId nullable FK, manual migration (db execute + migrate resolve), DB-level openLock race guard
+- [x] 07-02-PLAN.md — Shared types (Shift, ShiftWithTotals, Sale.shiftId) + shiftsRouter (clock-in, clock-out, current, history) + app.ts wiring
+- [x] 07-03-PLAN.md — sales.ts: shiftId lookup at creation (role-gated D-03/D-05) + ownership-checked shiftId query scoping on GET
+- [x] 07-04-PLAN.md — admin.ts: GET /shifts?date= (per-moderator merge) + POST /shifts/:id/force-clock-out
+- [x] 07-05-PLAN.md — Frontend: shiftStore, ClockControl, ClockOutConfirmDialog, ForceClockOutConfirmDialog, ShiftTotalsBanner
+- [x] 07-06-PLAN.md — Frontend: ShiftHistoryTable + ShiftHistoryPage + /shift-history route
+- [x] 07-07-PLAN.md — Frontend: AuthenticatedLayout (ClockControl + nav) + SalesPage (role-branched shift-gating)
+- [x] 07-08-PLAN.md — Frontend: AdminShiftTabs + AdminShiftsPage + /shifts route
+- [x] 07-09-PLAN.md — [GAP CLOSURE] shifts.ts: mount router-level requireRole('moderator') (CLAUDE.md Rule 9 backend RBAC enforcement) + correct app.ts mount comment
 **UI hint**: yes
 
 ---
@@ -168,7 +168,7 @@ Plans:
 | 4. Admin Dashboard + Management | 6/6 | Complete | 2026-06-26 |
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
 | 6. Dashboard KPI Cards | 2/2 | Complete | 2026-07-01 |
-| 7. Moderator Shift Clock In/Out | 0/8 | Planned | — |
+| 7. Moderator Shift Clock In/Out | 9/9 | Complete | 2026-07-18 |
 
 ---
 
