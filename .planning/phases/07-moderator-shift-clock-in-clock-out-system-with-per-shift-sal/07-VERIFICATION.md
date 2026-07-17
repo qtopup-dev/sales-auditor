@@ -1,7 +1,7 @@
 ---
 phase: 07-moderator-shift-clock-in-clock-out-system-with-per-shift-sal
 verified: 2026-07-18T00:00:00Z
-status: human_needed
+status: passed
 score: 6/6 must-haves verified
 overrides_applied: 0
 re_verification:
@@ -15,20 +15,24 @@ human_verification:
   - test: "Excel-style tab bar visual/interaction feel"
     expected: "Tabs visually resemble Excel sheet tabs (per D-15/UI-SPEC intent) and switching tabs swaps the visible sheet below without a full page reload or flash."
     why_human: "Visual/interaction feel cannot be verified via static code inspection alone."
+    result: "pass — confirmed by user in a live browser session (see 07-HUMAN-UAT.md)"
   - test: "End-to-end clock-in -> sales entry -> clock-out flow"
     expected: "Banner updates immediately after Add Row; sheet resets to 'Clock in to start a shift' after clock-out with no stale rows visible."
     why_human: "Requires a running browser session against a live backend/DB to observe actual React Query cache behavior and UI transitions, not just code correctness."
+    result: "pass — surfaced a real bug during testing (shift clock times displayed in raw UTC instead of Philippines local time, ~8h offset); fixed in commit 00330ef (lib/shiftTime.ts + ClockControl/ShiftHistoryTable/AdminShiftsPage), re-tested and confirmed correct"
   - test: "Force Clock Out on a real open shift, confirm both sides update"
     expected: "Moderator's ClockControl (on their own session) reflects clocked-out state; admin's tab loses the Force Clock Out button; no sales rows are altered."
     why_human: "Cross-session, real-time state observation requires two live browser sessions."
+    result: "pass — confirmed by user in a live browser session (see 07-HUMAN-UAT.md)"
 ---
 
 # Phase 7: Moderator Shift Clock In/Out Verification Report
 
 **Phase Goal:** Moderators can clock in/out of shifts; while clocked in, their Sales Sheet resets to show only the current shift's rows with a live count + revenue totals banner, and Add Row is gated on having an active shift. Moderators get a Shift History page of their own past shifts. Admins get a "Shifts" oversight page: a date-scoped, tabbed view (one tab per moderator, Excel-sheet-tab style) showing every moderator's sales for a selected day, with a force-clock-out action on any still-open shift when viewing today.
 **Verified:** 2026-07-18
-**Status:** human_needed
+**Status:** passed
 **Re-verification:** Yes — after gap closure (plan 07-09)
+**Human UAT:** Completed 2026-07-18 — all 3 items passed (see 07-HUMAN-UAT.md). Testing surfaced a real bug (shift clock times displayed in raw UTC instead of PH local time); fixed in commit 00330ef and re-confirmed.
 
 ## Goal Achievement
 
@@ -117,7 +121,7 @@ The prior blocking anti-pattern (missing `requireRole` guard on `shiftsRouter`) 
 
 This transitively restores integrity to ROADMAP Success Criterion 4: since no non-moderator session can ever create a `shifts` row now, `GET /api/admin/shifts?date=` (which has no role filter of its own) is backend-guaranteed to only ever surface moderator tabs — the "one Excel-style tab per moderator" invariant no longer depends on frontend-only enforcement.
 
-**All 6 must-have truths are now verified.** However, overall status is **human_needed rather than passed**: three items identified in the prior verification pass — the visual/interactive feel of the Excel-style tab bar, the live end-to-end clock-in → add-row → clock-out flow (React Query cache behavior in a real browser), and cross-session Force Clock Out propagation — genuinely require a live browser session against a running backend to confirm and were not part of this narrow gap-closure fix's scope. No automated e2e/UI test suite (Playwright/Cypress) exists in this repo to substitute for them. These are not new gaps and do not reflect on the quality of the gap-closure fix; they are the same three items flagged in the initial pass, carried forward unchanged, and stand between this phase and a fully "passed" verification.
+**All 6 must-have truths are verified, and all 3 human-verification items have since passed** (2026-07-18, see 07-HUMAN-UAT.md): the visual/interactive feel of the Excel-style tab bar, the live end-to-end clock-in → add-row → clock-out flow, and cross-session Force Clock Out propagation were all confirmed in a live browser session against a running backend. The end-to-end flow test surfaced a real bug — shift clock times were displayed in raw UTC instead of Philippines local time (an ~8-hour offset) — which was fixed in commit `00330ef` (new `lib/shiftTime.ts` Asia/Manila-aware formatters, wired into `ClockControl`, `ShiftHistoryTable`, and `AdminShiftsPage`) and re-tested as correct. No other regressions were found. Phase 7 is fully verified and complete.
 
 ---
 
