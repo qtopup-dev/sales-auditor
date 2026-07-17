@@ -218,6 +218,8 @@ No rows are queried/rendered in this state (D-12: true reset, not filtered displ
 
 **State C — clocked in, has shift sales:** existing `<SalesTable sales={shiftSales} />`, unchanged component, fed shift-scoped data (`GET /api/sales?shiftId=current` or equivalent — exact query shape is a backend/planner concern per CONTEXT.md Claude's Discretion).
 
+**Focal point (State C):** the `SalesTable` is the primary visual anchor of the page — it is the largest element, occupies the remaining vertical space (`flex-1 min-h-0`), and is where the moderator's actual work (entering/editing sales rows) happens. `ShiftTotalsBanner` is secondary/glanceable context sitting above it: two small stat cards, `text-2xl` values but far less screen area than the table, no interactive controls, read-only. A moderator's eye should land on the table first for data entry; the banner is a passive status readout consulted only when the moderator wants to check shift progress, not something competing for primary attention.
+
 **Query key convention:** `['sales', 'current-shift']` or `['sales', { shiftId: currentShiftId }]` — distinct from the existing `['sales']` key used for the historical/full view, so React Query does not conflate shift-scoped and full-history data. Exact key left to planner; must invalidate correctly on Add Row success (D-13).
 
 ---
@@ -251,6 +253,8 @@ Admin-only page (D-15). Date-scoped, tabbed, read-only.
 ```
 
 **Page header:** `flex items-center justify-between mb-8`. Left: `<h1 className="text-xl font-semibold text-gray-900">Shifts</h1>`. No button on the right (read-only page, D-15).
+
+**Focal point (selected tab panel):** the read-only sales table is the primary visual anchor within the tab panel — it is the largest element and the reason an admin opens this page (auditing what a moderator sold during the shift). `ShiftTotalsBanner` is secondary/glanceable summary context above the table, identical in visual weight to its role on `SalesPage`. `Force Clock Out` is a tertiary, low-frequency control: it is right-aligned, outlined (not solid), and only rendered at all when today's date is selected and the shift is still open — it must never out-compete the table or banner for attention since it is used rarely and only in an exceptional situation (a moderator forgetting to clock out), not as part of the page's core viewing task.
 
 **Date selector (Claude's Discretion — resolved):** native `<input type="date">`, not a calendar picker component or prev/next arrows. Rationale: the app already uses native `<input type="date">` for the DashboardPage filter bar's Start Date/End Date controls (Phase 4) — this is the established precedent, requires zero new dependencies, and admin users are already familiar with it from the existing filter bar.
 ```
@@ -421,7 +425,7 @@ function formatClockTime(iso: string): string {
   footer={
     <>
       <button className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md text-sm font-normal hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-        Cancel
+        Keep Shift Open
       </button>
       <button className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-normal hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
         {isPending ? 'Forcing Clock Out...' : 'Force Clock Out'}
@@ -570,7 +574,7 @@ No icon, no close button, no overflow menu — a simple horizontally-scrollable 
 | ClockOutConfirmDialog error | "Failed to clock out. Please try again." | Claude's discretion |
 | ForceClockOutConfirmDialog title | "Force Clock Out" | D-16 |
 | ForceClockOutConfirmDialog body | "Force clock out {username}? Their shift will end immediately and their Sales Sheet will reset. This does not affect their sales data — all rows remain intact." | Claude's discretion — clarifies no data loss, addresses likely admin concern |
-| ForceClockOutConfirmDialog cancel | "Cancel" | Claude's discretion |
+| ForceClockOutConfirmDialog cancel | "Keep Shift Open" | Claude's discretion — specific action label, not the generic "Cancel"; consistent with this spec's own `ClockOutConfirmDialog` cancel label ("Stay Clocked In") and with `VoidConfirmDialog.tsx`'s precedent ("Keep Row") |
 | ForceClockOutConfirmDialog confirm (idle) | "Force Clock Out" | D-16 |
 | ForceClockOutConfirmDialog confirm (in-flight) | "Forcing Clock Out..." | Claude's discretion |
 | ForceClockOutConfirmDialog error | "Failed to force clock out. Please try again." | Claude's discretion |
@@ -636,6 +640,7 @@ No other destructive actions are introduced in Phase 7 (Void remains admin-only 
 4. `POST /api/admin/shifts/:id/force-clock-out` fires — backend sets `clockOutAt = now()` server-side, `requireRole('admin')` enforced (CLAUDE.md Rule 9).
 5a. Success: invalidate the admin shifts query for `selectedDate` → dialog closes → the tab's Force Clock Out button disappears (shift now shows a clock-out time) → ShiftTotalsBanner and table remain visible, unaffected (D-04: sales rows untouched by shift closure).
 5b. Error: dialog stays open, inline error shown, button re-enabled.
+6. "Keep Shift Open" (cancel) — closes dialog with no mutation, only enabled when not mid-request.
 
 ### Shift-Gated Add Row (D-03)
 
