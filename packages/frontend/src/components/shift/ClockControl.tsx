@@ -20,7 +20,7 @@ export function ClockControl() {
   });
 
   const clockInMutation = useMutation({
-    mutationFn: () => api.post('/shifts/clock-in').then((r) => r.data),
+    mutationFn: () => api.post('/shifts/clock-in', {}).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-shift'] });
     },

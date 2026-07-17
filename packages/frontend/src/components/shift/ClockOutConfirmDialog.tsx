@@ -8,7 +8,7 @@ export function ClockOutConfirmDialog() {
   const { isClockOutDialogOpen, closeClockOutDialog } = useShiftStore();
 
   const clockOutMutation = useMutation({
-    mutationFn: () => api.post('/shifts/clock-out').then((r) => r.data),
+    mutationFn: () => api.post('/shifts/clock-out', {}).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-shift'] });
       queryClient.invalidateQueries({ queryKey: ['sales', 'current-shift'] });

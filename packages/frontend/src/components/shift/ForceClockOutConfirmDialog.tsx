@@ -9,7 +9,7 @@ export function ForceClockOutConfirmDialog() {
 
   const forceClockOutMutation = useMutation({
     mutationFn: (shiftId: number) =>
-      api.post(`/admin/shifts/${shiftId}/force-clock-out`).then((r) => r.data),
+      api.post(`/admin/shifts/${shiftId}/force-clock-out`, {}).then((r) => r.data),
     onSuccess: () => {
       // Broad invalidate covers every selectedDate key the AdminShiftsPage query uses.
       queryClient.invalidateQueries({ queryKey: ['admin-shifts'] });
