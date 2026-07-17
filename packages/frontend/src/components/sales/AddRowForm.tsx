@@ -154,6 +154,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
                     borderColor: errors.productId ? '#ef4444' : base.borderColor,
                   }),
                   menu: (base) => ({ ...base, zIndex: 9999 }),
+                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
+                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
                 }}
                 onChange={(option) => {
                   const opt = option as ProductOption | null;
@@ -199,6 +202,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
                     borderColor: errors.mopId ? '#ef4444' : base.borderColor,
                   }),
                   menu: (base) => ({ ...base, zIndex: 9999 }),
+                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
+                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
                 }}
                 onChange={(option) => {
                   const opt = option as MopOption | null;
@@ -233,6 +239,9 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
                     borderColor: errors.receiverId ? '#ef4444' : base.borderColor,
                   }),
                   menu: (base) => ({ ...base, zIndex: 9999 }),
+                  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
+                  placeholder: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+                  singleValue: (base) => ({ ...base, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
                 }}
                 onChange={(option) => {
                   const opt = option as ReceiverOption | null;
