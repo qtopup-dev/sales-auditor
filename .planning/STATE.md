@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-07-01T09:33:01.644Z"
+last_updated: "2026-07-17T16:25:36.423Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 6
   total_plans: 32
   completed_plans: 32
@@ -16,7 +16,7 @@ progress:
 
 **Last updated:** 2026-06-26
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-07-01T09:32:55.520Z
+**Last session:** --stopped-at
 
 ---
 
@@ -115,6 +115,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 
 - Phase 5 added: Receiver catalog and combobox — receivers table (id, name, optional account_number) replaces free-text receiver cell in sales sheet
 - Phase 6 added: Add dashboard KPI summary cards to admin dashboard top — Transactions, Profit, Turnover each showing yesterday's, today's, last month's, and this month's values
+- Phase 7 added: Moderator shift clock-in/clock-out system with per-shift sales view, shift history tab, and live shift totals
 
 ### Todos
 
