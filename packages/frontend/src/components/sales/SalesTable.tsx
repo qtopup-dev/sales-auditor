@@ -137,7 +137,7 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
   return (
     <div className="flex flex-col h-full">
       <div className="overflow-auto flex-1 min-h-0">
-        <table className="w-full border-collapse" style={{ minWidth: '1160px' }}>
+        <table className="w-full border-collapse" style={{ minWidth: '1060px', tableLayout: 'fixed' }}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">

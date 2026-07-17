@@ -245,12 +245,12 @@ export function AddRowForm({ onSaveSuccess }: AddRowFormProps) {
           />
         </div>
 
-        {/* Notes (flex-1) */}
-        <div style={{ flex: 1, padding: '0 16px', minWidth: '160px' }}>
+        {/* Notes (160px) — matches SalesTable's Notes column size exactly */}
+        <div style={{ width: '160px', padding: '0 16px', flexShrink: 0 }}>
           <textarea
             disabled={isPending}
             placeholder="Notes (optional)"
-            rows={2}
+            rows={1}
             {...register('notes')}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 resize-none"
           />
