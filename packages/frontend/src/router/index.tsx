@@ -10,6 +10,7 @@ import { ProductsPage } from '../pages/ProductsPage';
 import { MopsPage } from '../pages/MopsPage';
 import { ReceiversPage } from '../pages/ReceiversPage';
 import { ShiftHistoryPage } from '../pages/ShiftHistoryPage';
+import { AdminShiftsPage } from '../pages/AdminShiftsPage';
 
 // ─── ProtectedRoute ──────────────────────────────────────────────────────────
 // CONTEXT.md D-11: stores returnTo in location.state for post-login redirect
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
               { path: '/mops', element: <MopsPage /> },
               { path: '/receivers', element: <ReceiversPage /> },
               { path: '/users', element: <UsersPage /> },
+              { path: '/shifts', element: <AdminShiftsPage /> },
             ],
           },
         ],
