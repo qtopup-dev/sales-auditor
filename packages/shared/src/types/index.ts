@@ -9,6 +9,7 @@ export type { Role, User, Organization } from './user.js';
 export type { Product } from './product.js';
 export type { Mop } from './mop.js';
 export type { Receiver } from './receiver.js';
+export type { Shift, ShiftWithTotals } from './shift.js';
 export type { SaleStatus, Sale } from './sale.js';
 export type { AuditAction, AuditEntry } from './audit.js';
 export type { InviteToken, AuthSession } from './auth.js';

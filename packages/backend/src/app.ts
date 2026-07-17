@@ -16,6 +16,7 @@ import { usersRouter } from './routes/users.js';
 import { productsRouter } from './routes/products.js';
 import { mopsRouter } from './routes/mops.js';
 import { receiversRouter } from './routes/receivers.js';
+import { shiftsRouter } from './routes/shifts.js';
 import { salesRouter } from './routes/sales.js';
 import { catalogRouter } from './routes/catalog.js';
 import { adminRouter } from './routes/admin.js';
@@ -104,6 +105,7 @@ export function createApp(): Express {
   protectedRouter.use('/products', productsRouter); // admin-only (productsRouter mounts requireRole internally)
   protectedRouter.use('/mops', mopsRouter); // admin-only (mopsRouter mounts requireRole internally)
   protectedRouter.use('/receivers', receiversRouter); // admin-only (receiversRouter mounts requireRole internally)
+  protectedRouter.use('/shifts', shiftsRouter); // all authenticated users (D-05: admins never call these in practice)
   protectedRouter.use('/sales', salesRouter); // all authenticated users (role checks per-route)
   protectedRouter.use('/catalog', catalogRouter); // all authenticated users (no role restriction — D-05)
   protectedRouter.use('/admin', adminRouter); // admin-only (adminRouter mounts requireRole internally)

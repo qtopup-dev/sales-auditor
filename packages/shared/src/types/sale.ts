@@ -17,6 +17,7 @@ export interface Sale {
   mopNameSnapshot: string;          // Denormalized at creation — never join to mops for display
   receiverId: number;               // FK to receivers table (replaces free-text receiver — Phase 5)
   receiverNameSnapshot: string;     // Snapshot at creation — never join for display (CLAUDE.md Rule 4)
+  shiftId: number | null;           // FK to shifts table; null for pre-Phase-7 rows or admin-created rows (D-02, D-05)
   notes: string | null;
   status: SaleStatus;               // Soft-delete field (CLAUDE.md Rule 3)
   createdById: number;
