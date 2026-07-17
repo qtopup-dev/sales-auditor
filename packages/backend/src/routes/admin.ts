@@ -261,6 +261,11 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
   // NOTE: $queryRaw is required — Prisma cannot filter by DATE(clockInAt) expression directly
   // (same limitation documented at line 22 for trendData). organizationId comes from
   // req.session (server-controlled); date is regex-validated above — both parameterized.
+  // clockInAt is stored in UTC (CLAUDE.md Rule 7), but `date` is a Philippines-local calendar
+  // date (frontend's phTodayString()/date-picker) — CONVERT_TZ to +08:00 (fixed offset, no
+  // DST, doesn't require the mysql.time_zone_name tables to be loaded) before extracting DATE()
+  // so a shift that starts between midnight and 8am PH time (still the previous UTC day) is
+  // correctly grouped under its PH calendar date, not silently missing from "today".
   const sessions = await prisma.$queryRaw<
     { shiftId: number; userId: number; username: string; clockInAt: Date; clockOutAt: Date | null }[]
   >`
@@ -268,7 +273,7 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
     FROM shifts s
     JOIN users u ON u.id = s.userId
     WHERE s.organizationId = ${organizationId}
-      AND DATE(s.clockInAt) = ${date}
+      AND DATE(CONVERT_TZ(s.clockInAt, '+00:00', '+08:00')) = ${date}
     ORDER BY s.clockInAt ASC
   `;
 
