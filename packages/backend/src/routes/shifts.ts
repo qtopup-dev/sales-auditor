@@ -1,12 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
+import { requireRole } from '../middleware/requireRole.js';
 
 export const shiftsRouter = Router();
 
-// shiftsRouter does NOT mount requireRole at router level — every route here is open to
-// any authenticated user. In practice only moderators call these (D-05: admins never clock
-// in), but that is enforced by the frontend only showing ClockControl for role === 'moderator'.
-// requireAuth is already applied at the protectedRouter level in app.ts.
+// All /api/shifts/* routes require moderator role (D-05: shifts are a moderator-only concept;
+// admins never clock in). Router-level enforcement mirrors adminRouter.use(requireRole('admin')).
+// CLAUDE.md Rule 9: backend enforces RBAC — frontend role checks are UI-only.
+// A non-moderator session (e.g. admin) hitting any route here gets 403 { error: 'FORBIDDEN' }.
+shiftsRouter.use(requireRole('moderator'));
 
 // ─── Serializer ───────────────────────────────────────────────────────────────
 function serializeShift(s: {

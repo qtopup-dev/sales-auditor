@@ -105,7 +105,7 @@ export function createApp(): Express {
   protectedRouter.use('/products', productsRouter); // admin-only (productsRouter mounts requireRole internally)
   protectedRouter.use('/mops', mopsRouter); // admin-only (mopsRouter mounts requireRole internally)
   protectedRouter.use('/receivers', receiversRouter); // admin-only (receiversRouter mounts requireRole internally)
-  protectedRouter.use('/shifts', shiftsRouter); // all authenticated users (D-05: admins never call these in practice)
+  protectedRouter.use('/shifts', shiftsRouter); // moderator-only (shiftsRouter mounts requireRole('moderator') internally)
   protectedRouter.use('/sales', salesRouter); // all authenticated users (role checks per-route)
   protectedRouter.use('/catalog', catalogRouter); // all authenticated users (no role restriction — D-05)
   protectedRouter.use('/admin', adminRouter); // admin-only (adminRouter mounts requireRole internally)
