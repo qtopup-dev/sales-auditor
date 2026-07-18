@@ -20,8 +20,8 @@ export function ShiftHistoryPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Shift History</h1>
+      <div className="flex items-center justify-between mb-4 md:mb-8">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Shift History</h1>
       </div>
       <ShiftHistoryTable shifts={shifts} loading={isLoading} isError={isError} />
     </div>

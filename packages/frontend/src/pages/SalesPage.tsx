@@ -65,11 +65,11 @@ export function SalesPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 md:mb-8">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Sales Sheet</h1>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Sales Sheet</h1>
           {isModerator && (
-            <p className="text-sm font-normal text-gray-500 mt-1">{formatLongDatePH()}</p>
+            <p className="text-sm font-normal text-gray-500 dark:text-gray-400 mt-1">{formatLongDatePH()}</p>
           )}
         </div>
         <button
@@ -77,7 +77,7 @@ export function SalesPage() {
           disabled={addRowDisabled}
           title={isModerator && !hasActiveShift ? 'Clock in to add a new sale.' : undefined}
           onClick={openAddRow}
-          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add Row
         </button>
@@ -90,29 +90,29 @@ export function SalesPage() {
         />
       )}
 
-      <div className="flex-1 min-h-0 border border-gray-200 rounded-md overflow-hidden">
+      <div className="flex-1 min-h-0 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
         {isModerator ? (
           !hasActiveShift ? (
             // State A (D-12): not clocked in — true reset, no rows queried at all.
             <div className="flex flex-col items-center justify-center h-full gap-2">
-              <p className="text-sm font-semibold text-gray-900">Clock in to start a shift</p>
-              <p className="text-sm font-normal text-gray-500">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Clock in to start a shift</p>
+              <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
                 Use the Clock In button in the sidebar to begin your shift and start entering sales.
               </p>
             </div>
           ) : shiftLoading ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-sm font-normal text-gray-500">Loading sales...</p>
+              <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Loading sales...</p>
             </div>
           ) : shiftError ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-sm font-normal text-gray-500">Failed to load sales. Please refresh the page.</p>
+              <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Failed to load sales. Please refresh the page.</p>
             </div>
           ) : shiftSales.length === 0 && !isAddRowOpen ? (
             // State B (D-12): clocked in, zero rows this shift.
             <div className="flex flex-col items-center justify-center h-full gap-2">
-              <p className="text-sm font-semibold text-gray-900">No sales yet this shift</p>
-              <p className="text-sm font-normal text-gray-500">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">No sales yet this shift</p>
+              <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
                 Click &apos;Add Row&apos; to enter your first sale.
               </p>
             </div>
@@ -122,17 +122,17 @@ export function SalesPage() {
           )
         ) : adminLoading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm font-normal text-gray-500">Loading sales...</p>
+            <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Loading sales...</p>
           </div>
         ) : adminError ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm font-normal text-gray-500">Failed to load sales. Please refresh the page.</p>
+            <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Failed to load sales. Please refresh the page.</p>
           </div>
         ) : adminSales.length === 0 && !isAddRowOpen ? (
           // Admin: EXACT pre-Phase-7 empty state, unchanged.
           <div className="flex flex-col items-center justify-center h-full gap-2">
-            <p className="text-sm font-semibold text-gray-900">No sales yet</p>
-            <p className="text-sm font-normal text-gray-500">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">No sales yet</p>
+            <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
               Click &apos;Add Row&apos; to enter the first sale.
             </p>
           </div>

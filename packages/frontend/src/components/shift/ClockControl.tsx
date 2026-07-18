@@ -27,16 +27,16 @@ export function ClockControl() {
   });
 
   return (
-    <div className="px-4 py-4 border-t border-gray-200">
+    <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
       {currentShift ? (
         <>
-          <p className="text-xs font-normal text-gray-500 mb-2">
+          <p className="text-xs font-normal text-gray-500 dark:text-gray-400 mb-2">
             Clocked in at {formatClockTime(currentShift.clockInAt)}
           </p>
           <button
             type="button"
             onClick={openClockOutDialog}
-            className="w-full h-10 border border-gray-300 bg-white text-gray-700 rounded-md text-sm font-normal hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px]"
+            className="w-full h-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-normal hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 min-h-[44px]"
           >
             Clock Out
           </button>
@@ -47,12 +47,12 @@ export function ClockControl() {
             type="button"
             disabled={clockInMutation.isPending}
             onClick={() => clockInMutation.mutate()}
-            className="w-full h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            className="w-full h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
           >
             {clockInMutation.isPending ? 'Clocking In...' : 'Clock In'}
           </button>
           {clockInMutation.isError && (
-            <p className="text-xs text-red-600 mt-1">Failed to clock in. Please try again.</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-1">Failed to clock in. Please try again.</p>
           )}
         </>
       )}

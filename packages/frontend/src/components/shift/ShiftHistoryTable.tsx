@@ -55,7 +55,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         header: 'Date',
         size: 120,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{formatShiftDate(getValue<string>())}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{formatShiftDate(getValue<string>())}</span>
         ),
       },
       {
@@ -63,7 +63,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         header: 'Clock In',
         size: 110,
         cell: ({ row }) => (
-          <span className="text-sm text-gray-900">{formatClockTime(row.original.clockInAt)}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{formatClockTime(row.original.clockInAt)}</span>
         ),
       },
       {
@@ -73,7 +73,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         cell: ({ getValue }) => {
           const clockOutAt = getValue<string | null>();
           return (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {clockOutAt ? formatClockTime(clockOutAt) : 'Still open'}
             </span>
           );
@@ -84,7 +84,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         header: 'Duration',
         size: 100,
         cell: ({ row }) => (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {formatDuration(row.original.clockInAt, row.original.clockOutAt)}
           </span>
         ),
@@ -94,7 +94,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         header: () => <span className="block text-right">Sales</span>,
         size: 80,
         cell: ({ getValue }) => (
-          <span className="block text-right text-sm text-gray-900">{getValue<number>()}</span>
+          <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{getValue<number>()}</span>
         ),
       },
       {
@@ -103,7 +103,7 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
         size: 120,
         cell: ({ getValue }) => (
           // Display string as-is — NEVER parseFloat (CLAUDE.md Rule 6)
-          <span className="block text-right text-sm text-gray-900">{'₱' + getValue<string>()}</span>
+          <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{'₱' + getValue<string>()}</span>
         ),
       },
     ],
@@ -125,33 +125,33 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
   });
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading shift history...</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Loading shift history...</p>;
   }
 
   if (isError) {
-    return <p className="text-sm text-gray-500">Failed to load shift history. Please refresh the page.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Failed to load shift history. Please refresh the page.</p>;
   }
 
   if (shifts.length === 0) {
     return (
-      <div className="border border-gray-200 rounded-md p-8 text-center">
-        <p className="text-sm font-semibold text-gray-900 mb-1">No shifts yet</p>
-        <p className="text-sm font-normal text-gray-500">Clock in from the sidebar to start your first shift.</p>
+      <div className="border border-gray-200 dark:border-gray-700 rounded-md p-8 text-center">
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No shifts yet</p>
+        <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Clock in from the sidebar to start your first shift.</p>
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-200 rounded-md overflow-hidden">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[640px]">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200">
+              <tr key={headerGroup.id} className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-sm font-normal text-gray-500 text-left"
+                    className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left"
                     style={{ width: header.column.getSize() !== 150 ? header.column.getSize() : undefined }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -163,9 +163,9 @@ export function ShiftHistoryTable({ shifts, loading, isError }: ShiftHistoryTabl
           <tbody>
             {table.getRowModel().rows.map((row) => (
               // No strikethrough/tint — an open shift is a normal active state, not voided (UI-SPEC.md)
-              <tr key={row.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+              <tr key={row.id} className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 text-sm text-gray-900">
+                  <td key={cell.id} className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

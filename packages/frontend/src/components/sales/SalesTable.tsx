@@ -24,7 +24,7 @@ const columns: ColumnDef<Sale>[] = [
     cell: ({ row }) => {
       const sale = row.original;
       return (
-        <span className={`block text-right text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+        <span className={`block text-right text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}>
           {sale.priceSnapshot}
         </span>
       );
@@ -67,7 +67,7 @@ const columns: ColumnDef<Sale>[] = [
         ? sale.updatedAt.replace('T', ' ').slice(0, 16)
         : '—';
       return (
-        <span className={`text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400' : 'text-gray-400'}`}>
+        <span className={`text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
           {label}
         </span>
       );
@@ -86,16 +86,16 @@ const columns: ColumnDef<Sale>[] = [
       return (
         <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
           {isAdmin && !isVoided && (
-            <button type="button" onClick={() => openVoidDialog(sale.id)} className="text-red-600 hover:text-red-800 text-sm font-normal min-h-[44px] px-1">
+            <button type="button" onClick={() => openVoidDialog(sale.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-normal min-h-[44px] px-1">
               Void
             </button>
           )}
-          {isAdmin && !isVoided && <span className="text-gray-300">|</span>}
+          {isAdmin && !isVoided && <span className="text-gray-300 dark:text-gray-600">|</span>}
           {isVoided && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700">Void</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">Void</span>
           )}
           {isAdmin && (
-            <button type="button" onClick={() => openAuditDrawer(sale.id)} className="text-blue-600 hover:text-blue-800 text-sm font-normal min-h-[44px] px-1">
+            <button type="button" onClick={() => openAuditDrawer(sale.id)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-normal min-h-[44px] px-1">
               Audit
             </button>
           )}
@@ -162,9 +162,9 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
         <table className="w-full border-collapse" style={{ minWidth: '1060px', tableLayout: 'fixed' }}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} ref={headerRowRef} className="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
+              <tr key={headerGroup.id} ref={headerRowRef} className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="px-4 py-3 text-sm font-normal text-gray-500 text-left" style={{ width: header.column.getSize() }}>
+                  <th key={header.id} className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left" style={{ width: header.column.getSize() }}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
                 ))}
@@ -173,7 +173,7 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
           </thead>
           <tbody>
             {isAddRowOpen && (
-              <tr className="bg-gray-100 border-b border-blue-200">
+              <tr className="bg-gray-100 dark:bg-gray-800 border-b border-blue-200 dark:border-blue-900">
                 <td colSpan={columns.length} className="p-0">
                   <AddRowForm onSaveSuccess={handleSaveSuccess} columnWidths={columnWidths} />
                 </td>
@@ -187,14 +187,14 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
                   key={row.id}
                   className={
                     isVoidedRow
-                      ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
-                      : 'bg-white border-b border-gray-200 hover:bg-gray-50'
+                      ? 'bg-red-50 dark:bg-red-950 border-b border-gray-200 dark:border-gray-700 hover:bg-red-100 dark:hover:bg-red-900'
+                      : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="px-4 py-2 text-sm text-gray-900"
+                      className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100"
                       style={{ width: cell.column.getSize() }}
                       onClick={cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined}
                     >

@@ -174,7 +174,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
           style={{ width: priceW, padding: '0 16px', flexShrink: 0 }}
           className="flex items-center justify-end"
         >
-          <span className="block text-right text-sm font-normal text-gray-400 pt-2">
+          <span className="block text-right text-sm font-normal text-gray-400 dark:text-gray-500 pt-2">
             {priceDisplay}
           </span>
         </div>
@@ -238,7 +238,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
             placeholder="Notes (optional)"
             rows={1}
             {...register('notes')}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 resize-none"
+            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900 resize-none"
           />
         </div>
 
@@ -247,7 +247,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
           style={{ width: dateEditedW, padding: '0 16px', flexShrink: 0 }}
           className="flex items-center"
         >
-          <span className="text-sm font-normal text-gray-400">—</span>
+          <span className="text-sm font-normal text-gray-400 dark:text-gray-500">—</span>
         </div>
 
         {/* Actions */}
@@ -266,7 +266,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
             type="button"
             onClick={closeAddRow}
             disabled={isPending}
-            className="px-3 py-1.5 text-gray-600 text-sm font-normal hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-gray-600 dark:text-gray-300 text-sm font-normal hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Discard
           </button>
@@ -274,7 +274,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
       </div>
 
       {createMutation.isError && (
-        <p className="text-xs font-normal text-red-600 px-4 pb-1">
+        <p className="text-xs font-normal text-red-600 dark:text-red-400 px-4 pb-1">
           Failed to save. Please try again.
         </p>
       )}
