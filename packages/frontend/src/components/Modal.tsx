@@ -31,22 +31,22 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
     >
       {/* Card — stopPropagation prevents overlay click from closing when clicking inside card */}
       <div
-        className="bg-white rounded-lg shadow-xl w-[480px] max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-[480px] mx-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Title row */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-200">
-          <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 id="modal-title" className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {title}
           </h2>
           <button
             type="button"
             onClick={() => onClose?.()}
             disabled={!onClose}
-            className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-0"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-0"
             aria-label="Close"
           >
             &#x2715;
@@ -57,7 +57,7 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
         <div className="px-6 py-6 space-y-4">{children}</div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 pb-6 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-3 px-6 pb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           {footer}
         </div>
       </div>

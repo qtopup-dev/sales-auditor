@@ -32,7 +32,7 @@ export function VoidConfirmDialog() {
             type="button"
             onClick={closeVoidDialog}
             disabled={isPending}
-            className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md text-sm font-normal hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-normal hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Keep Row
           </button>
@@ -47,11 +47,11 @@ export function VoidConfirmDialog() {
         </>
       }
     >
-      <p className="text-sm font-normal text-gray-900">
+      <p className="text-sm font-normal text-gray-900 dark:text-gray-100">
         Are you sure you want to void this row? This action cannot be undone.
       </p>
       {voidMutation.isError && (
-        <p className="text-sm font-normal text-red-600 mt-2">
+        <p className="text-sm font-normal text-red-600 dark:text-red-400 mt-2">
           Failed to void row. Please try again.
         </p>
       )}
