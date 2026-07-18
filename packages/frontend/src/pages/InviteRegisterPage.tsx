@@ -57,8 +57,8 @@ export function InviteRegisterPage() {
   // Loading state
   if (tokenValid === null) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-sm text-gray-500">Checking invite link...</p>
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">Checking invite link...</p>
       </div>
     );
   }
@@ -68,8 +68,8 @@ export function InviteRegisterPage() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-[400px] p-8 border border-gray-200 rounded-lg shadow-sm bg-white">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-4">Invite Link Invalid</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Invite Link Invalid</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             This invite link has expired or already been used. Contact your admin for a new link.
           </p>
         </div>
@@ -80,16 +80,16 @@ export function InviteRegisterPage() {
   const password = watch('password');
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-[400px] p-8 border border-gray-200 rounded-lg shadow-sm bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-[400px] p-6 sm:p-8 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800">
         {/* Heading — UI-SPEC.md Copywriting Contract */}
-        <h1 className="text-2xl font-semibold text-gray-900">Create Your Account</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-6">Set a password to complete registration</p>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Create Your Account</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Set a password to complete registration</p>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           {/* Username field */}
           <div className="mb-4">
-            <label htmlFor="reg-username" className="text-sm text-gray-500 block mb-1">
+            <label htmlFor="reg-username" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
               Username
             </label>
             <input
@@ -102,20 +102,20 @@ export function InviteRegisterPage() {
                 minLength: { value: 2, message: 'Username must be at least 2 characters' },
                 maxLength: { value: 100, message: 'Username must be 100 characters or fewer' },
               })}
-              className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.username
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                  : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
               }`}
             />
             {errors.username && (
-              <p className="text-sm text-red-600 mt-1">{errors.username.message}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.username.message}</p>
             )}
           </div>
 
           {/* Password field */}
           <div className="mb-4">
-            <label htmlFor="reg-password" className="text-sm text-gray-500 block mb-1">
+            <label htmlFor="reg-password" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
               Password
             </label>
             <input
@@ -127,20 +127,20 @@ export function InviteRegisterPage() {
                 required: 'Password is required',
                 minLength: { value: 8, message: 'Password must be at least 8 characters.' },
               })}
-              className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.password
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                  : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
               }`}
             />
             {errors.password && (
-              <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.password.message}</p>
             )}
           </div>
 
           {/* Confirm password field */}
           <div className="mb-6">
-            <label htmlFor="reg-confirm" className="text-sm text-gray-500 block mb-1">
+            <label htmlFor="reg-confirm" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
               Confirm Password
             </label>
             <input
@@ -152,27 +152,27 @@ export function InviteRegisterPage() {
                 required: 'Please confirm your password',
                 validate: (value) => value === password || 'Passwords do not match.',
               })}
-              className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.confirmPassword
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                  : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
               }`}
             />
             {errors.confirmPassword && (
-              <p className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.confirmPassword.message}</p>
             )}
           </div>
 
           {/* Form-level error */}
           {errors.root && (
-            <p className="text-sm text-red-600 mt-1 mb-4">{errors.root.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1 mb-4">{errors.root.message}</p>
           )}
 
           {/* Submit button — pessimistic UI: disabled + label change during round-trip (CLAUDE.md Rule 10) */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Creating account...' : 'Create Account'}
           </button>
