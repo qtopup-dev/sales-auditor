@@ -92,7 +92,7 @@ export function ReceiverModal({ receiver, onClose }: ReceiverModalProps) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Discard
           </button>
@@ -110,7 +110,7 @@ export function ReceiverModal({ receiver, onClose }: ReceiverModalProps) {
       <form id="receiver-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* Receiver Name field — required */}
         <div className="mb-4">
-          <label htmlFor="receiver-name" className="text-sm text-gray-500 block mb-1">
+          <label htmlFor="receiver-name" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
             Receiver Name
           </label>
           <input
@@ -118,20 +118,20 @@ export function ReceiverModal({ receiver, onClose }: ReceiverModalProps) {
             type="text"
             disabled={isPending}
             {...register('name', { required: 'Receiver Name is required' })}
-            className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.name
                 ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
             }`}
           />
           {errors.name && (
-            <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.name.message}</p>
           )}
         </div>
 
         {/* Account Number field — optional */}
         <div>
-          <label htmlFor="receiver-account" className="text-sm text-gray-500 block mb-1">
+          <label htmlFor="receiver-account" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
             Account Number (optional)
           </label>
           <input
@@ -142,20 +142,20 @@ export function ReceiverModal({ receiver, onClose }: ReceiverModalProps) {
             {...register('accountNumber', {
               maxLength: { value: 100, message: 'Account Number must be 100 characters or less' },
             })}
-            className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.accountNumber
                 ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
             }`}
           />
           {errors.accountNumber && (
-            <p className="text-sm text-red-600 mt-1">{errors.accountNumber.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.accountNumber.message}</p>
           )}
         </div>
 
         {/* API error */}
         {error && (
-          <p className="text-sm text-red-600 mt-1">Something went wrong. Please try again.</p>
+          <p className="text-sm text-red-600 dark:text-red-400 mt-1">Something went wrong. Please try again.</p>
         )}
       </form>
     </Modal>

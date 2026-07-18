@@ -37,20 +37,20 @@ export function InviteModal({ open, inviteUrl, onClose }: InviteModalProps) {
         </button>
       }
     >
-      <p className="text-sm font-normal text-gray-500 mb-3">
+      <p className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-3">
         Share this link with the new moderator. It expires in 48 hours and can only be used once.
       </p>
       <input
         type="text"
         readOnly
         value={inviteUrl}
-        className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 font-mono break-all select-all mb-3"
+        className="w-full border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 font-mono break-all select-all mb-3"
         onClick={(e) => (e.target as HTMLInputElement).select()}
       />
       <button
         type="button"
         onClick={handleCopy}
-        className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 h-10 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 h-10 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         {copied ? 'Copied!' : 'Copy Link'}
       </button>

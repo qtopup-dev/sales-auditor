@@ -71,26 +71,26 @@ export function AdminShiftsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Shifts</h1>
+      <div className="flex items-center justify-between mb-4 md:mb-8">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Shifts</h1>
       </div>
 
       <div className="flex flex-col gap-1 mb-6 w-48">
-        <label className="text-sm font-normal text-gray-500">Date</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">Date</label>
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => handleDateChange(e.target.value)}
-          className="h-10 border border-gray-300 rounded-md px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="h-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 text-sm text-gray-900 dark:text-gray-100 dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {isLoading ? (
-        <p className="text-sm font-normal text-gray-500">Loading shifts...</p>
+        <p className="text-sm font-normal text-gray-500 dark:text-gray-400">Loading shifts...</p>
       ) : tabs.length === 0 ? (
-        <div className="border border-gray-200 rounded-md p-8 text-center">
-          <p className="text-sm font-semibold text-gray-900 mb-1">No shifts recorded for this date</p>
-          <p className="text-sm font-normal text-gray-500">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md p-8 text-center">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No shifts recorded for this date</p>
+          <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
             Select a different date, or check back once a moderator clocks in.
           </p>
         </div>
@@ -102,8 +102,8 @@ export function AdminShiftsPage() {
             onSelect={setActiveShiftId}
           />
           {selectedTab && (
-            <div className="bg-white border border-gray-200 border-t-0 rounded-b-md p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-t-0 rounded-b-md p-4 md:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                 <ShiftTotalsBanner count={selectedTab.activeSalesCount} revenue={selectedTab.activeSalesRevenue} />
                 {isToday && selectedTab.clockOutAt === null && (
                   <button
@@ -111,7 +111,7 @@ export function AdminShiftsPage() {
                     onClick={() =>
                       openForceClockOutDialog({ shiftId: selectedTab.shiftId, username: selectedTab.username })
                     }
-                    className="px-4 py-2 h-10 border border-red-300 text-red-600 rounded-md text-sm font-normal hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 min-h-[44px]"
+                    className="px-4 py-2 h-10 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md text-sm font-normal hover:bg-red-50 dark:hover:bg-red-950 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 min-h-[44px]"
                   >
                     Force Clock Out
                   </button>
@@ -119,25 +119,25 @@ export function AdminShiftsPage() {
               </div>
 
               {selectedTab.sales.length === 0 ? (
-                <div className="border border-gray-200 rounded-md p-8 text-center">
-                  <p className="text-sm font-semibold text-gray-900 mb-1">No sales recorded</p>
-                  <p className="text-sm font-normal text-gray-500">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-md p-8 text-center">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No sales recorded</p>
+                  <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
                     This moderator did not enter any sales during this shift.
                   </p>
                 </div>
               ) : (
-                <div className="border border-gray-200 rounded-md overflow-hidden">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[800px]">
                       <thead>
-                        <tr className="bg-gray-100 border-b border-gray-200">
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">Product</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-right">Price</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">MOP</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">Receiver</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">Notes</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">Date Edited</th>
-                          <th className="px-4 py-3 text-sm font-normal text-gray-500 text-left">Status</th>
+                        <tr className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Product</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-right">Price</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">MOP</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Receiver</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Notes</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Date Edited</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -148,28 +148,28 @@ export function AdminShiftsPage() {
                               key={sale.id}
                               className={
                                 isVoided
-                                  ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
-                                  : 'bg-white border-b border-gray-200 hover:bg-gray-50'
+                                  ? 'bg-red-50 dark:bg-red-950 border-b border-gray-200 dark:border-gray-700 hover:bg-red-100 dark:hover:bg-red-900'
+                                  : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                               }
                             >
-                              <td className="px-4 py-3 text-sm text-gray-900">{sale.productNameSnapshot}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900 text-right">{sale.priceSnapshot}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{sale.mopNameSnapshot}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{sale.receiverNameSnapshot}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.productNameSnapshot}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">{sale.priceSnapshot}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.mopNameSnapshot}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.receiverNameSnapshot}</td>
                               <td
-                                className="px-4 py-3 text-sm text-gray-900 line-clamp-2"
+                                className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 line-clamp-2"
                                 title={sale.notes ?? undefined}
                               >
                                 {sale.notes ?? ''}
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">{formatDateTime(sale.updatedAt)}</td>
+                              <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{formatDateTime(sale.updatedAt)}</td>
                               <td className="px-4 py-3 text-sm">
                                 {sale.status === 'active' ? (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-green-100 text-green-800">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                     Active
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">
                                     Void
                                   </span>
                                 )}

@@ -112,13 +112,13 @@ export function DashboardPage() {
   return (
     <div>
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Dashboard</h1>
         <button
           type="button"
           onClick={handleExportCSV}
           disabled={salesLoading || csvExporting}
-          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {csvExporting ? 'Exporting...' : 'Export CSV'}
         </button>
@@ -127,7 +127,7 @@ export function DashboardPage() {
       {/* KPI summary cards — D-06, D-07: period-specific KPIs above all-time stats */}
       {/* grid-cols-3: Transactions | Profit | Turnover left-to-right */}
       {/* mb-8: 32px gap separating KPI section from stats banner below */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
         <KpiCard
           label="Transactions"
           periods={summary?.kpiData?.transactions ?? { today: 0, yesterday: 0, thisMonth: 0, lastMonth: 0 }}
@@ -148,7 +148,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats banner — D-09: NOT affected by filter state */}
-      <div className="grid grid-cols-2 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-12">
         <StatCard
           label="Total Sales"
           value={totalSalesValue}

@@ -69,7 +69,7 @@ export function UserModal({ user, onClose }: UserModalProps) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 h-10 border border-gray-300 bg-white text-gray-700 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 h-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Discard Changes
           </button>
@@ -86,7 +86,7 @@ export function UserModal({ user, onClose }: UserModalProps) {
     >
       <form id="user-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div>
-          <label htmlFor="username" className="text-sm font-normal text-gray-500 block mb-1">
+          <label htmlFor="username" className="text-sm font-normal text-gray-500 dark:text-gray-400 block mb-1">
             Username
           </label>
           <input
@@ -98,14 +98,14 @@ export function UserModal({ user, onClose }: UserModalProps) {
               minLength: { value: 2, message: 'Username must be at least 2 characters.' },
               maxLength: { value: 100, message: 'Username must be 100 characters or fewer.' },
             })}
-            className={`w-full border rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full border rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.username
                 ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
             }`}
           />
           {errors.username && (
-            <p className="text-xs text-red-600 mt-1">{errors.username.message}</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.username.message}</p>
           )}
         </div>
       </form>

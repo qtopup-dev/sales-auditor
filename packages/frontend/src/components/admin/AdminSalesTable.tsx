@@ -107,7 +107,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'Product',
         size: 160,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{getValue<string>()}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
       },
       {
@@ -116,7 +116,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         size: 100,
         cell: ({ getValue }) => (
           // Display string as-is — NEVER parseFloat (CLAUDE.md Rule 6)
-          <span className="block text-right text-sm text-gray-900">{getValue<string>()}</span>
+          <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
       },
       {
@@ -124,7 +124,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'MOP',
         size: 140,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{getValue<string>()}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
       },
       {
@@ -132,7 +132,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'Receiver',
         size: 140,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{getValue<string>()}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
       },
       {
@@ -143,7 +143,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
           const notes = getValue<string | null>();
           return (
             <span
-              className="text-sm text-gray-900 line-clamp-2"
+              className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2"
               title={notes ?? undefined}
             >
               {notes ?? ''}
@@ -156,7 +156,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'Created By',
         size: 120,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{getValue<string>()}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
       },
       {
@@ -164,7 +164,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'Created At',
         size: 140,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-500">{formatDateTime(getValue<string>())}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{formatDateTime(getValue<string>())}</span>
         ),
       },
       {
@@ -172,7 +172,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         header: 'Last Edited By',
         size: 120,
         cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">{getValue<string | null>() ?? '—'}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string | null>() ?? '—'}</span>
         ),
       },
       {
@@ -185,7 +185,7 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
           // Show "—" if row has never been edited (updatedAt same as createdAt)
           const hasEdits = updatedAt !== createdAt;
           return (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {hasEdits ? formatDateTime(updatedAt) : '—'}
             </span>
           );
@@ -198,11 +198,11 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
         cell: ({ getValue }) => {
           const status = getValue<'active' | 'void'>();
           return status === 'active' ? (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-green-100 text-green-800">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Active
             </span>
           ) : (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">
               Void
             </span>
           );
@@ -221,17 +221,17 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
                   <button
                     type="button"
                     onClick={() => onVoid(sale.id)}
-                    className="text-red-600 hover:text-red-800 text-sm min-h-[44px]"
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm min-h-[44px]"
                   >
                     Void
                   </button>
-                  <span className="text-gray-300 mx-1">|</span>
+                  <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
                 </>
               )}
               <button
                 type="button"
                 onClick={() => openAuditDrawer(sale.id)}
-                className="text-blue-600 hover:text-blue-800 text-sm min-h-[44px]"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm min-h-[44px]"
               >
                 Audit
               </button>
@@ -258,29 +258,29 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
   });
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading sales...</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Loading sales...</p>;
   }
 
   if (rows.length === 0) {
     return (
-      <div className="border border-gray-200 rounded-md p-8 text-center">
-        <p className="text-sm font-semibold text-gray-900 mb-1">No sales match the current filters</p>
-        <p className="text-sm text-gray-500">Adjust or clear the filters to see results.</p>
+      <div className="border border-gray-200 dark:border-gray-700 rounded-md p-8 text-center">
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No sales match the current filters</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Adjust or clear the filters to see results.</p>
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-200 rounded-md overflow-hidden">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[900px]">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200">
+            <tr key={headerGroup.id} className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-sm font-normal text-gray-500 text-left"
+                  className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left"
                   style={{ width: header.column.getSize() !== 150 ? header.column.getSize() : undefined }}
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
@@ -297,12 +297,12 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
                 key={row.id}
                 className={
                   isVoided
-                    ? 'bg-red-50 border-b border-gray-200 hover:bg-red-100'
-                    : 'bg-white border-b border-gray-200 hover:bg-gray-50'
+                    ? 'bg-red-50 dark:bg-red-950 border-b border-gray-200 dark:border-gray-700 hover:bg-red-100 dark:hover:bg-red-900'
+                    : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 text-sm text-gray-900">
+                  <td key={cell.id} className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

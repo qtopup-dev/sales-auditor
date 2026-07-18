@@ -36,21 +36,21 @@ const PERIODS: { key: keyof KpiPeriods; label: string; skeletonWidth: string }[]
 
 export function KpiCard({ label, periods, loading = false, isCurrency = false }: KpiCardProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-md p-6">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-6">
       {/* Card header — text-sm font-normal text-gray-500 mb-4 (mb-4 not mb-1 unlike StatCard — needs room before 2×2 grid) */}
-      <p className="text-sm font-normal text-gray-500 mb-4">{label}</p>
+      <p className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4">{label}</p>
       <div className="grid grid-cols-2 gap-4">
         {PERIODS.map(({ key, label: periodLabel, skeletonWidth }) => (
           <div key={key} className="flex flex-col">
             {/* Sub-period label — text-xs font-normal text-gray-400 mb-1 */}
-            <p className="text-xs font-normal text-gray-400 mb-1">{periodLabel}</p>
+            <p className="text-xs font-normal text-gray-400 dark:text-gray-500 mb-1">{periodLabel}</p>
             {loading ? (
               // Skeleton height h-6 matches text-xl line height; width varies by period type
-              <div className={`animate-pulse bg-gray-200 h-6 rounded ${skeletonWidth}`} />
+              <div className={`animate-pulse bg-gray-200 dark:bg-gray-700 h-6 rounded ${skeletonWidth}`} />
             ) : (
               // text-xl font-semibold (not text-2xl — 4 values share card space per UI-SPEC §Typography)
               // isCurrency: string concat only — Rule 6 prohibits parseFloat on monetary values
-              <p className="text-xl font-semibold text-gray-900">
+              <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {isCurrency ? '₱' + addThousandsSep(String(periods[key])) : String(periods[key])}
               </p>
             )}

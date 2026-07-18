@@ -69,7 +69,7 @@ export function MopModal({ mop, onClose }: MopModalProps) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Discard
           </button>
@@ -86,7 +86,7 @@ export function MopModal({ mop, onClose }: MopModalProps) {
     >
       <form id="mop-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div>
-          <label htmlFor="mop-name" className="text-sm text-gray-500 block mb-1">
+          <label htmlFor="mop-name" className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
             Payment Method Name
           </label>
           <input
@@ -94,16 +94,16 @@ export function MopModal({ mop, onClose }: MopModalProps) {
             type="text"
             disabled={isPending}
             {...register('name', { required: 'Payment Method Name is required' })}
-            className={`h-10 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`h-10 w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.name
                 ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
             }`}
           />
-          {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.name.message}</p>}
         </div>
         {error && (
-          <p className="text-sm text-red-600 mt-1">Something went wrong. Please try again.</p>
+          <p className="text-sm text-red-600 dark:text-red-400 mt-1">Something went wrong. Please try again.</p>
         )}
       </form>
     </Modal>

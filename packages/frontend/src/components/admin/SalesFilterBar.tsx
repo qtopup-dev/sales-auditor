@@ -66,33 +66,33 @@ export function SalesFilterBar({
     <div className="flex items-end gap-4 flex-wrap mb-4">
       {/* From date */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-normal text-gray-500">From</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">From</label>
         <input
           type="date"
           value={filters.startDate ?? ''}
           onChange={(e) =>
             onFilterChange({ ...filters, startDate: e.target.value || null })
           }
-          className="h-10 border border-gray-300 rounded-md px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="h-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 text-sm text-gray-900 dark:text-gray-100 dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* To date */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-normal text-gray-500">To</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">To</label>
         <input
           type="date"
           value={filters.endDate ?? ''}
           onChange={(e) =>
             onFilterChange({ ...filters, endDate: e.target.value || null })
           }
-          className="h-10 border border-gray-300 rounded-md px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="h-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 text-sm text-gray-900 dark:text-gray-100 dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* Product filter */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-normal text-gray-500">Product</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">Product</label>
         <div className="w-48">
           <Select
             options={productOptions}
@@ -108,7 +108,7 @@ export function SalesFilterBar({
 
       {/* MOP filter */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-normal text-gray-500">MOP</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">MOP</label>
         <div className="w-40">
           <Select
             options={mopOptions}
@@ -124,7 +124,7 @@ export function SalesFilterBar({
 
       {/* Moderator filter */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-normal text-gray-500">Moderator</label>
+        <label className="text-sm font-normal text-gray-500 dark:text-gray-400">Moderator</label>
         <div className="w-48">
           <Select
             options={userOptions}
@@ -144,7 +144,7 @@ export function SalesFilterBar({
       <button
         type="button"
         onClick={clearAll}
-        className="text-sm text-gray-500 hover:text-gray-900 self-end h-10 px-2"
+        className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 self-end h-10 px-2"
       >
         Clear filters
       </button>

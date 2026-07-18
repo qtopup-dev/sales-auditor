@@ -42,7 +42,7 @@ export function ReceiversPage() {
       accessorKey: 'name',
       header: 'Name',
       cell: ({ getValue }) => (
-        <span className="text-sm text-gray-900">{getValue<string>()}</span>
+        <span className="text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
       ),
     },
     {
@@ -50,7 +50,7 @@ export function ReceiversPage() {
       header: 'Account #',
       size: 160,
       cell: ({ row }) => (
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {row.original.accountNumber ?? '—'}
         </span>
       ),
@@ -74,19 +74,19 @@ export function ReceiversPage() {
               type="button"
               onClick={() => setModalTarget(receiver)}
               disabled={isThisTogglePending}
-              className="text-blue-600 hover:text-blue-800 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
             >
               Edit
             </button>
-            <span className="text-gray-300 mx-1">|</span>
+            <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
             <button
               type="button"
               disabled={isThisTogglePending}
               onClick={() => toggleMutation.mutate(receiver.id)}
               className={`text-sm ${
                 isThisTogglePending
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >
               {receiver.isActive ? 'Deactivate' : 'Activate'}
@@ -105,34 +105,34 @@ export function ReceiversPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Receivers</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Receivers</h1>
         <button
           type="button"
           onClick={() => setModalTarget('create')}
-          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="px-4 py-2 h-10 bg-blue-600 text-white rounded-md text-sm font-normal hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
         >
           Add Receiver
         </button>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
       ) : receivers.length === 0 ? (
-        <div className="border border-gray-200 rounded-md p-8 text-center">
-          <p className="text-sm font-semibold text-gray-900 mb-1">No receivers yet</p>
-          <p className="text-sm text-gray-500">Add your first receiver to get started.</p>
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md p-8 text-center">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No receivers yet</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Add your first receiver to get started.</p>
         </div>
       ) : (
-        <div className="border border-gray-200 rounded-md overflow-hidden">
-          <table className="w-full">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[560px]">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-gray-100 border-b border-gray-200">
+                <tr key={headerGroup.id} className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-sm text-gray-500 font-normal text-left"
+                      className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-normal text-left"
                       style={
                         header.column.getSize() !== 150
                           ? { width: header.column.getSize() }
@@ -149,13 +149,13 @@ export function ReceiversPage() {
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                   onClick={() => setModalTarget(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="px-4 py-3 text-sm text-gray-900"
+                      className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
                       onClick={
                         cell.column.id === 'actions' ? (e) => e.stopPropagation() : undefined
                       }
