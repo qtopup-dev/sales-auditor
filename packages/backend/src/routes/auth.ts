@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireRole } from '../middleware/requireRole.js';
+import { sessionPool } from '../lib/db.js';
 
 export const authRouter = Router();
 
@@ -22,6 +23,15 @@ const registerValidation = [
     .isLength({ min: 2, max: 100 }).withMessage('Username must be 2-100 characters'),
   body('password')
     .notEmpty().withMessage('Password is required')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+];
+
+// D-04/D-05: self-service password change — only the new password reaches the server.
+// The confirm-field match is a client-only UX check (never sent). Server re-validates the
+// 8-char minimum (CLAUDE.md Rule 9 — never trust client-only validation).
+const changePasswordValidation = [
+  body('newPassword')
+    .notEmpty().withMessage('New password is required')
     .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 ];
 
@@ -214,4 +224,42 @@ authRouter.post('/invite/:token', registerValidation, async (req: Request, res: 
   });
 
   res.status(201).json({ ok: true });
+});
+
+// ─── POST /api/auth/change-password ──────────────────────────────────────────
+// Phase 8: self-service password change for the CURRENTLY logged-in user (admin or moderator).
+// D-01: no role branching — any authenticated user may change their own password.
+// D-03: no current-password field (confirmed user decision — internal tool, trusted team).
+// D-06: invalidate all of THIS user's OTHER sessions but PRESERVE the current one (req.sessionID).
+//       This is the ONE point of divergence from users.ts admin-reset, which kills every session.
+// requireAuth is per-route because authRouter is mounted unauthenticated in app.ts (see GET /me).
+authRouter.post('/change-password', requireAuth, changePasswordValidation, async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+    return;
+  }
+
+  const { newPassword } = req.body as { newPassword: string };
+
+  // Hash before touching the DB — bcrypt cost 12 per CLAUDE.md (same as invite register + admin reset).
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+
+  // Update ONLY the caller's own row — id comes from the session, never from the request body,
+  // so a user can never change another account's password (Rule 9 backend RBAC enforcement).
+  await prisma.user.update({
+    where: { id: req.session.userId!, organizationId: req.session.organizationId! },
+    data: { passwordHash },
+  });
+
+  // D-06: kill every OTHER session for this user, but keep the current one alive.
+  // session_id is the express-session primary key (== req.sessionID); excluding it preserves
+  // the requester's login. Cannot reuse the admin-reset query verbatim — that deletes ALL sessions.
+  await sessionPool.query(
+    `DELETE FROM sessions WHERE JSON_EXTRACT(data, '$.userId') = ? AND session_id != ?`,
+    [req.session.userId, req.sessionID],
+  );
+
+  // No password is echoed back (unlike admin reset which returns tempPassword) — mirror /logout's shape.
+  res.json({ ok: true });
 });
