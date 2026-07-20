@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
 import { api } from '../lib/axios';
 import { queryClient } from '../lib/queryClient';
 import { ClockControl } from '../components/shift/ClockControl';
+import { ChangePasswordModal } from '../components/users/ChangePasswordModal';
 
 // Admin nav items per CONTEXT.md D-04 and UI-SPEC.md §AuthenticatedLayout
 const ADMIN_NAV = [
@@ -38,6 +39,30 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     setUser(null);
     navigate('/login', { replace: true });
   };
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Escape closes the dropdown (same pattern as the mobile-drawer Escape handler).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
+
+  // Click-outside closes the dropdown (no existing analog — standard useRef + mousedown idiom).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [menuOpen]);
 
   return (
     <>
@@ -90,17 +115,64 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </button>
       </div>
 
-      {/* Bottom: username + logout */}
-      <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 truncate">{user?.username}</p>
+      {/* Bottom: username dropdown (Change Password + Log Out) — replaces the old plain username + Log Out */}
+      <div ref={menuRef} className="relative px-4 py-4 border-t border-gray-200 dark:border-gray-800">
         <button
           type="button"
-          onClick={handleLogout}
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 rounded"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className="flex items-center justify-between w-full px-4 py-2 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Log Out
+          <span className="truncate">{user?.username}</span>
+          {/* Chevron — up when closed (menu opens upward) */}
+          <svg
+            className={`w-4 h-4 flex-shrink-0 ${menuOpen ? 'rotate-180' : ''}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
         </button>
+
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute bottom-full left-4 right-4 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-50"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                setPasswordModalOpen(true);
+              }}
+              className="flex items-center w-full px-4 py-2 min-h-[44px] text-sm font-normal text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+            >
+              Change Password
+            </button>
+            <div className="border-t border-gray-200 dark:border-gray-700" />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                handleLogout();
+              }}
+              className="flex items-center w-full px-4 py-2 min-h-[44px] text-sm font-normal text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+            >
+              Log Out
+            </button>
+          </div>
+        )}
       </div>
+
+      <ChangePasswordModal open={passwordModalOpen} onClose={() => setPasswordModalOpen(false)} />
     </>
   );
 }
