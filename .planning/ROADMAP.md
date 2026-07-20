@@ -190,7 +190,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Backend: POST /api/auth/change-password (bcrypt cost 12, server-side 8-char re-validation, invalidate other sessions but preserve current)
+- [x] 08-01-PLAN.md — Backend: POST /api/auth/change-password (bcrypt cost 12, server-side 8-char re-validation, invalidate other sessions but preserve current)
 - [ ] 08-02-PLAN.md — Frontend: username dropdown menu + Change Password modal (new/confirm fields, success + inline error states)
 
 ---
