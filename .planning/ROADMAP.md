@@ -182,6 +182,17 @@ Plans:
 - [ ] 999-01-01-PLAN.md — Backend: new catalogRouter (GET /catalog/products + GET /catalog/mops, no requireRole) mounted on protectedRouter
 - [ ] 999-01-02-PLAN.md — Frontend: SalesPage pre-fetch + AddRowForm + EditableCell updated to read from React Query cache
 
+### Phase 8: Self-service password change for moderators via username dropdown menu
+
+**Goal:** Any logged-in user (admin or moderator) can change their own password from a username dropdown in the sidebar. On success, all of their OTHER active sessions are invalidated while their current session stays logged in.
+**Requirements**: PHASE8-SC1..SC5 (phase-local — new feature beyond v1 REQ-IDs)
+**Depends on:** Phase 7
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Backend: POST /api/auth/change-password (bcrypt cost 12, server-side 8-char re-validation, invalidate other sessions but preserve current)
+- [ ] 08-02-PLAN.md — Frontend: username dropdown menu + Change Password modal (new/confirm fields, success + inline error states)
+
 ---
 
 ## Traceability
