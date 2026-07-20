@@ -194,6 +194,21 @@ Plans:
 - [x] 08-01-PLAN.md — Backend: POST /api/auth/change-password (bcrypt cost 12, server-side 8-char re-validation, invalidate other sessions but preserve current)
 - [x] 08-02-PLAN.md — Frontend: username dropdown menu + Change Password modal (new/confirm fields, success + inline error states)
 
+### Phase 9: add the option to delete MOPs, Products, and Users for the admin role
+
+**Goal:** Admin can permanently soft-delete a Product, MOP, or User via a new "Delete" action distinct from the existing Activate/Deactivate toggle — with confirmation, immediate removal from every admin-facing list/combo-box, and User-specific safeguards (self-delete block, last-admin block, immediate session kill + login rejection).
+**Requirements**: PHASE9-SC1..SC7 (phase-local — new feature beyond v1 REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-10)
+**Depends on:** Phase 8
+**Plans:** 5 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Product/Mop/User, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
+- [ ] 09-02-PLAN.md — Backend: DELETE /api/products/:id + DELETE /api/mops/:id routes
+- [ ] 09-03-PLAN.md — Backend: DELETE /api/users/:id (self-delete + last-admin + session-kill safeguards) + auth.ts login block
+- [ ] 09-04-PLAN.md — Frontend: ProductDeleteConfirmDialog + MopDeleteConfirmDialog + ProductsPage/MopsPage wiring
+- [ ] 09-05-PLAN.md — Frontend: UserDeleteConfirmDialog (error-code mapping) + UsersPage wiring (own-row disable)
+
+
 ---
 
 ## Traceability
