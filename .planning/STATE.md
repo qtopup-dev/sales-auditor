@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-07-20T07:49:15.827Z"
+last_updated: "2026-07-20T08:16:06.814Z"
 progress:
   total_phases: 9
   completed_phases: 7
-  total_plans: 41
+  total_plans: 43
   completed_plans: 41
-  percent: 100
+  percent: 95
 ---
 
 # Project State — Sales Auditing Web App
@@ -24,7 +24,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 07 — moderator-shift-clock-in-clock-out-system-with-per-shift-sal
+**Current focus:** Phase 08 — self-service-password-change-for-moderators-via-username-dro
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -32,8 +32,8 @@ progress:
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 08 (self-service-password-change-for-moderators-via-username-dro) — EXECUTING
+Plan: 1 of 2
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
@@ -146,4 +146,4 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 3. `/gsd-plan-phase 3` — Sales Core (inline-edit sheet, add row, void, transactional audit log)
 4. `/gsd-plan-phase 4` — Admin Dashboard + Management (filters, charts, CSV, user management)
 
-**Planned Phase:** 07 (moderator-shift-clock-in-clock-out-system-with-per-shift-sal) — 9 plans — 2026-07-17T20:52:42.710Z
+**Planned Phase:** 8 (Self-service password change for moderators via username dropdown menu) — 2 plans — 2026-07-20T08:09:13.298Z
