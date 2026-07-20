@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-last_updated: "2026-07-17T20:54:29.429Z"
+status: unknown
+last_updated: "2026-07-20T07:49:15.827Z"
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 7
   total_plans: 41
-  completed_plans: 40
-  percent: 88
+  completed_plans: 41
+  percent: 100
 ---
 
 # Project State — Sales Auditing Web App
@@ -118,6 +118,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 - Phase 5 added: Receiver catalog and combobox — receivers table (id, name, optional account_number) replaces free-text receiver cell in sales sheet
 - Phase 6 added: Add dashboard KPI summary cards to admin dashboard top — Transactions, Profit, Turnover each showing yesterday's, today's, last month's, and this month's values
 - Phase 7 added: Moderator shift clock-in/clock-out system with per-shift sales view, shift history tab, and live shift totals
+- Phase 8 added: Self-service password change for moderators via username dropdown menu
 
 ### Todos
 
