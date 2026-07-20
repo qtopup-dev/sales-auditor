@@ -169,6 +169,7 @@ Plans:
 | 5. Receiver Catalog | 5/5 | Complete | 2026-06-26 |
 | 6. Dashboard KPI Cards | 2/2 | Complete | 2026-07-01 |
 | 7. Moderator Shift Clock In/Out | 9/9 | Complete | 2026-07-18 |
+| 8. Self-Service Password Change | 2/2 | Complete | 2026-07-20 |
 
 ---
 
