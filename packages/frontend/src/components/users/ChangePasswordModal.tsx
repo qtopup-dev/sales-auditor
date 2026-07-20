@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../Modal';
@@ -25,6 +25,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<ChangePasswordFormData>();
   const newPassword = watch('newPassword');
@@ -40,6 +41,17 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
   const showServerError = mutation.isError; // 400/500 — surfaced as generic copy (D-08)
 
   const onSubmit = (data: ChangePasswordFormData) => mutation.mutate(data);
+
+  // Component stays mounted between opens (parent always renders it) — reset on close
+  // so a stale success/error screen and old field values don't reappear on reopen.
+  useEffect(() => {
+    if (!open) {
+      setSuccess(false);
+      reset();
+      mutation.reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open) return null;
 
