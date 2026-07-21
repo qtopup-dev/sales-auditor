@@ -212,6 +212,7 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
         id: Number(receiverId),
         organizationId: req.session.organizationId!,
         isActive: true, // explicit — $extends NOT active in tx
+        deletedAt: null, // gap fix: a soft-deleted receiver must not be referenceable by ID (Phase 10)
       },
     });
     if (!receiver) {
@@ -463,6 +464,7 @@ salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Respons
           id: Number(rawValue),
           organizationId: req.session.organizationId!,
           isActive: true, // explicit — $extends NOT active in tx
+          deletedAt: null, // gap fix: a soft-deleted receiver must not be referenceable by ID (Phase 10)
         },
       });
       if (!newReceiver) {
