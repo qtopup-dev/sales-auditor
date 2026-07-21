@@ -20,6 +20,8 @@ import { StatusBadge } from '../components/StatusBadge';
 import { UserModal } from '../components/users/UserModal';
 import { InviteModal } from '../components/users/InviteModal';
 import { ResetPasswordModal } from '../components/users/ResetPasswordModal';
+import { UserDeleteConfirmDialog } from '../components/users/UserDeleteConfirmDialog';
+import { useAuthStore } from '../stores/authStore';
 
 interface User {
   id: number;
@@ -51,6 +53,9 @@ export function UsersPage() {
   // Pessimistic per-row pending state (CLAUDE.md Rule 10)
   const [pendingCanEditId, setPendingCanEditId] = useState<number | null>(null);
   const [pendingResetId, setPendingResetId] = useState<number | null>(null);
+
+  // Delete confirm dialog target — separate from modalTarget so Edit and Delete never collide
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
   // Fetch all users (active + inactive)
   const { data: users = [], isLoading } = useQuery<User[]>({
@@ -161,6 +166,7 @@ export function UsersPage() {
         const canEditPending = pendingCanEditId === user.id;
         const resetPending = pendingResetId === user.id;
         const isModerator = user.role === 'moderator';
+        const isOwnRow = user.id === useAuthStore.getState().user?.id;
 
         return (
           <div className="flex items-center gap-1">
@@ -209,6 +215,16 @@ export function UsersPage() {
               className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
             >
               {resetPending ? 'Resetting...' : 'Reset Password'}
+            </button>
+
+            <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
+            <button
+              type="button"
+              disabled={isRowPending || isOwnRow}
+              onClick={() => setDeleteTarget(user)}
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              Delete
             </button>
           </div>
         );
@@ -303,6 +319,12 @@ export function UsersPage() {
         open={resetModalOpen}
         tempPassword={tempPassword}
         onClose={() => setResetModalOpen(false)}
+      />
+
+      {/* UserDeleteConfirmDialog — Delete user (D-08/D-09/D-10 safeguards enforced server-side) */}
+      <UserDeleteConfirmDialog
+        user={deleteTarget ? { id: deleteTarget.id, username: deleteTarget.username } : null}
+        onClose={() => setDeleteTarget(null)}
       />
     </div>
   );
