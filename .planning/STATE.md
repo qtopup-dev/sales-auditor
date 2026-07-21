@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-07-21T08:02:29.407Z"
+last_updated: "2026-07-21T08:08:28.495Z"
 progress:
   total_phases: 10
   completed_phases: 8
@@ -24,7 +24,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 08 — self-service-password-change-for-moderators-via-username-dro
+**Current focus:** Phase 09 — add-the-option-to-delete-mops-products-and-users-for-the-adm
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -32,8 +32,8 @@ progress:
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 09 (add-the-option-to-delete-mops-products-and-users-for-the-adm) — EXECUTING
+Plan: 1 of 6
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
