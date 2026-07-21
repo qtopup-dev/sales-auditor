@@ -9,6 +9,7 @@ import {
 import { api } from '../lib/axios';
 import { StatusBadge } from '../components/StatusBadge';
 import { MopModal } from '../components/catalog/MopModal';
+import { MopDeleteConfirmDialog } from '../components/catalog/MopDeleteConfirmDialog';
 import type { Mop } from '@alejinput/shared';
 
 // PAY-04: admin views all MOPs (active + inactive)
@@ -20,6 +21,8 @@ export function MopsPage() {
   const [modalTarget, setModalTarget] = useState<Mop | 'create' | null>(null);
   // Track which MOP's toggle is in-flight (pessimistic per-row — CLAUDE.md Rule 10)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null);
+  // Delete confirm dialog target — separate from modalTarget so Edit and Delete never collide
+  const [deleteTarget, setDeleteTarget] = useState<Mop | null>(null);
 
   const { data: mops = [], isLoading } = useQuery<Mop[]>({
     queryKey: ['mops'],
@@ -81,6 +84,15 @@ export function MopsPage() {
               }`}
             >
               {mop.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+            <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
+            <button
+              type="button"
+              disabled={isThisTogglePending}
+              onClick={() => setDeleteTarget(mop)}
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              Delete
             </button>
           </div>
         );
@@ -161,6 +173,9 @@ export function MopsPage() {
           onClose={() => setModalTarget(null)}
         />
       )}
+
+      {/* MOP delete confirm dialog */}
+      <MopDeleteConfirmDialog mop={deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }
