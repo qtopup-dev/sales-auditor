@@ -114,12 +114,14 @@ model Receiver {
   name           String       @db.VarChar(255)
   accountNumber  String?      @db.VarChar(100)
   isActive       Boolean      @default(true)
+  deletedAt      DateTime?    // D-01: second soft-delete signal, distinct from isActive -- set on admin Delete action
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   sales Sale[]
 
   @@index([organizationId, isActive])
+  @@index([organizationId, deletedAt])
   @@map("receivers")
 }
 
