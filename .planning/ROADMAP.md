@@ -211,6 +211,16 @@ Plans:
 - [x] 09-07-PLAN.md — [GAP] Filter last-admin guard to login-capable admins (AND isActive = true) — closes PHASE9-SC5 / CR-01
 
 
+### Phase 10: Add the option to delete Receivers for the admin role — mirrors Phase 9's delete pattern for Products/MOPs (soft-delete via deletedAt, confirm dialog, red Delete action distinct from Activate/Deactivate toggle), applied to the Receiver catalog. Receiver model currently only has isActive, not deletedAt — needs the same schema migration treatment as Phase 9 Plan 09-01.
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 10 to break down)
+
 ---
 
 ## Traceability
