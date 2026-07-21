@@ -9,6 +9,7 @@ import {
 import { api } from '../lib/axios';
 import { StatusBadge } from '../components/StatusBadge';
 import { ReceiverModal } from '../components/catalog/ReceiverModal';
+import { ReceiverDeleteConfirmDialog } from '../components/catalog/ReceiverDeleteConfirmDialog';
 import type { Receiver } from '@alejinput/shared';
 
 // UI-SPEC.md §1 Receiver Catalog Page
@@ -18,6 +19,8 @@ export function ReceiversPage() {
   const [modalTarget, setModalTarget] = useState<Receiver | 'create' | null>(null);
   // Track which receiver's toggle is in-flight (pessimistic per-row — CLAUDE.md Rule 10)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null);
+  // Delete confirm dialog target — separate from modalTarget so Edit and Delete never collide
+  const [deleteTarget, setDeleteTarget] = useState<Receiver | null>(null);
 
   const { data: receivers = [], isLoading } = useQuery<Receiver[]>({
     queryKey: ['receivers'],
@@ -90,6 +93,15 @@ export function ReceiversPage() {
               }`}
             >
               {receiver.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+            <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
+            <button
+              type="button"
+              disabled={isThisTogglePending}
+              onClick={() => setDeleteTarget(receiver)}
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              Delete
             </button>
           </div>
         );
@@ -176,6 +188,9 @@ export function ReceiversPage() {
           onClose={() => setModalTarget(null)}
         />
       )}
+
+      {/* Receiver delete confirm dialog */}
+      <ReceiverDeleteConfirmDialog receiver={deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }
