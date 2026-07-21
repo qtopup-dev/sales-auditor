@@ -35,24 +35,24 @@ export const prisma = baseClient.$extends({
         return query(args);
       },
     },
-    // Users: inject isActive=true as default
+    // Users: inject isActive=true and deletedAt=null as default
     user: {
       findMany({ args, query }) {
-        args.where = { isActive: true, ...args.where };
+        args.where = { isActive: true, deletedAt: null, ...args.where };
         return query(args);
       },
     },
-    // Products: inject isActive=true as default
+    // Products: inject isActive=true and deletedAt=null as default
     product: {
       findMany({ args, query }) {
-        args.where = { isActive: true, ...args.where };
+        args.where = { isActive: true, deletedAt: null, ...args.where };
         return query(args);
       },
     },
-    // Mops: inject isActive=true as default
+    // Mops: inject isActive=true and deletedAt=null as default
     mop: {
       findMany({ args, query }) {
-        args.where = { isActive: true, ...args.where };
+        args.where = { isActive: true, deletedAt: null, ...args.where };
         return query(args);
       },
     },
