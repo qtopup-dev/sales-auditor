@@ -216,12 +216,12 @@ Plans:
 **Goal:** Admin can permanently soft-delete a Receiver via a new "Delete" action distinct from the existing Activate/Deactivate toggle, mirroring Phase 9's Product/Mop delete pattern.
 **Requirements**: PHASE10-SC1, PHASE10-SC2
 **Depends on:** Phase 9
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 10-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Receiver, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
-- [ ] 10-02-PLAN.md — Backend: DELETE /api/receivers/:id route
-- [ ] 10-03-PLAN.md — Frontend: ReceiverDeleteConfirmDialog + ReceiversPage wiring
+- [x] 10-02-PLAN.md — Backend: DELETE /api/receivers/:id route
+- [x] 10-03-PLAN.md — Frontend: ReceiverDeleteConfirmDialog + ReceiversPage wiring
 
 ---
 
