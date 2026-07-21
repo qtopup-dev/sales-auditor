@@ -56,10 +56,10 @@ export const prisma = baseClient.$extends({
         return query(args);
       },
     },
-    // Receivers: inject isActive=true as default (catalog endpoint uses this to hide inactive)
+    // Receivers: inject isActive=true and deletedAt=null as default (Phase 10 — mirrors Phase 9 D-02)
     receiver: {
       findMany({ args, query }) {
-        args.where = { isActive: true, ...args.where };
+        args.where = { isActive: true, deletedAt: null, ...args.where };
         return query(args);
       },
     },
