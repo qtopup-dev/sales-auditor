@@ -213,13 +213,15 @@ Plans:
 
 ### Phase 10: Add the option to delete Receivers for the admin role — mirrors Phase 9's delete pattern for Products/MOPs (soft-delete via deletedAt, confirm dialog, red Delete action distinct from Activate/Deactivate toggle), applied to the Receiver catalog. Receiver model currently only has isActive, not deletedAt — needs the same schema migration treatment as Phase 9 Plan 09-01.
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Admin can permanently soft-delete a Receiver via a new "Delete" action distinct from the existing Activate/Deactivate toggle, mirroring Phase 9's Product/Mop delete pattern.
+**Requirements**: PHASE10-SC1, PHASE10-SC2
 **Depends on:** Phase 9
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 10 to break down)
+- [x] 10-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Receiver, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
+- [ ] 10-02-PLAN.md — Backend: DELETE /api/receivers/:id route
+- [ ] 10-03-PLAN.md — Frontend: ReceiverDeleteConfirmDialog + ReceiversPage wiring
 
 ---
 

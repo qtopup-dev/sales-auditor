@@ -2,21 +2,21 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-last_updated: "2026-07-21T10:36:53.859Z"
+status: unknown
+last_updated: "2026-07-21T14:24:11.347Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 9
-  total_plans: 50
-  completed_plans: 49
-  percent: 90
+  total_plans: 53
+  completed_plans: 51
+  percent: 96
 ---
 
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-06-26
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** --stopped-at
+**Last session:** 2026-07-21T14:24:11.342Z
 
 ---
 
@@ -24,7 +24,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 09 — add-the-option-to-delete-mops-products-and-users-for-the-adm
+**Current focus:** Phase 10 — add-the-option-to-delete-receivers-for-the-admin-role-mirror
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -32,8 +32,8 @@ progress:
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 10 (add-the-option-to-delete-receivers-for-the-admin-role-mirror) — EXECUTING
+Plan: 2 of 3
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
@@ -42,7 +42,7 @@ Plan: Not started
 | Overall progress | 4 of 5 phases complete |
 
 ```
-Progress: [██████████] 100%
+Progress: [██████████] 96%
 Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [==========] Complete (6/6 plans complete)
 Phase 3: Sales Core         [==========] Complete (8/8 plans complete)
@@ -66,6 +66,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 | Phase 05 P03 | 5min | 2 tasks | 1 files |
 | Phase 06-add-dashboard-kpi-summary-cards-to-admin-dashboard-top P01 | 8min | 1 tasks | 1 files |
 | Phase 06-add-dashboard-kpi-summary-cards-to-admin-dashboard-top P02 | 22 | 2 tasks | 2 files |
+| Phase 10-add-the-option-to-delete-receivers-for-the-admin-role-mirror P01 | 15min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 | errorHandler reads err.statusCode and err.code for extensibility | Phase 2 auth errors use statusCode: 401 + code: 'UNAUTHORIZED' pattern; fallback to 500/INTERNAL_ERROR |
 | express-mysql-session pool separate from Prisma mariadb adapter | MySQLStore(session) pattern with dedicated mysql2.createPool; sessions table auto-created with createDatabaseTable: true |
 | Manual migration workflow (db execute + migrate resolve) | sessions table drift blocks prisma migrate dev; use prisma db execute + prisma migrate resolve --applied for all future Phase 5+ migrations |
+| No deletedAt override for receivers (Phase 10-01) | Mirrors Phase 9 D-02 — no "show deleted" surface exists for receivers, so deleted receivers vanish unconditionally from both the admin list and catalog combo box |
 
 ### Critical Pitfalls to Watch
 
@@ -148,4 +150,4 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 3. `/gsd-plan-phase 3` — Sales Core (inline-edit sheet, add row, void, transactional audit log)
 4. `/gsd-plan-phase 4` — Admin Dashboard + Management (filters, charts, CSV, user management)
 
-**Planned Phase:** 09 (add-the-option-to-delete-mops-products-and-users-for-the-adm) — 7 plans — 2026-07-21T08:59:31.260Z
+**Planned Phase:** 10 (add-the-option-to-delete-receivers-for-the-admin-role-mirror) — 3 plans — 2026-07-21T12:44:12.528Z
