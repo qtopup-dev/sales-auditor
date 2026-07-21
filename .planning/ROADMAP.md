@@ -202,12 +202,12 @@ Plans:
 **Plans:** 7 plans (6 executed + 1 gap-closure)
 
 Plans:
-- [ ] 09-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Product/Mop/User, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
-- [ ] 09-02-PLAN.md — Backend: DELETE /api/products/:id + DELETE /api/mops/:id routes
-- [ ] 09-03-PLAN.md — Backend: DELETE /api/users/:id (self-delete + last-admin + session-kill safeguards) + auth.ts login block
-- [ ] 09-04-PLAN.md — Frontend: ProductDeleteConfirmDialog + MopDeleteConfirmDialog + ProductsPage/MopsPage wiring
-- [ ] 09-05-PLAN.md — Frontend: UserDeleteConfirmDialog (error-code mapping) + UsersPage wiring (own-row disable)
-- [ ] 09-06-PLAN.md — Backend: reject sale create/edit referencing a soft-deleted product/MOP in sales.ts (deletedAt: null on all four tx.product/tx.mop existence checks)
+- [x] 09-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Product/Mop/User, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
+- [x] 09-02-PLAN.md — Backend: DELETE /api/products/:id + DELETE /api/mops/:id routes
+- [x] 09-03-PLAN.md — Backend: DELETE /api/users/:id (self-delete + last-admin + session-kill safeguards) + auth.ts login block
+- [x] 09-04-PLAN.md — Frontend: ProductDeleteConfirmDialog + MopDeleteConfirmDialog + ProductsPage/MopsPage wiring
+- [x] 09-05-PLAN.md — Frontend: UserDeleteConfirmDialog (error-code mapping) + UsersPage wiring (own-row disable)
+- [x] 09-06-PLAN.md — Backend: reject sale create/edit referencing a soft-deleted product/MOP in sales.ts (deletedAt: null on all four tx.product/tx.mop existence checks)
 - [x] 09-07-PLAN.md — [GAP] Filter last-admin guard to login-capable admins (AND isActive = true) — closes PHASE9-SC5 / CR-01
 
 
