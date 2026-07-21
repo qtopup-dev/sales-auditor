@@ -51,9 +51,11 @@ authRouter.post('/login', loginValidation, async (req: Request, res: Response) =
 
   const { username, password } = req.body as { username: string; password: string };
 
-  // findFirst with explicit isActive: true (not covered by $extends softDeleteFilter for findFirst)
+  // D-10 (Phase 9): reject deleted users at login, in addition to the existing isActive check.
+  // findFirst is not covered by the $extends softDeleteFilter for the user model — this explicit
+  // where clause is the only enforcement point here.
   const user = await prisma.user.findFirst({
-    where: { username, isActive: true, organizationId: 1 },
+    where: { username, isActive: true, deletedAt: null, organizationId: 1 },
   });
 
   // Constant-time comparison via bcrypt.compare prevents timing attacks
