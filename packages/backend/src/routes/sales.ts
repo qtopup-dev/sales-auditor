@@ -188,6 +188,7 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
         id: Number(productId),
         organizationId: req.session.organizationId!,
         isActive: true, // explicit — $extends NOT active in tx
+        deletedAt: null, // gap fix: a soft-deleted product must not be referenceable by ID (D-02)
       },
     });
     if (!product) {
@@ -199,6 +200,7 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
         id: Number(mopId),
         organizationId: req.session.organizationId!,
         isActive: true, // explicit — $extends NOT active in tx
+        deletedAt: null, // gap fix: a soft-deleted MOP must not be referenceable by ID (D-02)
       },
     });
     if (!mop) {
@@ -327,6 +329,7 @@ salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Respons
           id: Number(rawValue),
           organizationId: req.session.organizationId!,
           isActive: true, // explicit
+          deletedAt: null, // gap fix: a soft-deleted product must not be referenceable by ID (D-02)
         },
       });
       if (!newProduct) {
@@ -400,6 +403,7 @@ salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Respons
           id: Number(rawValue),
           organizationId: req.session.organizationId!,
           isActive: true, // explicit — $extends NOT active in tx
+          deletedAt: null, // gap fix: a soft-deleted MOP must not be referenceable by ID (D-02)
         },
       });
       if (!newMop) {
