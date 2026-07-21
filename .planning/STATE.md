@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-07-21T08:59:31.269Z"
+last_updated: "2026-07-21T10:36:53.859Z"
 progress:
   total_phases: 10
   completed_phases: 8
@@ -33,7 +33,7 @@ progress:
 ## Current Position
 
 Phase: 09 (add-the-option-to-delete-mops-products-and-users-for-the-adm) — EXECUTING
-Plan: 1 of 6
+Plan: 1 of 7
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |

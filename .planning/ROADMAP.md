@@ -208,7 +208,7 @@ Plans:
 - [ ] 09-04-PLAN.md — Frontend: ProductDeleteConfirmDialog + MopDeleteConfirmDialog + ProductsPage/MopsPage wiring
 - [ ] 09-05-PLAN.md — Frontend: UserDeleteConfirmDialog (error-code mapping) + UsersPage wiring (own-row disable)
 - [ ] 09-06-PLAN.md — Backend: reject sale create/edit referencing a soft-deleted product/MOP in sales.ts (deletedAt: null on all four tx.product/tx.mop existence checks)
-- [ ] 09-07-PLAN.md — [GAP] Filter last-admin guard to login-capable admins (AND isActive = true) — closes PHASE9-SC5 / CR-01
+- [x] 09-07-PLAN.md — [GAP] Filter last-admin guard to login-capable admins (AND isActive = true) — closes PHASE9-SC5 / CR-01
 
 
 ---
