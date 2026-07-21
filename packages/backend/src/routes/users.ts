@@ -197,3 +197,88 @@ usersRouter.post(
   // Return temp password ONCE — admin copies and shares verbally or via direct message (D-01)
   res.json({ tempPassword });
 });
+
+// ─── DELETE /api/users/:id ────────────────────────────────────────────────────
+// CONTEXT.md D-01: sets deletedAt (a second, stricter soft-delete signal distinct from isActive).
+// CONTEXT.md D-08: blocks self-delete using req.session.userId (server-side truth, never the body).
+// CONTEXT.md D-09: blocks deleting the organization's last remaining admin — race-safe via a
+// SELECT ... FOR UPDATE row lock on ALL of the org's admin rows (the target is NOT excluded in the
+// SQL; "other admin" is computed in application code) inside a transaction, so two concurrent
+// delete requests for two different admins cannot both pass the count check and leave zero admins.
+// CONTEXT.md D-10: kills ALL sessions for the deleted user — no session_id exclusion (unlike
+// auth.ts's /change-password route, which preserves the requester's own current session).
+
+usersRouter.delete(
+  '/:id',
+  [param('id').isInt({ min: 1 }).withMessage('Invalid user ID')],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+      return;
+    }
+
+    const targetId = Number(req.params.id);
+    const organizationId = req.session.organizationId!;
+
+    // D-08: block self-delete — checked BEFORE any DB read/write, using the server-side session,
+    // never any client-supplied value.
+    if (targetId === req.session.userId) {
+      res.status(400).json({ error: 'CANNOT_DELETE_SELF' });
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Existence check bypasses isActive (undefined = include inactive-but-not-deleted rows),
+      // but KEEPS deletedAt: null enforced — an already-deleted user is treated as not-found.
+      const target = await tx.user.findFirst({
+        where: { id: targetId, organizationId, isActive: undefined, deletedAt: null },
+        select: { id: true, role: true },
+      });
+      if (!target) {
+        throw Object.assign(new Error('User not found'), {
+          statusCode: 404, code: 'USER_NOT_FOUND',
+        });
+      }
+
+      // D-09: race-safe last-admin guard. FOR UPDATE locks ALL of the organization's admin rows
+      // (INCLUDING the target row — it is deliberately NOT excluded in the SQL) for the duration of
+      // this transaction. Two concurrent DELETEs targeting two DIFFERENT admins in the same org
+      // therefore lock the SAME row set and contend: the second blocks until the first commits or
+      // rolls back, then re-reads the (now smaller) locked set and correctly sees zero other admins.
+      // The "other admin" count is computed in application code by filtering the target out of the
+      // locked result set. (If the target row were excluded from this SQL via an id-inequality
+      // predicate, the two transactions would lock DISJOINT rows, never contend, and both could
+      // commit — leaving zero admins. That exclusion is intentionally absent.)
+      if (target.role === 'admin') {
+        const admins = await tx.$queryRaw<{ id: number }[]>`
+          SELECT id FROM users
+          WHERE organizationId = ${organizationId}
+            AND role = 'admin'
+            AND deletedAt IS NULL
+          FOR UPDATE
+        `;
+        const otherAdmins = admins.filter((a) => a.id !== targetId);
+        if (otherAdmins.length === 0) {
+          throw Object.assign(new Error('Cannot delete the last remaining admin'), {
+            statusCode: 400, code: 'LAST_ADMIN',
+          });
+        }
+      }
+
+      await tx.user.update({
+        where: { id: targetId, organizationId },
+        data: { deletedAt: new Date() },
+      });
+    });
+
+    // D-10: kill EVERY session for this user — unconditional, no session_id exclusion.
+    // Runs AFTER the transaction commits, mirroring the reset-password route's ordering.
+    await sessionPool.query(
+      `DELETE FROM sessions WHERE JSON_EXTRACT(data, '$.userId') = ?`,
+      [targetId],
+    );
+
+    res.status(204).send();
+  },
+);
