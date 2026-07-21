@@ -9,6 +9,7 @@ import {
 import { api } from '../lib/axios';
 import { StatusBadge } from '../components/StatusBadge';
 import { ProductModal } from '../components/catalog/ProductModal';
+import { ProductDeleteConfirmDialog } from '../components/catalog/ProductDeleteConfirmDialog';
 import type { Product } from '@alejinput/shared';
 
 // PROD-04: admin views all products (active + inactive)
@@ -22,6 +23,8 @@ export function ProductsPage() {
   const [modalTarget, setModalTarget] = useState<Product | 'create' | null>(null);
   // Track which product's toggle is in-flight (pessimistic per-row — CLAUDE.md Rule 10)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null);
+  // Delete confirm dialog target — separate from modalTarget so Edit and Delete never collide
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -92,6 +95,15 @@ export function ProductsPage() {
               }`}
             >
               {product.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+            <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
+            <button
+              type="button"
+              disabled={isThisTogglePending}
+              onClick={() => setDeleteTarget(product)}
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              Delete
             </button>
           </div>
         );
@@ -180,6 +192,9 @@ export function ProductsPage() {
           onClose={() => setModalTarget(null)}
         />
       )}
+
+      {/* Product delete confirm dialog */}
+      <ProductDeleteConfirmDialog product={deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }
