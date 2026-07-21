@@ -141,3 +141,46 @@ receiversRouter.patch(
     res.json(serializeReceiver(receiver));
   },
 );
+
+// ─── DELETE /api/receivers/:id ───────────────────────────────────────────────
+// Phase 10 (mirrors Phase 9 D-01): sets deletedAt (a second, stricter soft-delete signal
+// distinct from isActive). Deleted rows are excluded from ALL admin-facing list/catalog queries
+// via the $extends softDeleteFilter (Plan 01) — this route does not touch any read query itself.
+// Never touches Sale rows — historical receiverNameSnapshot on existing sales rows is unaffected.
+receiversRouter.delete(
+  '/:id',
+  [param('id').isInt({ min: 1 }).withMessage('Invalid receiver ID')],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+      return;
+    }
+
+    const id = Number(req.params.id);
+
+    // Fetch bypassing the isActive default (undefined = include inactive-but-not-deleted rows too),
+    // but KEEP deletedAt: null enforced (not bypassed) — an already-deleted receiver is treated as
+    // not-found, consistent with "once deleted, gone from every admin-facing surface".
+    const current = await prisma.receiver.findFirst({
+      where: {
+        id,
+        organizationId: req.session.organizationId!,
+        isActive: undefined,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+
+    if (!current) {
+      res.status(404).json({ error: 'RECEIVER_NOT_FOUND' });
+      return;
+    }
+
+    await prisma.receiver.update({
+      where: { id, organizationId: req.session.organizationId! },
+      data: { deletedAt: new Date() },
+    });
+    res.status(204).send();
+  },
+);
