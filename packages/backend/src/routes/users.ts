@@ -233,7 +233,7 @@ usersRouter.delete(
       // but KEEPS deletedAt: null enforced — an already-deleted user is treated as not-found.
       const target = await tx.user.findFirst({
         where: { id: targetId, organizationId, isActive: undefined, deletedAt: null },
-        select: { id: true, role: true },
+        select: { id: true, role: true, isActive: true },
       });
       if (!target) {
         throw Object.assign(new Error('User not found'), {
@@ -250,12 +250,21 @@ usersRouter.delete(
       // locked result set. (If the target row were excluded from this SQL via an id-inequality
       // predicate, the two transactions would lock DISJOINT rows, never contend, and both could
       // commit — leaving zero admins. That exclusion is intentionally absent.)
-      if (target.role === 'admin') {
+      // D-09 (PHASE9-SC5 / CR-01 fix): the guard counts only admins who can actually LOG IN.
+      // It runs ONLY when the target is itself an ACTIVE admin — deleting a deactivated
+      // (isActive: false) admin can never reduce the usable-admin count, so it is never blocked.
+      // The FOR UPDATE set is restricted to isActive = true so a deactivated-but-not-deleted admin
+      // does NOT count as "another usable admin" (auth.ts login requires isActive: true AND
+      // deletedAt: null — a deactivated admin genuinely cannot authenticate). Race-safety is
+      // preserved: the target (active) is INCLUDED in the locked set (not excluded in SQL), so two
+      // concurrent deletes of two different active admins lock the identical set and contend.
+      if (target.role === 'admin' && target.isActive) {
         const admins = await tx.$queryRaw<{ id: number }[]>`
           SELECT id FROM users
           WHERE organizationId = ${organizationId}
             AND role = 'admin'
             AND deletedAt IS NULL
+            AND isActive = true
           FOR UPDATE
         `;
         const otherAdmins = admins.filter((a) => a.id !== targetId);
