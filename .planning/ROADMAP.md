@@ -199,7 +199,7 @@ Plans:
 **Goal:** Admin can permanently soft-delete a Product, MOP, or User via a new "Delete" action distinct from the existing Activate/Deactivate toggle — with confirmation, immediate removal from every admin-facing list/combo-box, and User-specific safeguards (self-delete block, last-admin block, immediate session kill + login rejection).
 **Requirements**: PHASE9-SC1..SC7 (phase-local — new feature beyond v1 REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-10)
 **Depends on:** Phase 8
-**Plans:** 5 plans
+**Plans:** 6 plans
 
 Plans:
 - [ ] 09-01-PLAN.md — [BLOCKING] Prisma schema: add deletedAt to Product/Mop/User, manual migration (db execute + migrate resolve), extend $extends soft-delete filter
@@ -207,6 +207,7 @@ Plans:
 - [ ] 09-03-PLAN.md — Backend: DELETE /api/users/:id (self-delete + last-admin + session-kill safeguards) + auth.ts login block
 - [ ] 09-04-PLAN.md — Frontend: ProductDeleteConfirmDialog + MopDeleteConfirmDialog + ProductsPage/MopsPage wiring
 - [ ] 09-05-PLAN.md — Frontend: UserDeleteConfirmDialog (error-code mapping) + UsersPage wiring (own-row disable)
+- [ ] 09-06-PLAN.md — Backend: reject sale create/edit referencing a soft-deleted product/MOP in sales.ts (deletedAt: null on all four tx.product/tx.mop existence checks)
 
 
 ---
