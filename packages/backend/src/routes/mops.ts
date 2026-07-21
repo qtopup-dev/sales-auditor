@@ -118,3 +118,40 @@ mopsRouter.patch(
     res.json(serializeMop(mop));
   },
 );
+
+// ─── DELETE /api/mops/:id ─────────────────────────────────────────────────────
+// CONTEXT.md D-01: sets deletedAt (a second, stricter soft-delete signal distinct from isActive).
+// CONTEXT.md D-02: deleted rows are excluded from ALL admin-facing list/catalog queries via the
+// $extends softDeleteFilter (Plan 01) — this route does not need to touch any read query itself.
+// CONTEXT.md D-03: never touches Sale rows — historical mopNameSnapshot on existing sales rows
+// is completely unaffected.
+
+mopsRouter.delete(
+  '/:id',
+  [param('id').isInt({ min: 1 }).withMessage('Invalid MOP ID')],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: errors.array() });
+      return;
+    }
+
+    const id = Number(req.params.id);
+
+    const current = await prisma.mop.findFirst({
+      where: { id, organizationId: 1, isActive: undefined, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!current) {
+      res.status(404).json({ error: 'MOP_NOT_FOUND' });
+      return;
+    }
+
+    await prisma.mop.update({
+      where: { id, organizationId: 1 },
+      data: { deletedAt: new Date() },
+    });
+    res.status(204).send();
+  },
+);
