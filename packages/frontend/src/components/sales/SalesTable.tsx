@@ -6,6 +6,7 @@ import { useSalesEditStore } from '../../stores/salesEditStore';
 import { AddRowForm } from './AddRowForm';
 import { EditableCell } from './EditableCell';
 import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
+import { formatDateTime } from '../../lib/dateTime';
 
 const columns: ColumnDef<Sale>[] = [
   {
@@ -58,13 +59,26 @@ const columns: ColumnDef<Sale>[] = [
     },
   },
   {
+    accessorKey: 'createdAt',
+    header: 'Created At',
+    size: 140,
+    cell: ({ row }) => {
+      const sale = row.original;
+      return (
+        <span className={`text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
+          {formatDateTime(sale.createdAt)}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: 'updatedAt',
     header: 'Date Edited',
     size: 140,
     cell: ({ row }) => {
       const sale = row.original;
       const label = sale.lastEditedById
-        ? sale.updatedAt.replace('T', ' ').slice(0, 16)
+        ? formatDateTime(sale.updatedAt)
         : '—';
       return (
         <span className={`text-sm font-normal ${sale.status === 'void' ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
