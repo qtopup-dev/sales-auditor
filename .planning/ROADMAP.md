@@ -228,10 +228,10 @@ Plans:
 **Goal:** Add a "Created At" column to the moderator Sales sheet (mirroring the admin sheet's existing column) and reformat all date/time displays across both Sales sheets and the Audit Drawer to a shared humanized format ("July 29, 2026, 2:32 PM"), replacing the three duplicated raw-ISO-slice formatters — Created At column must be visible on the /sales page for both admin and moderator sheets.
 **Requirements**: PHASE11-SC1..SC4 (phase-local — new feature beyond v1 REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-05)
 **Depends on:** Phase 10
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 11-01-PLAN.md — Frontend: shared `formatDateTime` util (`lib/dateTime.ts`, UTC-pinned) + moderator SalesTable "Created At" column + AdminSalesTable/AuditDrawer pointed at shared formatter (local duplicate removed, CSV export unchanged)
+- [x] 11-01-PLAN.md — Frontend: shared `formatDateTime` util (`lib/dateTime.ts`, UTC-pinned) + moderator SalesTable "Created At" column + AdminSalesTable/AuditDrawer pointed at shared formatter (local duplicate removed, CSV export unchanged)
 
 ---
 
