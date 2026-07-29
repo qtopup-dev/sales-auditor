@@ -131,4 +131,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-21 after Phase 10 (Receiver delete) completion*
+*Last updated: 2026-07-29 after Phase 11 (Created At column + humanized dates) completion*
