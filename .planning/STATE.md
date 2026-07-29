@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-last_updated: "2026-07-21T15:04:32.416Z"
+last_updated: "2026-07-29T13:57:41.301Z"
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 10
   total_plans: 53
   completed_plans: 52
@@ -16,7 +16,7 @@ progress:
 
 **Last updated:** 2026-06-26
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-07-21T14:24:11.342Z
+**Last session:** Phase 11 context gathered — resume: .planning/phases/11-add-created-at-column-to-admin-and-moderator-sheets-with-hum/11-CONTEXT.md
 
 ---
 
@@ -124,6 +124,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 - Phase 8 added: Self-service password change for moderators via username dropdown menu
 - Phase 9 added: Add the option to delete MOPs, Products, and Users for the admin role
 - Phase 10 added: Add the option to delete Receivers for the admin role — mirrors Phase 9's delete pattern for Products/MOPs (soft-delete via deletedAt, confirm dialog); Receiver model currently only has isActive, needs the same schema migration treatment as Phase 9 Plan 09-01
+- Phase 11 added: Add "Created At" column to admin and moderator sheets, with humanized date format ("July 29, 2026") applied consistently across the sheets, audit logs, and edited-at timestamps. Clarified: the Created At column must be visible on the /sales page for both admin and moderator sheets.
 
 ### Todos
 
