@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { AuditEntry } from '@alejinput/shared';
 import { api } from '../../lib/axios';
 import { useSalesEditStore } from '../../stores/salesEditStore';
+import { formatDateTime } from '../../lib/dateTime';
 
 function actionLabel(action: string, fieldName: string | null): string {
   if (action === 'create') return 'Created row';
@@ -73,7 +74,7 @@ export function AuditDrawer() {
               {entries.map((entry) => (
                 <div key={entry.id} className="py-3">
                   <p className="text-xs font-normal text-gray-400 dark:text-gray-500">
-                    {entry.createdAt.replace('T', ' ').slice(0, 16)} UTC
+                    {formatDateTime(entry.createdAt)}
                   </p>
                   <p className="text-sm font-normal text-gray-900 dark:text-gray-100">
                     {entry.userUsername}

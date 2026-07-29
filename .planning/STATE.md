@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-last_updated: "2026-07-29T13:57:41.301Z"
+status: unknown
+last_updated: "2026-07-29T14:27:02.883Z"
 progress:
   total_phases: 12
   completed_phases: 10
-  total_plans: 53
-  completed_plans: 52
-  percent: 91
+  total_plans: 54
+  completed_plans: 53
+  percent: 98
 ---
 
 # Project State — Sales Auditing Web App
@@ -24,7 +24,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 10 — add-the-option-to-delete-receivers-for-the-admin-role-mirror
+**Current focus:** Phase 11 — add-created-at-column-to-admin-and-moderator-sheets-with-hum
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -32,8 +32,8 @@ progress:
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 11 (add-created-at-column-to-admin-and-moderator-sheets-with-hum) — EXECUTING
+Plan: 1 of 1
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
@@ -152,4 +152,4 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 3. `/gsd-plan-phase 3` — Sales Core (inline-edit sheet, add row, void, transactional audit log)
 4. `/gsd-plan-phase 4` — Admin Dashboard + Management (filters, charts, CSV, user management)
 
-**Planned Phase:** 10 (add-the-option-to-delete-receivers-for-the-admin-role-mirror) — 3 plans — 2026-07-21T12:44:12.528Z
+**Planned Phase:** 11 (add-created-at-column-to-admin-and-moderator-sheets-with-hum) — 1 plans — 2026-07-29T14:19:49.360Z
