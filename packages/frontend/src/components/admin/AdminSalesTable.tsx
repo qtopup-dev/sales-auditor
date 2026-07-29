@@ -15,11 +15,7 @@ import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
 import { Parser } from '@json2csv/plainjs';
 import type { Sale } from '@alejinput/shared';
 import { useSalesEditStore } from '../../stores/salesEditStore';
-
-// Format ISO-8601 string to "YYYY-MM-DD HH:mm" (UTC) for date columns
-function formatDateTime(iso: string): string {
-  return iso.replace('T', ' ').slice(0, 16);
-}
+import { formatDateTime } from '../../lib/dateTime';
 
 // CSV formula injection sanitizer (D-11, ADMIN-09)
 // Prepend single quote to cells starting with dangerous characters
