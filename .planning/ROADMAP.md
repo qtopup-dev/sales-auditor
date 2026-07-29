@@ -223,6 +223,16 @@ Plans:
 - [x] 10-02-PLAN.md — Backend: DELETE /api/receivers/:id route
 - [x] 10-03-PLAN.md — Frontend: ReceiverDeleteConfirmDialog + ReceiversPage wiring
 
+### Phase 11: Add "Created At" column to admin and moderator sheets with humanized date format (e.g. "July 29, 2026"), applied consistently to audit logs and edited-at timestamps
+
+**Goal:** Add a "Created At" column to the moderator Sales sheet (mirroring the admin sheet's existing column) and reformat all date/time displays across both Sales sheets and the Audit Drawer to a shared humanized format ("July 29, 2026, 2:32 PM"), replacing the three duplicated raw-ISO-slice formatters — Created At column must be visible on the /sales page for both admin and moderator sheets.
+**Requirements**: PHASE11-SC1..SC4 (phase-local — new feature beyond v1 REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-05)
+**Depends on:** Phase 10
+**Plans:** 1 plan
+
+Plans:
+- [ ] 11-01-PLAN.md — Frontend: shared `formatDateTime` util (`lib/dateTime.ts`, UTC-pinned) + moderator SalesTable "Created At" column + AdminSalesTable/AuditDrawer pointed at shared formatter (local duplicate removed, CSV export unchanged)
+
 ---
 
 ## Traceability
@@ -297,4 +307,3 @@ Plans:
 | USERS-04 | Phase 4 |
 | USERS-05 | Phase 4 |
 | USERS-06 | Phase 4 |
-</content>
