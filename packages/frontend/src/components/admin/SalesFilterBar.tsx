@@ -15,14 +15,17 @@ export interface FilterState {
 }
 
 // Apply all active filters in-memory (D-04 client-side filtering)
-// sale.createdAt is ISO-8601 string — lexicographic comparison is safe (RESEARCH.md Pattern 4)
+// The date pickers select Philippine calendar days, but sale.createdAt is stored/transmitted
+// in UTC (CLAUDE.md Rule 7). Bounds are anchored to Asia/Manila (UTC+8, no DST) midnight so a
+// sale made at, say, 1 AM PH time is correctly grouped into that PH day, not the UTC day before.
 export function applyFilters(sales: Sale[], filters: FilterState): Sale[] {
+  const startMs = filters.startDate ? new Date(`${filters.startDate}T00:00:00+08:00`).getTime() : null;
+  const endMs = filters.endDate ? new Date(`${filters.endDate}T23:59:59.999+08:00`).getTime() : null;
+
   return sales.filter((sale) => {
-    if (filters.startDate && sale.createdAt < filters.startDate) return false;
-    if (filters.endDate) {
-      const endDayInclusive = filters.endDate + 'T23:59:59.999Z';
-      if (sale.createdAt > endDayInclusive) return false;
-    }
+    const createdMs = new Date(sale.createdAt).getTime();
+    if (startMs !== null && createdMs < startMs) return false;
+    if (endMs !== null && createdMs > endMs) return false;
     if (filters.productId !== null && sale.productId !== filters.productId) return false;
     if (filters.mopId !== null && sale.mopId !== filters.mopId) return false;
     if (filters.createdById !== null && sale.createdById !== filters.createdById) return false;

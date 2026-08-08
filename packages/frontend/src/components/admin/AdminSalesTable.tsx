@@ -16,6 +16,7 @@ import { Parser } from '@json2csv/plainjs';
 import type { Sale } from '@alejinput/shared';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { formatDateTime } from '../../lib/dateTime';
+import { phTodayString } from '../../lib/shiftTime';
 
 // CSV formula injection sanitizer (D-11, ADMIN-09)
 // Prepend single quote to cells starting with dangerous characters
@@ -67,7 +68,7 @@ export function downloadCSV(rows: Sale[]): void {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `sales-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `sales-export-${phTodayString()}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

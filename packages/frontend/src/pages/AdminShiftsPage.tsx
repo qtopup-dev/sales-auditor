@@ -6,6 +6,7 @@ import { ShiftTotalsBanner } from '../components/shift/ShiftTotalsBanner';
 import { ForceClockOutConfirmDialog } from '../components/shift/ForceClockOutConfirmDialog';
 import { useShiftStore } from '../stores/shiftStore';
 import { phTodayString } from '../lib/shiftTime';
+import { formatDateTime } from '../lib/dateTime';
 
 interface AdminShiftSaleRow {
   id: number;
@@ -31,10 +32,6 @@ interface AdminShiftTab {
 interface AdminShiftsResponse {
   date: string;
   tabs: AdminShiftTab[];
-}
-
-function formatDateTime(iso: string): string {
-  return iso.replace('T', ' ').slice(0, 16);
 }
 
 // D-15: admin-only oversight page — read-only (no Void/Audit here, use DashboardPage/SalesPage).

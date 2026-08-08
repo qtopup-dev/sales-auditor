@@ -25,7 +25,7 @@ const toMoneyStr = (v: unknown): string => {
 // Returns aggregated dashboard stats — all figures are active-only (voided sales excluded):
 //   totalCount     — number of active sales in org
 //   totalRevenue   — sum of active sale prices as string "NNN.NN" (CLAUDE.md Rule 6)
-//   trendData      — [{date, count}] grouped by DATE(createdAt) via $queryRaw, active-only
+//   trendData      — [{date, count}] grouped by PH calendar day (CONVERT_TZ) via $queryRaw, active-only
 //   productBreakdown — [{name, count, revenue}] grouped by productNameSnapshot, active-only
 //   mopBreakdown   — [{name, count}] grouped by mopNameSnapshot, active-only
 //
@@ -75,46 +75,51 @@ adminRouter.get('/summary', async (req, res) => {
       // Table name: @@map("sales") in schema.prisma — use `sales` (plural lowercase)
       // Active-only — voided sales must not count toward the trend chart
       prisma.$queryRaw<{ date: string; count: bigint }[]>`
-        SELECT DATE(createdAt) AS date, COUNT(*) AS count
+        SELECT DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00')) AS date, COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status = 'active'
-        GROUP BY DATE(createdAt)
+        GROUP BY DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00'))
         ORDER BY date ASC
       `,
       // ── KPI: Transaction counts (active-only, D-01) ─────────────────────────────
       // BigInt warning: COUNT(*) returns bigint — Number() coercion required before JSON serialization
-      // Rule 7: CURDATE() operates in UTC because DB connection is ?timezone=UTC
+      // Rule 7: createdAt is stored in UTC and CURDATE()/NOW() operate in UTC because the DB
+      // connection is ?timezone=UTC — but "today"/"this month" mean the Philippines calendar day
+      // to the humans reading this dashboard. Both sides are converted with CONVERT_TZ(..., '+00:00',
+      // '+08:00') (fixed offset, no DST, no mysql.time_zone_name tables needed — same pattern as the
+      // /shifts endpoint below) so a sale made between midnight and 8am PH time (still the previous
+      // UTC day) lands in the correct PH bucket instead of silently falling into "yesterday".
       // Rule 8: soft-delete middleware does not intercept $queryRaw — explicit status filter required
       prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status = 'active'
-          AND DATE(createdAt) = CURDATE()
+          AND DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
       `,
       prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status = 'active'
-          AND DATE(createdAt) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+          AND DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+08:00')), INTERVAL 1 DAY)
       `,
       prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status = 'active'
-          AND YEAR(createdAt) = YEAR(CURDATE())
-          AND MONTH(createdAt) = MONTH(CURDATE())
+          AND YEAR(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
+          AND MONTH(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = MONTH(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
       `,
       prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) AS count
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status = 'active'
-          AND YEAR(createdAt) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
-          AND MONTH(createdAt) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+          AND YEAR(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = YEAR(DATE_SUB(CONVERT_TZ(NOW(), '+00:00', '+08:00'), INTERVAL 1 MONTH))
+          AND MONTH(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = MONTH(DATE_SUB(CONVERT_TZ(NOW(), '+00:00', '+08:00'), INTERVAL 1 MONTH))
       `,
       // ── KPI: Profit (active-only, D-02) + Turnover (active+void, D-03) per period ─
       // Single query per period returns both values via CASE WHEN.
@@ -129,7 +134,7 @@ adminRouter.get('/summary', async (req, res) => {
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
-          AND DATE(createdAt) = CURDATE()
+          AND DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
@@ -138,7 +143,7 @@ adminRouter.get('/summary', async (req, res) => {
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
-          AND DATE(createdAt) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+          AND DATE(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+08:00')), INTERVAL 1 DAY)
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
@@ -147,8 +152,8 @@ adminRouter.get('/summary', async (req, res) => {
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
-          AND YEAR(createdAt) = YEAR(CURDATE())
-          AND MONTH(createdAt) = MONTH(CURDATE())
+          AND YEAR(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
+          AND MONTH(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = MONTH(CONVERT_TZ(NOW(), '+00:00', '+08:00'))
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
@@ -157,8 +162,8 @@ adminRouter.get('/summary', async (req, res) => {
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
-          AND YEAR(createdAt) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
-          AND MONTH(createdAt) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+          AND YEAR(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = YEAR(DATE_SUB(CONVERT_TZ(NOW(), '+00:00', '+08:00'), INTERVAL 1 MONTH))
+          AND MONTH(CONVERT_TZ(createdAt, '+00:00', '+08:00')) = MONTH(DATE_SUB(CONVERT_TZ(NOW(), '+00:00', '+08:00'), INTERVAL 1 MONTH))
       `,
     ]);
 
