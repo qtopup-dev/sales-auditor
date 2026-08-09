@@ -13,7 +13,7 @@ export const salesRouter = Router();
 
 // CRITICAL: priceSnapshot uses .toFixed(2) — never .toString() or .toNumber()
 // Decimal("1000").toString() = "1000" not "1000.00" (drops trailing zeros)
-function serializeSale(sale: {
+export function serializeSale(sale: {
   id: number;
   organizationId: number;
   productId: number;
