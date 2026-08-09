@@ -283,7 +283,7 @@ Plans:
   5. The admin sidebar shows a red-circle badge next to "Void Requests" with the current count of pending (unreviewed) requests only, hidden when the count is 0
   6. Both request-creation (moderator, own rows only) and approve/reject (admin only) are enforced server-side per CLAUDE.md Rule 9 — not just hidden in the UI
 
-**Plans:** 4/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
