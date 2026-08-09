@@ -283,7 +283,7 @@ Plans:
   5. The admin sidebar shows a red-circle badge next to "Void Requests" with the current count of pending (unreviewed) requests only, hidden when the count is 0
   6. Both request-creation (moderator, own rows only) and approve/reject (admin only) are enforced server-side per CLAUDE.md Rule 9 — not just hidden in the UI
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 1**
@@ -292,7 +292,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 12-02-PLAN.md — voidRequestsRouter: create/list/approve/reject/counts with per-route RBAC, transactional approve + audit write, and an end-to-end tracer script
+- [x] 12-02-PLAN.md — voidRequestsRouter: create/list/approve/reject/counts with per-route RBAC, transactional approve + audit write, and an end-to-end tracer script
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
