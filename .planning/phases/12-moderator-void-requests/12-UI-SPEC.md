@@ -1,7 +1,7 @@
 ---
 phase: 12
 slug: moderator-void-requests
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-08-09
@@ -22,6 +22,8 @@ created: 2026-08-09
 | Component library | none — hand-rolled Tailwind components (`Modal.tsx`, `StatusBadge.tsx`) + `react-select` v5 (AsyncSelect) + `@tanstack/react-table` v8 |
 | Icon library | none — inline hand-drawn SVG icons (`stroke="currentColor"` `strokeWidth="2"`, viewBox `0 0 24 24`, see `AuthenticatedLayout.tsx` sun/moon/hamburger/chevron icons) |
 | Font | Tailwind default sans-serif stack — no custom `font-family` declared in `tailwind.config.js` or `index.css` |
+
+**Primary focal point:** the requests table itself, on the new admin Void Requests page — no other element competes for attention (mirrors `AdminSalesTable`'s existing focal treatment: table fills the content area, page heading is minimal, actions live inline in the table's own rows).
 
 **shadcn gate note:** No `components.json` exists (`tailwind.config.js` only, `content: []` — Tailwind classes are applied via `@tailwind` directives with no PurgeCSS content globs, consistent with 11 prior phases). This is Phase 12 of a mature production app with a firmly established hand-rolled Tailwind + Zustand + react-hook-form + react-table design system, documented consistently across every prior UI-SPEC and implementation. Initializing shadcn now would fracture visual consistency rather than serve it, so the gate was not offered — this UI-SPEC extends the existing system exclusively, with every new element modeled directly on an existing component (cited per-section below).
 
@@ -170,11 +172,11 @@ Applicable state considerations resolved: 11 covered, 2 backstop, 0 unresolved.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (non-blocking recommendation applied — focal point now stated explicitly above)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (2026-08-09, gsd-ui-checker)
