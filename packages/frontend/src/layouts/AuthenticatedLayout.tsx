@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
 import { api } from '../lib/axios';
@@ -16,6 +17,7 @@ const ADMIN_NAV = [
   { to: '/receivers', label: 'Receivers' },
   { to: '/users', label: 'Users' },
   { to: '/shifts', label: 'Shifts' },
+  { to: '/void-requests', label: 'Void Requests' },
 ];
 
 // Moderator nav items per CONTEXT.md D-04 (ROLES-07: only Sales Sheet visible)
@@ -31,6 +33,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
 
   const navItems = user?.role === 'admin' ? ADMIN_NAV : MODERATOR_NAV;
+
+  // Red pending-count badge next to "Void Requests" (D-08/D-09) — React Query default
+  // staleness/refetch-on-navigation only, no polling interval or websocket. Gated to admin
+  // sessions so a moderator session never issues the admin-only endpoint. Error state is
+  // left unhandled so a failed fetch leaves pendingCount undefined, which the render guard
+  // below treats identically to zero (badge omitted, never a stale/error count).
+  const { data: pendingCount } = useQuery({
+    queryKey: ['void-requests-pending-count'],
+    queryFn: () => api.get<{ count: number }>('/void-requests/pending-count').then((r) => r.data.count),
+    enabled: user?.role === 'admin',
+  });
 
   // AUTH-03: logout — pessimistic: await server before clearing client state (CLAUDE.md Rule 10)
   const handleLogout = async () => {
@@ -80,11 +93,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             className={({ isActive }) =>
               isActive
-                ? 'flex items-center px-4 py-2 text-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-600 min-h-[44px]'
-                : 'flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 min-h-[44px]'
+                ? 'flex items-center justify-between px-4 py-2 text-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-600 min-h-[44px]'
+                : 'flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 min-h-[44px]'
             }
           >
-            {item.label}
+            <span>{item.label}</span>
+            {item.to === '/void-requests' && !!pendingCount && (
+              <span className="min-w-[20px] h-5 px-1 rounded-full bg-red-600 text-white text-xs font-semibold leading-none flex items-center justify-center">
+                {pendingCount > 99 ? '99+' : pendingCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
