@@ -5,11 +5,11 @@ milestone_name: milestone
 current_phase: 12 — Moderator Void Requests
 status: ready_to_plan
 stopped_at: Phase 12 UI-SPEC approved
-last_updated: "2026-08-09T06:34:14.639Z"
+last_updated: "2026-08-09T09:32:40.921Z"
 progress:
   total_phases: 12
   completed_phases: 11
-  total_plans: 54
+  total_plans: 58
   completed_plans: 54
 current_phase_name: moderator-void-requests
 ---

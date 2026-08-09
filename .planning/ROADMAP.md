@@ -275,18 +275,27 @@ Plans:
 **Requirements**: PHASE12-SC1..SC6 (phase-local — new feature beyond v1 REQ-IDs; scope locked via CONTEXT.md decisions D-01 through D-09)
 **Depends on:** Phase 11
 **Success Criteria** (what must be TRUE):
+
   1. A moderator sees a "Void Request" button (with a tooltip explaining its purpose) on their own active sales rows only; submitting it requires a plain-text reason and creates a pending request — the button is disabled/hidden while a pending request already exists on that row (enforced server-side, not just UI)
   2. An admin sees a new "Void Requests" nav tab (admin-only) showing a sales-like table (Product, Price, MOP, Receiver, Notes, Created By, Created At) plus a Reason column and a Status column (Pending/Approved/Rejected), newest-first, with all requests — reviewed ones stay visible
   3. Approving a pending request voids the underlying sale row in the same transaction as the existing admin void behavior (status → void, AuditLog `void` entry, lastEditedBy fields updated) and marks the request Approved; the row reflects as voided on the moderator's own Sales sheet
   4. Rejecting a pending request leaves the sale row completely untouched (still active) and marks the request Rejected; the moderator can submit a new Void Request on that row afterward (no permanent lockout)
   5. The admin sidebar shows a red-circle badge next to "Void Requests" with the current count of pending (unreviewed) requests only, hidden when the count is 0
   6. Both request-creation (moderator, own rows only) and approve/reject (admin only) are enforced server-side per CLAUDE.md Rule 9 — not just hidden in the UI
+
 **Plans:** 4 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 12-01-PLAN.md — VoidRequest Prisma model, void_requests migration with the pendingLock race guard, and the shared VoidRequest types
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 12-02-PLAN.md — voidRequestsRouter: create/list/approve/reject/counts with per-route RBAC, transactional approve + audit write, and an end-to-end tracer script
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 12-03-PLAN.md — Moderator Sales sheet: gated "Void Request" button, reason dialog, and pending-state disabling
 - [ ] 12-04-PLAN.md — Admin /void-requests page: requests table with Reason + Status, Approve confirm dialog, instant Reject, and the red sidebar pending-count badge
 
