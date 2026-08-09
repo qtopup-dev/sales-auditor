@@ -18,6 +18,7 @@ import { mopsRouter } from './routes/mops.js';
 import { receiversRouter } from './routes/receivers.js';
 import { shiftsRouter } from './routes/shifts.js';
 import { salesRouter } from './routes/sales.js';
+import { voidRequestsRouter } from './routes/voidRequests.js';
 import { catalogRouter } from './routes/catalog.js';
 import { adminRouter } from './routes/admin.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -107,6 +108,7 @@ export function createApp(): Express {
   protectedRouter.use('/receivers', receiversRouter); // admin-only (receiversRouter mounts requireRole internally)
   protectedRouter.use('/shifts', shiftsRouter); // moderator-only (shiftsRouter mounts requireRole('moderator') internally)
   protectedRouter.use('/sales', salesRouter); // all authenticated users (role checks per-route)
+  protectedRouter.use('/void-requests', voidRequestsRouter); // mixed access: moderators create their own, admins list/count/approve/reject (role checks per-route)
   protectedRouter.use('/catalog', catalogRouter); // all authenticated users (no role restriction — D-05)
   protectedRouter.use('/admin', adminRouter); // admin-only (adminRouter mounts requireRole internally)
   app.use('/api', requireAuth, protectedRouter);
