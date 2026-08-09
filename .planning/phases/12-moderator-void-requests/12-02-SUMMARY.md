@@ -188,3 +188,14 @@ None — the tracer script is self-contained (creates its own fixture data and r
 ---
 *Phase: 12-moderator-void-requests*
 *Completed: 2026-08-09*
+
+## Self-Check: PASSED
+
+- FOUND: packages/backend/src/routes/voidRequests.ts
+- FOUND: packages/backend/src/routes/sales.ts (modified — serializeSale export confirmed)
+- FOUND: packages/backend/src/app.ts (modified)
+- FOUND: .planning/phases/12-moderator-void-requests/12-02-tracer.sh
+- FOUND: commit 0247d39 (Task 1)
+- FOUND: commit b839caa (Task 2)
+- FOUND: commit 448e3f1 (Task 3)
+- FOUND: commit 4549b12 (docs: plan complete)
