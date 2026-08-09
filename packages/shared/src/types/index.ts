@@ -11,5 +11,6 @@ export type { Mop } from './mop.js';
 export type { Receiver } from './receiver.js';
 export type { Shift, ShiftWithTotals } from './shift.js';
 export type { SaleStatus, Sale } from './sale.js';
+export type { VoidRequestStatus, VoidRequest, VoidRequestWithSale } from './voidRequest.js';
 export type { AuditAction, AuditEntry } from './audit.js';
 export type { InviteToken, AuthSession } from './auth.js';
