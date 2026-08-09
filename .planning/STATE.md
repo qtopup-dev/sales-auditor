@@ -2,21 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
+current_phase: "12"
+current_phase_name: moderator-void-requests
 status: ready_to_plan
-last_updated: "2026-07-29T14:27:02.883Z"
+stopped_at: Phase 12 context gathered
+last_updated: "2026-08-09T06:12:31.551Z"
 progress:
   total_phases: 12
-  completed_phases: 11
-  total_plans: 54
-  completed_plans: 53
-  percent: 92
+  completed_phases: 12
+  total_plans: 56
+  completed_plans: 56
 ---
 
 # Project State — Sales Auditing Web App
 
-**Last updated:** 2026-06-26
+**Last updated:** 2026-08-09
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** Phase 11 context gathered — resume: .planning/phases/11-add-created-at-column-to-admin-and-moderator-sheets-with-hum/11-CONTEXT.md
+**Last session:** Phase 12 context gathered — resume: .planning/phases/12-moderator-void-requests/12-CONTEXT.md
 
 ---
 
@@ -24,7 +26,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 11 — add-created-at-column-to-admin-and-moderator-sheets-with-hum
+**Current focus:** Phase 12 — Moderator Void Requests
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -32,22 +34,29 @@ progress:
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 12
+Plan: Not started (context gathered, ready to plan)
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
-| Current phase | 5 — Receiver Catalog |
-| Phase status | In progress (1/5 plans complete) |
-| Overall progress | 4 of 5 phases complete |
+| Current phase | 12 — Moderator Void Requests |
+| Phase status | Context gathered — ready for `/gsd-plan-phase 12` |
+| Overall progress | 12 of 12 prior phases complete; Phase 12 in progress |
 
 ```
-Progress: [██████████] 98%
+Progress: [██████████] 100%
 Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [==========] Complete (6/6 plans complete)
 Phase 3: Sales Core         [==========] Complete (8/8 plans complete)
 Phase 4: Admin Dashboard    [==========] Complete (6/6 plans complete)
-Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans complete)
+Phase 5: Receiver Catalog   [==========] Complete (5/5 plans complete)
+Phase 6: Dashboard KPI      [==========] Complete (2/2 plans complete)
+Phase 7: Shift Clock In/Out [==========] Complete (9/9 plans complete)
+Phase 8: Password Change    [==========] Complete (2/2 plans complete)
+Phase 9: Delete Products/MOPs/Users [==========] Complete (7/7 plans complete)
+Phase 10: Delete Receivers  [==========] Complete (3/3 plans complete)
+Phase 11: Created At column [==========] Complete (1/1 plans complete)
+Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 ```
 
 ---
@@ -125,6 +134,7 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 - Phase 9 added: Add the option to delete MOPs, Products, and Users for the admin role
 - Phase 10 added: Add the option to delete Receivers for the admin role — mirrors Phase 9's delete pattern for Products/MOPs (soft-delete via deletedAt, confirm dialog); Receiver model currently only has isActive, needs the same schema migration treatment as Phase 9 Plan 09-01
 - Phase 11 added: Add "Created At" column to admin and moderator sheets, with humanized date format ("July 29, 2026") applied consistently across the sheets, audit logs, and edited-at timestamps. Clarified: the Created At column must be visible on the /sales page for both admin and moderator sheets.
+- Phase 12 added: Moderator Void Requests — moderators submit a "Void Request" (button + tooltip) with a plain-text reason instead of voiding directly; admin gets a new "Void Requests" sidebar tab with a red unread-count badge (count of pending, unreviewed requests) showing a sales-like table with an added Reason column; admin can approve (voids the row, reflects as voided on the moderator's sheet) or reject (row stays as-is, request stays recorded).
 
 ### Todos
 
@@ -142,6 +152,9 @@ Phase 5: Receiver Catalog   [==░░░░░░░░] In progress (1/5 plans 
 ---
 
 ## Session Continuity
+
+**Stopped at:** Phase 12 context gathered
+**Resume file:** .planning/phases/12-moderator-void-requests/12-CONTEXT.md
 
 **How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-execute-phase 1` to execute the 5 plans for Phase 1.
 
