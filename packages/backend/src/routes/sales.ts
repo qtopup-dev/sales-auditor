@@ -562,6 +562,15 @@ salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Respons
 // ─── POST /api/sales/:id/void ─────────────────────────────────────────────────
 // ROLES-06 (T-03-04): admin only — requireRole('admin') returns 403 before handler for moderators
 // AUDIT-01/02: audit 'void' record in same transaction
+//
+// `status: 'active'` is re-asserted via `updateMany` + an explicit `.count` check (not
+// just the earlier `findFirst`) — a plain SELECT under MySQL's default REPEATABLE READ
+// isolation does not lock the row, so two concurrent void calls on the same row could
+// otherwise both pass the read above before either commits and both write an audit
+// entry. Verified empirically that Prisma's singular `update()` with extra non-unique
+// where-conditions does not reliably reject a non-matching write on this connector —
+// `updateMany`'s `{ count }` is the only unambiguous signal (mirrors the same fix in
+// voidRequests.ts's approve/reject handlers).
 
 salesRouter.post(
   '/:id/void',
@@ -586,21 +595,26 @@ salesRouter.post(
         },
       });
 
-
       if (!sale) {
         throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
       }
 
-      const updated = await tx.sale.update({
-        where: { id: saleId, organizationId: req.session.organizationId! },
+      const voided = await tx.sale.updateMany({
+        where: { id: saleId, organizationId: req.session.organizationId!, status: 'active' },
         data: {
           status: 'void',
           lastEditedById: req.session.userId!,
           lastEditedByUsername: req.session.username!,
         },
       });
+      if (voided.count === 0) {
+        // A concurrent void (this endpoint, or a Void Request approval) won the race
+        // between the findFirst read above and this write.
+        throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
+      }
 
-      // AUDIT-02: audit record in same transaction
+      // AUDIT-02: audit record in same transaction. Only reached when this request's
+      // update genuinely won the race above.
       await tx.auditLog.create({
         data: {
           organizationId: req.session.organizationId!,
@@ -616,7 +630,7 @@ salesRouter.post(
         },
       });
 
-      return updated;
+      return tx.sale.findFirstOrThrow({ where: { id: saleId } });
     }, { timeout: 5000, maxWait: 3000 });
 
     res.json(serializeSale(updatedSale));

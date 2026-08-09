@@ -3,7 +3,7 @@
 // column (identical truncation + title treatment as Notes) and a Status column (D-05).
 // No CSV export, no client-side sorting, no status filter — none of these are in scope for v1 (D-04).
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -35,6 +35,15 @@ export function VoidRequestsTable({ rows, loading, onApprove }: VoidRequestsTabl
     setPageSizeOption(size);
     setPageIndex(0);
   };
+
+  // Approve/Reject invalidate ['void-requests'], which can shrink `rows` out from under
+  // the current page (e.g. approving the last pending row on the last page). Clamp back
+  // to the new last valid page instead of silently rendering zero rows.
+  useEffect(() => {
+    if (pageSizeOption === 'all') return;
+    const maxPageIndex = Math.max(0, Math.ceil(rows.length / pageSizeOption) - 1);
+    if (pageIndex > maxPageIndex) setPageIndex(maxPageIndex);
+  }, [rows.length, pageSizeOption, pageIndex]);
 
   // Reject is instant (no confirm dialog) — track per-row pending/error state so only the
   // row being rejected grays out, and a failed Reject never reads as a silent no-op (D-03).

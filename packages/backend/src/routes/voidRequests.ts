@@ -223,6 +223,15 @@ voidRequestsRouter.get(
 // D-06 / CLAUDE.md Rule 2: voids the sale, writes the AuditLog 'void' entry, and marks
 // the request approved — all inside one transaction. Re-reads request as status:'pending'
 // and sale as status:'active' so a repeat approve is a 404, not a double-void (T-12-09).
+//
+// The status is re-asserted via `updateMany` + an explicit `.count` check (not `update`
+// with a combined where, and not just the earlier `findFirst`) because a plain SELECT
+// under MySQL's default REPEATABLE READ isolation does not lock the row — two concurrent
+// approves could otherwise both pass the reads above before either commits. Verified
+// empirically: Prisma's singular `update()` with extra non-unique conditions in `where`
+// does NOT reliably throw when those conditions fail to match on this connector — it can
+// silently no-op the UPDATE while still returning a (stale) row, letting the audit write
+// below run unconditionally. `updateMany`'s `{ count }` is the only unambiguous signal.
 
 voidRequestsRouter.patch(
   '/:id/approve',
@@ -264,17 +273,23 @@ voidRequestsRouter.patch(
           throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
         }
 
-        const updatedSale = await tx.sale.update({
-          where: { id: sale.id },
+        const saleUpdate = await tx.sale.updateMany({
+          where: { id: sale.id, organizationId: req.session.organizationId!, status: 'active' },
           data: {
             status: 'void',
             lastEditedById: req.session.userId!,
             lastEditedByUsername: req.session.username!,
           },
         });
+        if (saleUpdate.count === 0) {
+          // A concurrent approve or a direct admin void won the race between our
+          // findFirst read above and this write — treat exactly like the findFirst miss.
+          throw Object.assign(new Error('Sale not found'), { statusCode: 404, code: 'NOT_FOUND' });
+        }
 
         // CLAUDE.md Rule 2: audit record in the SAME transaction. Reuses the existing
-        // 'void' AuditAction value — no new enum value is added.
+        // 'void' AuditAction value — no new enum value is added. Only reached when this
+        // request's saleUpdate genuinely won the race above.
         await tx.auditLog.create({
           data: {
             organizationId: req.session.organizationId!,
@@ -290,8 +305,8 @@ voidRequestsRouter.patch(
           },
         });
 
-        const updatedRequest = await tx.voidRequest.update({
-          where: { id: requestId },
+        const requestUpdate = await tx.voidRequest.updateMany({
+          where: { id: requestId, organizationId: req.session.organizationId!, status: 'pending' },
           data: {
             status: 'approved',
             reviewedById: req.session.userId!,
@@ -299,6 +314,17 @@ voidRequestsRouter.patch(
             reviewedAt: new Date(),
           },
         });
+        if (requestUpdate.count === 0) {
+          throw Object.assign(new Error('Void request not found'), {
+            statusCode: 404,
+            code: 'NOT_FOUND',
+          });
+        }
+
+        const [updatedRequest, updatedSale] = await Promise.all([
+          tx.voidRequest.findFirstOrThrow({ where: { id: requestId } }),
+          tx.sale.findFirstOrThrow({ where: { id: sale.id } }),
+        ]);
 
         return { ...updatedRequest, sale: updatedSale };
       },
@@ -313,6 +339,11 @@ voidRequestsRouter.patch(
 // D-06: updates only the VoidRequest — no sale.update, no auditLog.create. Lookup is
 // constrained to status:'pending' so a repeat reject is 404 and never overwrites the
 // original reviewer identity/timestamp.
+//
+// As with approve, `status: 'pending'` is re-asserted via `updateMany` + an explicit
+// `.count` check so a concurrent approve/reject racing this same request cannot both
+// win — verified empirically that Prisma's singular `update()` with extra non-unique
+// where-conditions does not reliably reject a non-matching write on this connector.
 
 voidRequestsRouter.patch(
   '/:id/reject',
@@ -343,14 +374,24 @@ voidRequestsRouter.patch(
           });
         }
 
-        const updatedRequest = await tx.voidRequest.update({
-          where: { id: requestId },
+        const requestUpdate = await tx.voidRequest.updateMany({
+          where: { id: requestId, organizationId: req.session.organizationId!, status: 'pending' },
           data: {
             status: 'rejected',
             reviewedById: req.session.userId!,
             reviewedByUsername: req.session.username!,
             reviewedAt: new Date(),
           },
+        });
+        if (requestUpdate.count === 0) {
+          throw Object.assign(new Error('Void request not found'), {
+            statusCode: 404,
+            code: 'NOT_FOUND',
+          });
+        }
+
+        const updatedRequest = await tx.voidRequest.findFirstOrThrow({
+          where: { id: requestId },
           include: { sale: true },
         });
 
