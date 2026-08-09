@@ -283,12 +283,12 @@ Plans:
   5. The admin sidebar shows a red-circle badge next to "Void Requests" with the current count of pending (unreviewed) requests only, hidden when the count is 0
   6. Both request-creation (moderator, own rows only) and approve/reject (admin only) are enforced server-side per CLAUDE.md Rule 9 — not just hidden in the UI
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 12-01-PLAN.md — VoidRequest Prisma model, void_requests migration with the pendingLock race guard, and the shared VoidRequest types
+- [x] 12-01-PLAN.md — VoidRequest Prisma model, void_requests migration with the pendingLock race guard, and the shared VoidRequest types
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
