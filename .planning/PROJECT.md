@@ -131,4 +131,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-29 after Phase 11 (Created At column + humanized dates) completion*
+*Last updated: 2026-08-09 after Phase 12 (Moderator Void Requests) completion — final phase of the v1.0 milestone*
