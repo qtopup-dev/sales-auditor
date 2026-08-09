@@ -10,6 +10,8 @@ interface SalesEditState {
   openAuditSaleId: number | null;
   isVoidDialogOpen: boolean;
   voidTargetSaleId: number | null;
+  isVoidRequestDialogOpen: boolean;
+  voidRequestTargetSaleId: number | null;
   // Inline cell edit state
   activeCellSaleId: number | null;
   activeCellField: string | null;
@@ -26,6 +28,8 @@ interface SalesEditState {
   closeAuditDrawer: () => void;
   openVoidDialog: (saleId: number) => void;
   closeVoidDialog: () => void;
+  openVoidRequestDialog: (saleId: number) => void;
+  closeVoidRequestDialog: () => void;
 }
 
 export const useSalesEditStore = create<SalesEditState>()((set) => ({
@@ -33,6 +37,8 @@ export const useSalesEditStore = create<SalesEditState>()((set) => ({
   openAuditSaleId: null,
   isVoidDialogOpen: false,
   voidTargetSaleId: null,
+  isVoidRequestDialogOpen: false,
+  voidRequestTargetSaleId: null,
   activeCellSaleId: null,
   activeCellField: null,
   draftValue: '',
@@ -49,6 +55,10 @@ export const useSalesEditStore = create<SalesEditState>()((set) => ({
   closeAuditDrawer: () => set({ openAuditSaleId: null }),
   openVoidDialog: (saleId) => set({ isVoidDialogOpen: true, voidTargetSaleId: saleId }),
   closeVoidDialog: () => set({ isVoidDialogOpen: false, voidTargetSaleId: null }),
+  openVoidRequestDialog: (saleId) =>
+    set({ isVoidRequestDialogOpen: true, voidRequestTargetSaleId: saleId }),
+  closeVoidRequestDialog: () =>
+    set({ isVoidRequestDialogOpen: false, voidRequestTargetSaleId: null }),
 }));
 
 // Synchronous getter for use outside React components if needed

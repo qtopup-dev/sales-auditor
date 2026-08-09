@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useReactTable, getCoreRowModel, getPaginationRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
 import type { Sale } from '@alejinput/shared';
 import { useAuthStore } from '../../stores/authStore';
@@ -8,7 +8,7 @@ import { EditableCell } from './EditableCell';
 import { PaginationFooter, type PageSizeOption } from '../PaginationFooter';
 import { formatDateTime } from '../../lib/dateTime';
 
-const columns: ColumnDef<Sale>[] = [
+const BASE_COLUMNS: ColumnDef<Sale>[] = [
   {
     accessorKey: 'productNameSnapshot',
     header: 'Product',
@@ -87,40 +87,81 @@ const columns: ColumnDef<Sale>[] = [
       );
     },
   },
-  {
-    id: 'actions',
-    header: () => <span className="block text-center">Actions</span>,
-    size: 120,
-    cell: ({ row }) => {
-      const sale = row.original;
-      const { openVoidDialog, openAuditDrawer } = useSalesEditStore.getState();
-      const { user } = useAuthStore.getState();
-      const isAdmin = user?.role === 'admin';
-      const isVoided = sale.status === 'void';
-      return (
-        <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-          {isAdmin && !isVoided && (
-            <button type="button" onClick={() => openVoidDialog(sale.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-normal min-h-[44px] px-1">
-              Void
-            </button>
-          )}
-          {isAdmin && !isVoided && <span className="text-gray-300 dark:text-gray-600">|</span>}
-          {isVoided && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">Void</span>
-          )}
-          {isAdmin && (
-            <button type="button" onClick={() => openAuditDrawer(sale.id)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-normal min-h-[44px] px-1">
-              Audit
-            </button>
-          )}
-        </div>
-      );
-    },
-  },
 ];
 
-export function SalesTable({ sales }: { sales: Sale[] }) {
+export function SalesTable({
+  sales,
+  pendingVoidRequestSaleIds = [],
+}: {
+  sales: Sale[];
+  pendingVoidRequestSaleIds?: number[];
+}) {
   const isAddRowOpen = useSalesEditStore((s) => s.isAddRowOpen);
+
+  // Set of sale ids with a pending Void Request — component-level (server-derived via React
+  // Query in SalesPage), so it cannot live in the module-level base column array.
+  const pendingSet = useMemo(
+    () => new Set(pendingVoidRequestSaleIds),
+    [pendingVoidRequestSaleIds],
+  );
+
+  const columns = useMemo<ColumnDef<Sale>[]>(
+    () => [
+      ...BASE_COLUMNS,
+      {
+        id: 'actions',
+        header: () => <span className="block text-center">Actions</span>,
+        size: 120,
+        cell: ({ row }) => {
+          const sale = row.original;
+          const { openVoidDialog, openAuditDrawer } = useSalesEditStore.getState();
+          const { user } = useAuthStore.getState();
+          const isAdmin = user?.role === 'admin';
+          const isVoided = sale.status === 'void';
+          const isOwnRow = user?.id === sale.createdById;
+          const hasPendingRequest = pendingSet.has(sale.id);
+          return (
+            <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {!isAdmin && !isVoided && isOwnRow && (
+                <button
+                  type="button"
+                  disabled={hasPendingRequest}
+                  title={
+                    hasPendingRequest
+                      ? 'A void request for this row is already pending admin review.'
+                      : 'Request admin approval to void this row.'
+                  }
+                  onClick={() => useSalesEditStore.getState().openVoidRequestDialog(sale.id)}
+                  className={
+                    hasPendingRequest
+                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed text-sm font-normal min-h-[44px] px-1'
+                      : 'text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-normal min-h-[44px] px-1'
+                  }
+                >
+                  Void Request
+                </button>
+              )}
+              {isAdmin && !isVoided && (
+                <button type="button" onClick={() => openVoidDialog(sale.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-normal min-h-[44px] px-1">
+                  Void
+                </button>
+              )}
+              {isAdmin && !isVoided && <span className="text-gray-300 dark:text-gray-600">|</span>}
+              {isVoided && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">Void</span>
+              )}
+              {isAdmin && (
+                <button type="button" onClick={() => openAuditDrawer(sale.id)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-normal min-h-[44px] px-1">
+                  Audit
+                </button>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [pendingSet],
+  );
 
   // Table stretches to fill its container (w-full), so declared column `size` values
   // (used for the initial layout ratio) don't match the actual rendered pixel widths.

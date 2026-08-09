@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/authStore';
 import { SalesTable } from '../components/sales/SalesTable';
 import { AuditDrawer } from '../components/sales/AuditDrawer';
 import { VoidConfirmDialog } from '../components/sales/VoidConfirmDialog';
+import { VoidRequestDialog } from '../components/sales/VoidRequestDialog';
 import { ClockOutConfirmDialog } from '../components/shift/ClockOutConfirmDialog';
 import { ShiftTotalsBanner } from '../components/shift/ShiftTotalsBanner';
 import { formatLongDatePH } from '../lib/shiftTime';
@@ -58,6 +59,16 @@ export function SalesPage() {
     queryFn: () => api.get('/catalog/mops').then((r) => r.data),
     staleTime: 5 * 60 * 1000,
   });
+
+  // Moderator-only: sale ids with a pending Void Request, gates the SalesTable action button
+  // (D-01/D-02). Invalidated by the reason dialog on create and by Plan 12-04 on approve/reject.
+  const { data: pendingVoidRequests } = useQuery<{ saleIds: number[] }>({
+    queryKey: ['void-request-pending-sale-ids'],
+    queryFn: () =>
+      api.get<{ saleIds: number[] }>('/void-requests/pending-sale-ids').then((r) => r.data),
+    enabled: isModerator,
+  });
+  const pendingVoidRequestSaleIds = pendingVoidRequests?.saleIds ?? [];
 
   const hasActiveShift = !!currentShift;
   // D-03: Add Row gating applies ONLY to moderators — admins retain their existing capability.
@@ -118,7 +129,7 @@ export function SalesPage() {
             </div>
           ) : (
             // State C: clocked in, has shift sales.
-            <SalesTable sales={shiftSales} />
+            <SalesTable sales={shiftSales} pendingVoidRequestSaleIds={pendingVoidRequestSaleIds} />
           )
         ) : adminLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -144,6 +155,7 @@ export function SalesPage() {
       {user?.role === 'admin' && <AuditDrawer />}
       <VoidConfirmDialog />
       {isModerator && <ClockOutConfirmDialog />}
+      {isModerator && <VoidRequestDialog />}
     </div>
   );
 }
