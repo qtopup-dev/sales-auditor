@@ -28,6 +28,12 @@ enum AuditAction {
   void
 }
 
+enum VoidRequestStatus {
+  pending
+  approved
+  rejected
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Organization {
@@ -44,6 +50,7 @@ model Organization {
   inviteTokens InviteToken[]
   receivers    Receiver[]
   shifts       Shift[]
+  voidRequests VoidRequest[]
 
   @@map("organizations")
 }
@@ -66,6 +73,8 @@ model User {
   auditLogs     AuditLog[]
   inviteTokens  InviteToken[] @relation("CreatedByUser")
   shifts        Shift[]
+  voidRequestsMade     VoidRequest[] @relation("VoidRequestedBy")
+  voidRequestsReviewed VoidRequest[] @relation("VoidReviewedBy")
 
   @@unique([organizationId, username])
   @@index([organizationId, deletedAt])
@@ -178,6 +187,7 @@ model Sale {
   updatedAt            DateTime     @updatedAt
 
   auditLogs AuditLog[]
+  voidRequests VoidRequest[]
 
   @@index([organizationId, status])
   @@index([organizationId, createdById])
@@ -211,6 +221,37 @@ model AuditLog {
   @@index([organizationId, userId, createdAt])
   @@index([organizationId, createdAt])
   @@map("audit_log")
+}
+
+model VoidRequest {
+  id                   Int                @id @default(autoincrement())
+  organizationId       Int
+  organization         Organization       @relation(fields: [organizationId], references: [id])
+  saleId               Int
+  sale                 Sale               @relation(fields: [saleId], references: [id])
+  reason               String             @db.Text
+  status               VoidRequestStatus  @default(pending)
+  requestedById        Int
+  requestedBy          User               @relation("VoidRequestedBy", fields: [requestedById], references: [id])
+  requestedByUsername  String             @db.VarChar(100)
+  reviewedById         Int?
+  reviewedBy           User?              @relation("VoidReviewedBy", fields: [reviewedById], references: [id])
+  reviewedByUsername   String?            @db.VarChar(100)
+  reviewedAt           DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // NOTE: an additional `pendingLock` generated column + unique index exists in the DB
+  // (added by the migration in Task 2) to enforce "at most one pending void request per
+  // sale row" (CONTEXT.md D-02) at the DB layer — it is intentionally NOT declared here,
+  // same precedent as the `Shift.openLock` generated column and the unmanaged `sessions`
+  // table documented at the bottom of this file. Prisma never reads or writes that column;
+  // it collapses to NULL once a request leaves `pending`, so a rejected request never
+  // permanently blocks a future request on the same sale row (D-03).
+  @@index([organizationId, status])
+  @@index([organizationId, saleId])
+  @@index([organizationId, createdAt])
+  @@map("void_requests")
 }
 
 model InviteToken {
