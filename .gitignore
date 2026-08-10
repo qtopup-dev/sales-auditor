@@ -28,5 +28,8 @@ Thumbs.db
 # Claude Code local config (machine-specific, contains worktrees)
 .claude/
 
+# GSD workflow dispatch state (ephemeral, machine-specific)
+.gsd/
+
 # Playwright MCP browser data
 .playwright-mcp/
