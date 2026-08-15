@@ -21,7 +21,7 @@ const INACTIVE_TAB_CLASSES =
 
 export function AdminShiftTabs({ tabs, activeShiftId, onSelect }: AdminShiftTabsProps) {
   return (
-    <div className="flex gap-1 overflow-x-auto bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 pt-2">
+    <div className="flex flex-shrink-0 gap-1 overflow-x-auto bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.shiftId}
