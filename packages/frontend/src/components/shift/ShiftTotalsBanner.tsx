@@ -9,6 +9,13 @@ interface ShiftTotalsBannerProps {
   loading?: boolean;
 }
 
+// Pure string manipulation — no float conversion (Rule 6). Same pattern as KpiCard's addThousandsSep.
+function addThousandsSep(moneyStr: string): string {
+  const [int, dec] = moneyStr.split('.');
+  const withCommas = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return dec !== undefined ? `${withCommas}.${dec}` : withCommas;
+}
+
 export function ShiftTotalsBanner({ count, revenue, loading = false }: ShiftTotalsBannerProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
@@ -26,7 +33,7 @@ export function ShiftTotalsBanner({ count, revenue, loading = false }: ShiftTota
           <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 rounded w-24" />
         ) : (
           // Pure string concat — NEVER parseFloat/Number() (CLAUDE.md Rule 6)
-          <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{'₱' + revenue}</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{'₱' + addThousandsSep(revenue)}</p>
         )}
       </div>
     </div>
