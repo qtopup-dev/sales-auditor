@@ -104,6 +104,12 @@ const createSaleValidation = [
   body('mopId').isInt({ min: 1 }).withMessage('MOP is required'),
   body('receiverId').isInt({ min: 1 }).withMessage('Receiver is required'),
   body('notes').optional().isString(),
+  body('tip')
+    .custom((v) => {
+      parseTip(v);
+      return true;
+    })
+    .withMessage('Tip must be a non-negative amount with up to 2 decimals (max 99999999.99)'),
 ];
 
 const patchSaleValidation = [
@@ -184,11 +190,12 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
     return;
   }
 
-  const { productId, mopId, receiverId, notes } = req.body as {
+  const { productId, mopId, receiverId, notes, tip } = req.body as {
     productId: number;
     mopId: number;
     receiverId: number;
     notes?: string;
+    tip?: string | number | null;
   };
 
   const sale = await prisma.$transaction(async (tx: PrismaTransactionClient) => {
@@ -249,6 +256,7 @@ salesRouter.post('/', createSaleValidation, async (req: Request, res: Response) 
         productId: Number(productId),
         productNameSnapshot: product.name,
         priceSnapshot: product.price, // Decimal field — Prisma accepts the Decimal value directly
+        tip: parseTip(tip),
         mopId: Number(mopId),
         mopNameSnapshot: mop.name,
         receiverId: receiver.id,

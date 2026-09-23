@@ -5,27 +5,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
 import { makeSelectStyles } from '../../lib/selectStyles';
 import { useSalesEditStore } from '../../stores/salesEditStore';
+import { TIP_PATTERN, TIP_ERROR, isZeroTip, blockNonTipKeys } from '../../lib/tip';
 
 interface AddRowFormProps {
   onSaveSuccess: () => void;
-  // Actual rendered <th> widths from SalesTable, in column order (Product, Price, MOP,
-  // Receiver, Notes, Date Edited, Actions) — the table stretches to fill its container
-  // (w-full), so these can differ from the columns' declared `size` values. Falls back to
-  // the declared sizes until the first measurement lands (avoids a flash of 0-width fields).
+  // Actual rendered <th> widths from SalesTable, in column order (Product, Price, Tip,
+  // MOP, Receiver, Notes, Date Edited, Actions) — the table stretches to fill its
+  // container (w-full), so these can differ from the columns' declared `size` values.
+  // Falls back to the declared sizes until the first measurement lands (avoids a flash
+  // of 0-width fields).
   columnWidths: number[] | null;
 }
 
-const DEFAULT_COLUMN_WIDTHS = [200, 100, 180, 160, 160, 140, 120];
+const DEFAULT_COLUMN_WIDTHS = [200, 100, 100, 180, 160, 160, 140, 120];
 
 type AddRowFormData = {
   productId: number | null;
   mopId: number | null;
   receiverId: number | null;  // FK replacing free-text receiver (Phase 5)
   notes: string;
+  tip: string;
 };
 
 export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
-  const [productW, priceW, mopW, receiverW, notesW, dateEditedW, actionsW] =
+  const [productW, priceW, tipW, mopW, receiverW, notesW, dateEditedW, actionsW] =
     columnWidths ?? DEFAULT_COLUMN_WIDTHS;
   const queryClient = useQueryClient();
   const closeAddRow = useSalesEditStore((s) => s.closeAddRow);
@@ -37,7 +40,7 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
     watch,
     formState: { errors },
   } = useForm<AddRowFormData>({
-    defaultValues: { productId: null, mopId: null, receiverId: null, notes: '' },
+    defaultValues: { productId: null, mopId: null, receiverId: null, notes: '', tip: '' },
   });
 
   const [priceDisplay, setPriceDisplay] = useState<string>('—');
@@ -52,8 +55,10 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
   const watchedProductId = watch('productId');
   const watchedMopId = watch('mopId');
   const watchedReceiverId = watch('receiverId');
+  const watchedTip = watch('tip');
+  const tipInvalid = watchedTip !== '' && !TIP_PATTERN.test(watchedTip);
   const isFormValid =
-    watchedProductId !== null && watchedMopId !== null && watchedReceiverId !== null;
+    watchedProductId !== null && watchedMopId !== null && watchedReceiverId !== null && !tipInvalid;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,7 +143,9 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
 
   return (
     <form
-      onSubmit={handleSubmit((data) => createMutation.mutate(data))}
+      onSubmit={handleSubmit((data) =>
+        createMutation.mutate({ ...data, tip: isZeroTip(data.tip) ? '' : data.tip }),
+      )}
       className="w-full"
     >
       <div className="flex items-start px-0 py-2 gap-0 w-full">
@@ -177,6 +184,23 @@ export function AddRowForm({ onSaveSuccess, columnWidths }: AddRowFormProps) {
           <span className="block text-right text-sm font-normal text-gray-400 dark:text-gray-500 pt-2">
             {priceDisplay}
           </span>
+        </div>
+
+        {/* Tip */}
+        <div style={{ width: tipW, padding: '0 16px', flexShrink: 0 }}>
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="Tip"
+            disabled={isPending}
+            onKeyDown={blockNonTipKeys}
+            aria-invalid={tipInvalid}
+            {...register('tip')}
+            className={`w-full border ${tipInvalid ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm font-normal text-right focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900`}
+          />
+          {tipInvalid && (
+            <p className="text-xs font-normal text-red-600 dark:text-red-400 mt-1">{TIP_ERROR}</p>
+          )}
         </div>
 
         {/* MOP */}

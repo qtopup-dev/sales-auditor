@@ -6,6 +6,7 @@ import { api } from '../../lib/axios';
 import { makeSelectStyles } from '../../lib/selectStyles';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { useAuthStore } from '../../stores/authStore';
+import { TIP_PATTERN, TIP_ERROR, isZeroTip, blockNonTipKeys } from '../../lib/tip';
 
 interface EditableCellProps {
   sale: Sale;
@@ -66,6 +67,12 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   const canEdit = user?.role === 'admin' || user?.canEdit === true;
   const isEditable = canEdit && sale.status !== 'void';
 
+  // Tip-specific derived state (D-11, D-12, D-15, D-21)
+  const isTip = field === 'tip';
+  const tipInvalid = isTip && draftValue !== '' && !TIP_PATTERN.test(draftValue);
+  const emptyText = isTip ? '' : '—'; // D-21: no dash for an empty tip cell
+  const align = isTip ? ' justify-end text-right' : ''; // D-11: right-align like Price
+
   // Auto-focus input when cell becomes active
   useEffect(() => {
     if (isThisCellActive && !isThisCellPending && inputRef.current) {
@@ -88,6 +95,9 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
         .then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      // Tip edits change revenue totals — refresh the shift banner and admin dashboard.
+      queryClient.invalidateQueries({ queryKey: ['current-shift'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-summary'] });
       clearActiveCell();
       setPending(false);
     },
@@ -115,10 +125,16 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   const handleBlur = () => {
     const { isPending: curPending, draftValue: curDraft } = useSalesEditStore.getState();
     if (!isThisCellActive || curPending) return;
+    // D-15: an invalid tip is discarded on blur — nothing saved, no inline error persists.
+    if (isTip && curDraft !== '' && !TIP_PATTERN.test(curDraft)) {
+      clearActiveCell();
+      return;
+    }
+    const nextValue = isTip && isZeroTip(curDraft) ? '' : curDraft; // D-12: 0 → blank
     const originalValue = String(sale[field as keyof Sale] ?? '');
-    if (curDraft !== originalValue) {
+    if (nextValue !== originalValue) {
       setPending(true);
-      patchMutation.mutate({ saleId: sale.id, field, value: curDraft });
+      patchMutation.mutate({ saleId: sale.id, field, value: nextValue });
     } else {
       clearActiveCell();
     }
@@ -156,8 +172,8 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   // ── Pending state (cell disabled with spinner) ──────────────────────────────
   if (isThisCellPending) {
     return (
-      <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 opacity-60 min-h-[48px] px-0 py-2">
-        <span className="text-sm font-normal text-gray-400 dark:text-gray-500">{displayValue || '—'}</span>
+      <div className={`flex items-center gap-1 bg-gray-100 dark:bg-gray-800 opacity-60 min-h-[48px] px-0 py-2${align}`}>
+        <span className="text-sm font-normal text-gray-400 dark:text-gray-500">{displayValue || emptyText}</span>
         <svg
           className="animate-spin h-4 w-4 text-gray-400 ml-1 flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
@@ -234,25 +250,33 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
       );
     }
 
-    // Text fields: plain input
+    // Text fields: plain input (only `tip` reaches here — select fields and notes return above)
     return (
-      <div className="min-h-[48px] flex items-center">
+      <div className="min-h-[48px] flex flex-col justify-center">
         <input
           ref={(el) => {
             inputRef.current = el;
           }}
           type="text"
+          inputMode="decimal"
+          aria-invalid={tipInvalid}
           value={draftValue}
           onChange={(e) => setDraftValue(e.target.value)}
           onBlur={handleBlur}
-          className="w-full border border-blue-500 rounded-sm px-2 py-1 text-sm font-normal text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className={`w-full border ${tipInvalid ? 'border-red-500' : 'border-blue-500'} rounded-sm px-2 py-1 text-sm font-normal text-right text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500`}
           onKeyDown={(e) => {
+            blockNonTipKeys(e);
             if (e.key === 'Escape') {
               e.preventDefault();
               clearActiveCell(); // discard draft without saving
             }
           }}
         />
+        {tipInvalid && (
+          <p role="alert" className="text-xs font-normal text-red-600 dark:text-red-400 mt-1">
+            {TIP_ERROR}
+          </p>
+        )}
       </div>
     );
   }
@@ -266,16 +290,16 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
   if (!isEditable) {
     return (
       <span
-        className={`${displayClass} cursor-default block min-h-[48px] flex items-center`}
+        className={`${displayClass} cursor-default block min-h-[48px] flex items-center${align}`}
       >
-        {displayValue || '—'}
+        {displayValue || emptyText}
       </span>
     );
   }
 
   return (
     <span
-      className={`${displayClass} cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950 block min-h-[48px] flex items-center rounded-sm -mx-1 px-1`}
+      className={`${displayClass} cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950 block min-h-[48px] flex items-center rounded-sm -mx-1 px-1${align}`}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -283,7 +307,7 @@ export function EditableCell({ sale, field, displayValue }: EditableCellProps) {
         if (e.key === 'Enter' || e.key === ' ') handleClick();
       }}
     >
-      {displayValue || <span className="text-gray-400 dark:text-gray-500">—</span>}
+      {displayValue || (emptyText && <span className="text-gray-400 dark:text-gray-500">{emptyText}</span>)}
     </span>
   );
 }
