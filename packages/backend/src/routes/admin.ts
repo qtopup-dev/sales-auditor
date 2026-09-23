@@ -133,7 +133,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
+          SUM(priceSnapshot + COALESCE(tip, 0)) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -142,7 +142,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
+          SUM(priceSnapshot + COALESCE(tip, 0)) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -151,7 +151,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
+          SUM(priceSnapshot + COALESCE(tip, 0)) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -161,7 +161,7 @@ adminRouter.get('/summary', async (req, res) => {
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
           SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
+          SUM(priceSnapshot + COALESCE(tip, 0)) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
