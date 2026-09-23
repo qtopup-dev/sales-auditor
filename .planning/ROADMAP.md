@@ -304,12 +304,12 @@ Plans:
 **Goal:** Every moderator sales sheet gets an optional numeric "Tip" column. Tips add to the sheet's total revenue. Negative values are rejected (frontend and backend); only positive numbers allowed, blank = no tip. Money stored as DECIMAL(10,2) per project rules.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — Tracer: sales.tip DECIMAL(10,2) column + migration, parseTip validation/normalization + runnable check, audited PATCH/create, Tip column + Add Row input on the moderator sheet
+- [x] 13-01-PLAN.md — Tracer: sales.tip DECIMAL(10,2) column + migration, parseTip validation/normalization + runnable check, audited PATCH/create, Tip column + Add Row input on the moderator sheet
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

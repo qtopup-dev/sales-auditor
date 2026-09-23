@@ -2,23 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 12
-current_phase_name: moderator-void-requests
+current_phase: 13
+current_phase_name: moderator-sales-sheet-tip-column
 status: ready_to_plan
-stopped_at: Phase 13 context gathered
-last_updated: "2026-09-23T03:46:06.380Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-09-23T04:05:53.090Z"
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 61
-  completed_plans: 58
+  completed_plans: 59
 ---
 
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-08-09
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-09-23T02:55:08.280Z
+**Last session:** 2026-09-23T04:05:53.045Z
 
 ---
 
@@ -26,7 +26,7 @@ progress:
 
 **Core value:** Every sales entry is traceable — who submitted it, what changed, when, and by whom — giving the admin a reliable audit trail of all sales activity.
 
-**Current focus:** Phase 12 — moderator-void-requests
+**Current focus:** Phase 13 — moderator-sales-sheet-tip-column
 
 **Stack:** React 18 + Vite + TypeScript (frontend) | Express 5 + Prisma 7 + MySQL 8.4 (backend) | express-session + express-mysql-session (auth) | Monorepo via npm workspaces
 
@@ -34,17 +34,17 @@ progress:
 
 ## Current Position
 
-Phase: 12 (moderator-void-requests) — EXECUTING
-Plan: Not started
+Phase: 13 (moderator-sales-sheet-tip-column) — EXECUTING
+Plan: 2 of 3
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
-| Current phase | 12 |
+| Current phase | 13 |
 | Phase status | Context gathered — ready for `/gsd-plan-phase 12` |
 | Overall progress | 12 of 12 prior phases complete; Phase 12 in progress |
 
 ```
-Progress: [██████████] 100%
+Progress: [██████████] 97%
 Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [==========] Complete (6/6 plans complete)
 Phase 3: Sales Core         [==========] Complete (8/8 plans complete)
@@ -77,6 +77,11 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 | Phase 06-add-dashboard-kpi-summary-cards-to-admin-dashboard-top P02 | 22 | 2 tasks | 2 files |
 | Phase 10-add-the-option-to-delete-receivers-for-the-admin-role-mirror P01 | 15min | 3 tasks | 3 files |
 | Phase 10 P02 | 8min | 2 tasks | 2 files |
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 13 P01 | 45min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -154,8 +159,8 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 
 ## Session Continuity
 
-**Stopped at:** Phase 13 context gathered
-**Resume file:** .planning/phases/13-moderator-sales-sheet-tip-column/13-CONTEXT.md
+**Stopped at:** Completed 13-01-PLAN.md
+**Resume file:** None
 
 **How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-execute-phase 1` to execute the 5 plans for Phase 1.
 
@@ -167,3 +172,8 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 4. `/gsd-plan-phase 4` — Admin Dashboard + Management (filters, charts, CSV, user management)
 
 **Planned Phase:** 11 (add-created-at-column-to-admin-and-moderator-sheets-with-hum) — 1 plans — 2026-07-29T14:19:49.360Z
+
+## Decisions
+
+- [Phase ?]: Tip PATCH reuses existing notes-style permission/ownership checks (D-10) — no new RBAC logic added
+- [Phase ?]: 0 / 0.00 normalizes to null on both backend (parseTip) and frontend (isZeroTip) — single representation of no tip (D-12)
