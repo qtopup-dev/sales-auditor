@@ -10,6 +10,7 @@
     "dev:api": "cross-env TZ=UTC tsx --watch packages/backend/src/index.ts",
     "dev:ui": "vite --config packages/frontend/vite.config.ts",
     "build": "npm run build --workspaces",
+    "test": "npm run test --workspace=@alejinput/backend",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
