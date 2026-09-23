@@ -304,7 +304,7 @@ Plans:
 **Goal:** Every moderator sales sheet gets an optional numeric "Tip" column. Tips add to the sheet's total revenue. Negative values are rejected (frontend and backend); only positive numbers allowed, blank = no tip. Money stored as DECIMAL(10,2) per project rules.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 **Wave 1**
@@ -313,7 +313,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 13-02-PLAN.md — Tips counted in every revenue figure (shift banner, shift history, admin shift tabs, dashboard total, KPIs; product breakdown stays price-only) + `incl. ₱X tips` captions + admin per-shift Tip column
+- [x] 13-02-PLAN.md — Tips counted in every revenue figure (shift banner, shift history, admin shift tabs, dashboard total, KPIs; product breakdown stays price-only) + `incl. ₱X tips` captions + admin per-shift Tip column
 - [ ] 13-03-PLAN.md — Admin tables: inline-editable Tip column + CSV Tip column on the dashboard, Tip column on Void Requests
 
 ---

@@ -5,20 +5,20 @@ milestone_name: milestone
 current_phase: 13
 current_phase_name: moderator-sales-sheet-tip-column
 status: ready_to_plan
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-09-23T04:05:53.090Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-09-23T04:12:35.047Z"
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 61
-  completed_plans: 59
+  completed_plans: 60
 ---
 
 # Project State — Sales Auditing Web App
 
 **Last updated:** 2026-08-09
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-09-23T04:05:53.045Z
+**Last session:** 2026-09-23T04:12:28.155Z
 
 ---
 
@@ -35,7 +35,7 @@ progress:
 ## Current Position
 
 Phase: 13 (moderator-sales-sheet-tip-column) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 | Field | Value |
 |-------|-------|
 | Milestone | 1 — v1 MVP |
@@ -44,7 +44,7 @@ Plan: 2 of 3
 | Overall progress | 12 of 12 prior phases complete; Phase 12 in progress |
 
 ```
-Progress: [██████████] 97%
+Progress: [██████████] 98%
 Phase 1: Foundation         [==========] Complete (5/5 plans complete)
 Phase 2: Auth + Catalogs    [==========] Complete (6/6 plans complete)
 Phase 3: Sales Core         [==========] Complete (8/8 plans complete)
@@ -82,6 +82,7 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 13 P01 | 45min | 2 tasks | 10 files |
+| Phase 13 P02 | 25min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -159,7 +160,7 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 
 ## Session Continuity
 
-**Stopped at:** Completed 13-01-PLAN.md
+**Stopped at:** Completed 13-02-PLAN.md
 **Resume file:** None
 
 **How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-execute-phase 1` to execute the 5 plans for Phase 1.
@@ -177,3 +178,5 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 
 - [Phase ?]: Tip PATCH reuses existing notes-style permission/ownership checks (D-10) — no new RBAC logic added
 - [Phase ?]: 0 / 0.00 normalizes to null on both backend (parseTip) and frontend (isZeroTip) — single representation of no tip (D-12)
+- [Phase ?]: Combined revenue computed via Prisma.Decimal.add() at the JS aggregate layer and SQL priceSnapshot + COALESCE(tip, 0) at the raw-SQL KPI layer — both Decimal-safe (CLAUDE.md Rule 6)
+- [Phase ?]: activeSalesTips/totalTips returned as separate fields alongside combined revenue so the frontend never parses floats to derive the tips-only caption
