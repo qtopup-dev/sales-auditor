@@ -307,8 +307,12 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 13-01-PLAN.md — Tracer: sales.tip DECIMAL(10,2) column + migration, parseTip validation/normalization + runnable check, audited PATCH/create, Tip column + Add Row input on the moderator sheet
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 13-02-PLAN.md — Tips counted in every revenue figure (shift banner, shift history, admin shift tabs, dashboard total, KPIs; product breakdown stays price-only) + `incl. ₱X tips` captions + admin per-shift Tip column
 - [ ] 13-03-PLAN.md — Admin tables: inline-editable Tip column + CSV Tip column on the dashboard, Tip column on Void Requests
 
