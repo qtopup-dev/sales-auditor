@@ -304,7 +304,7 @@ Plans:
 **Goal:** Every moderator sales sheet gets an optional numeric "Tip" column. Tips add to the sheet's total revenue. Negative values are rejected (frontend and backend); only positive numbers allowed, blank = no tip. Money stored as DECIMAL(10,2) per project rules.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**

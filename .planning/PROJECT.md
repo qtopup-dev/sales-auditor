@@ -12,7 +12,7 @@ Every sales entry is traceable — who submitted it, what changed, when, and by 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Optional non-negative Tip per sales row (DECIMAL(10,2)), counted in every revenue total except the per-product breakdown — Validated in Phase 13: Moderator Sales Sheet Tip Column
 
 ### Active
 
@@ -131,4 +131,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-09 after Phase 12 (Moderator Void Requests) completion — final phase of the v1.0 milestone*
+*Last updated: 2026-09-23 after Phase 13 (Moderator Sales Sheet Tip Column) completion*
