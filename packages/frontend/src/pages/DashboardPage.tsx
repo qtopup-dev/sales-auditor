@@ -34,6 +34,7 @@ interface KpiPeriodMoney {
 interface AdminSummary {
   totalCount: number;
   totalRevenue: string;
+  totalTips: string;
   trendData: Array<{ date: string; count: number }>;
   productBreakdown: Array<{ name: string; count: number; revenue: string }>;
   mopBreakdown: Array<{ name: string; count: number }>;
@@ -108,6 +109,11 @@ export function DashboardPage() {
     ? '₱' + summary.totalRevenue.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     : '—';
   const totalSalesValue = summary ? String(summary.totalCount) : '—';
+  // Total Revenue caption only (D-05/D-06) — hidden when tips are 0.00; string-regex only, no float.
+  const tipsCaption =
+    summary && summary.totalTips !== '0.00'
+      ? 'incl. ₱' + summary.totalTips.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' tips'
+      : undefined;
 
   return (
     <div>
@@ -157,6 +163,7 @@ export function DashboardPage() {
         <StatCard
           label="Total Revenue"
           value={revenueValue}
+          caption={tipsCaption}
           loading={summaryLoading}
         />
       </div>

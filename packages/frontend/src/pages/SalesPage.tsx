@@ -17,6 +17,7 @@ interface CurrentShiftWithTotals {
   clockOutAt: string | null;
   activeSalesCount: number;
   activeSalesRevenue: string;
+  activeSalesTips: string;
 }
 
 export function SalesPage() {
@@ -98,6 +99,7 @@ export function SalesPage() {
         <ShiftTotalsBanner
           count={currentShift!.activeSalesCount}
           revenue={currentShift!.activeSalesRevenue}
+          tips={currentShift!.activeSalesTips}
         />
       )}
 

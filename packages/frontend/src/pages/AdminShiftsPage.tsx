@@ -12,6 +12,7 @@ interface AdminShiftSaleRow {
   id: number;
   productNameSnapshot: string;
   priceSnapshot: string;
+  tip: string | null;
   mopNameSnapshot: string;
   receiverNameSnapshot: string;
   notes: string | null;
@@ -26,6 +27,7 @@ interface AdminShiftTab {
   clockOutAt: string | null;
   activeSalesCount: number;
   activeSalesRevenue: string;
+  activeSalesTips: string;
   sales: AdminShiftSaleRow[];
 }
 
@@ -101,7 +103,11 @@ export function AdminShiftsPage() {
           {selectedTab && (
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-t-0 rounded-b-md p-4 md:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-                <ShiftTotalsBanner count={selectedTab.activeSalesCount} revenue={selectedTab.activeSalesRevenue} />
+                <ShiftTotalsBanner
+                  count={selectedTab.activeSalesCount}
+                  revenue={selectedTab.activeSalesRevenue}
+                  tips={selectedTab.activeSalesTips}
+                />
                 {isToday && selectedTab.clockOutAt === null && (
                   <button
                     type="button"
@@ -130,6 +136,7 @@ export function AdminShiftsPage() {
                         <tr className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                           <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Product</th>
                           <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-right">Price</th>
+                          <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-right">Tip</th>
                           <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">MOP</th>
                           <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Receiver</th>
                           <th className="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left">Notes</th>
@@ -151,6 +158,7 @@ export function AdminShiftsPage() {
                             >
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.productNameSnapshot}</td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">{sale.priceSnapshot}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">{sale.tip ?? ''}</td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.mopNameSnapshot}</td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{sale.receiverNameSnapshot}</td>
                               <td

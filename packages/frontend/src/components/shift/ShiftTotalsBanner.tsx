@@ -6,6 +6,7 @@
 interface ShiftTotalsBannerProps {
   count: number;
   revenue: string; // DECIMAL string, never parsed as float (CLAUDE.md Rule 6)
+  tips?: string; // DECIMAL string tips-only share of `revenue` (Phase 13 D-04, Rule 6)
   loading?: boolean;
 }
 
@@ -16,7 +17,7 @@ function addThousandsSep(moneyStr: string): string {
   return dec !== undefined ? `${withCommas}.${dec}` : withCommas;
 }
 
-export function ShiftTotalsBanner({ count, revenue, loading = false }: ShiftTotalsBannerProps) {
+export function ShiftTotalsBanner({ count, revenue, tips, loading = false }: ShiftTotalsBannerProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-6">
@@ -33,7 +34,14 @@ export function ShiftTotalsBanner({ count, revenue, loading = false }: ShiftTota
           <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 rounded w-24" />
         ) : (
           // Pure string concat — NEVER parseFloat/Number() (CLAUDE.md Rule 6)
-          <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{'₱' + addThousandsSep(revenue)}</p>
+          <>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{'₱' + addThousandsSep(revenue)}</p>
+            {tips && tips !== '0.00' && (
+              <p className="text-xs font-normal text-gray-500 dark:text-gray-400 mt-1">
+                {'incl. ₱' + addThousandsSep(tips) + ' tips'}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>
