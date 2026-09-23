@@ -299,6 +299,19 @@ Plans:
 - [x] 12-03-PLAN.md — Moderator Sales sheet: gated "Void Request" button, reason dialog, and pending-state disabling
 - [x] 12-04-PLAN.md — Admin /void-requests page: requests table with Reason + Status, Approve confirm dialog, instant Reject, and the red sidebar pending-count badge
 
+### Phase 13: Moderator Sales Sheet Tip Column
+
+**Goal:** Every moderator sales sheet gets an optional numeric "Tip" column. Tips add to the sheet's total revenue. Negative values are rejected (frontend and backend); only positive numbers allowed, blank = no tip. Money stored as DECIMAL(10,2) per project rules.
+**Requirements**: TBD
+**Depends on:** Phase 12
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 13-01-PLAN.md — Tracer: sales.tip DECIMAL(10,2) column + migration, parseTip validation/normalization + runnable check, audited PATCH/create, Tip column + Add Row input on the moderator sheet
+- [ ] 13-02-PLAN.md — Tips counted in every revenue figure (shift banner, shift history, admin shift tabs, dashboard total, KPIs; product breakdown stays price-only) + `incl. ₱X tips` captions + admin per-shift Tip column
+- [ ] 13-03-PLAN.md — Admin tables: inline-editable Tip column + CSV Tip column on the dashboard, Tip column on Void Requests
+
 ---
 
 ## Traceability
