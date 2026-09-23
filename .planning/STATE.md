@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 12
 current_phase_name: moderator-void-requests
 status: ready_to_plan
-stopped_at: Phase 12 UI-SPEC approved
-last_updated: "2026-08-09T14:11:44.341Z"
+stopped_at: Phase 13 context gathered
+last_updated: "2026-09-23T02:55:08.322Z"
 progress:
-  total_phases: 12
+  total_phases: 13
   completed_phases: 12
   total_plans: 58
   completed_plans: 58
@@ -18,7 +18,7 @@ progress:
 
 **Last updated:** 2026-08-09
 **Mode:** yolo | **Granularity:** coarse
-**Last session:** 2026-08-09T06:34:14.610Z
+**Last session:** 2026-09-23T02:55:08.280Z
 
 ---
 
@@ -135,6 +135,7 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 - Phase 10 added: Add the option to delete Receivers for the admin role — mirrors Phase 9's delete pattern for Products/MOPs (soft-delete via deletedAt, confirm dialog); Receiver model currently only has isActive, needs the same schema migration treatment as Phase 9 Plan 09-01
 - Phase 11 added: Add "Created At" column to admin and moderator sheets, with humanized date format ("July 29, 2026") applied consistently across the sheets, audit logs, and edited-at timestamps. Clarified: the Created At column must be visible on the /sales page for both admin and moderator sheets.
 - Phase 12 added: Moderator Void Requests — moderators submit a "Void Request" (button + tooltip) with a plain-text reason instead of voiding directly; admin gets a new "Void Requests" sidebar tab with a red unread-count badge (count of pending, unreviewed requests) showing a sales-like table with an added Reason column; admin can approve (voids the row, reflects as voided on the moderator's sheet) or reject (row stays as-is, request stays recorded).
+- Phase 13 added: Optional "Tip" column on all moderator sales sheets — non-negative numbers only; tips add to the sheet's total revenue
 
 ### Todos
 
@@ -153,8 +154,8 @@ Phase 999.1: Catalog Lag Fix [==========] Complete (2/2 plans complete)
 
 ## Session Continuity
 
-**Stopped at:** Phase 12 UI-SPEC approved
-**Resume file:** .planning/phases/12-moderator-void-requests/12-UI-SPEC.md
+**Stopped at:** Phase 13 context gathered
+**Resume file:** .planning/phases/13-moderator-sales-sheet-tip-column/13-CONTEXT.md
 
 **How to resume:** Read PROJECT.md and ROADMAP.md. Check current phase in this file. Run `/gsd-execute-phase 1` to execute the 5 plans for Phase 1.
 
