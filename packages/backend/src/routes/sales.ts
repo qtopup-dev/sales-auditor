@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
+import { parseTip } from '../lib/tip.js';
 import type { PrismaTransactionClient } from '../lib/prisma.js';
 
 export const salesRouter = Router();
@@ -19,6 +20,7 @@ export function serializeSale(sale: {
   productId: number;
   productNameSnapshot: string;
   priceSnapshot: { toFixed: (n: number) => string };
+  tip: { toFixed: (n: number) => string } | null;
   mopId: number;
   mopNameSnapshot: string;
   receiverId: number;
@@ -39,6 +41,7 @@ export function serializeSale(sale: {
     productId: sale.productId,
     productNameSnapshot: sale.productNameSnapshot,
     priceSnapshot: sale.priceSnapshot.toFixed(2),
+    tip: sale.tip?.toFixed(2) ?? null,
     mopId: sale.mopId,
     mopNameSnapshot: sale.mopNameSnapshot,
     receiverId: sale.receiverId,
@@ -91,7 +94,7 @@ function serializeAuditEntry(entry: {
 // ─── Allowed PATCH fields ─────────────────────────────────────────────────────
 // SECURITY (T-03-03): allowlist prevents injection of status, organizationId, createdById, etc.
 
-const ALLOWED_PATCH_FIELDS = ['productId', 'mopId', 'receiverId', 'notes'] as const;
+const ALLOWED_PATCH_FIELDS = ['productId', 'mopId', 'receiverId', 'notes', 'tip'] as const;
 type AllowedPatchField = (typeof ALLOWED_PATCH_FIELDS)[number];
 
 // ─── Validation arrays ────────────────────────────────────────────────────────
@@ -111,6 +114,13 @@ const patchSaleValidation = [
     .if(body('field').isIn(['productId', 'mopId', 'receiverId']))
     .isInt({ min: 1 })
     .withMessage('productId, mopId, and receiverId must be positive integers'),
+  body('value')
+    .if(body('field').equals('tip'))
+    .custom((v) => {
+      parseTip(v);
+      return true;
+    })
+    .withMessage('Tip must be a non-negative amount with up to 2 decimals (max 99999999.99)'),
 ];
 
 const voidSaleValidation = [
@@ -513,6 +523,44 @@ salesRouter.patch('/:id', patchSaleValidation, async (req: Request, res: Respons
             newValue: updated.receiverNameSnapshot,
           },
         ],
+      });
+
+      return updated;
+    } else if (field === 'tip') {
+      // Money field: normalize/validate via parseTip, audit as .toFixed(2) strings or ''
+      // for null (D-08/D-09), and skip the write+audit entirely when the canonical value
+      // is unchanged (prevents phantom audit rows from e.g. "20.5" vs "20.50").
+      const newTip = parseTip(rawValue);
+      const oldValue = sale.tip?.toFixed(2) ?? '';
+
+      if ((newTip ?? '') === oldValue) {
+        return sale;
+      }
+
+      const updated = await tx.sale.update({
+        where: { id: saleId },
+        data: {
+          tip: newTip,
+          lastEditedById: req.session.userId!,
+          lastEditedByUsername: req.session.username!,
+        },
+      });
+
+      const newValue = updated.tip?.toFixed(2) ?? '';
+
+      await tx.auditLog.create({
+        data: {
+          organizationId: req.session.organizationId!,
+          userId: req.session.userId!,
+          userUsername: req.session.username!,
+          saleId,
+          tableName: 'sales',
+          rowId: saleId,
+          action: 'update',
+          fieldName: 'tip',
+          oldValue,
+          newValue,
+        },
       });
 
       return updated;

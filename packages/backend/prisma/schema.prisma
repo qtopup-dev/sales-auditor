@@ -167,6 +167,7 @@ model Sale {
   // Snapshot fields — denormalized at creation; never join products/mops for display (CLAUDE.md Rule 4)
   productNameSnapshot  String       @db.VarChar(255)
   priceSnapshot        Decimal      @db.Decimal(10, 2)
+  tip                  Decimal?     @db.Decimal(10, 2)
   mopId                Int
   mop                  Mop          @relation(fields: [mopId], references: [id])
   mopNameSnapshot      String       @db.VarChar(255)

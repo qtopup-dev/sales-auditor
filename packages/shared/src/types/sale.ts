@@ -13,6 +13,7 @@ export interface Sale {
   productId: number;
   productNameSnapshot: string;      // Denormalized at creation — never join to products for display (CLAUDE.md Rule 4)
   priceSnapshot: string;            // DECIMAL(10,2) returned as string (CLAUDE.md Rule 6)
+  tip: string | null;               // DECIMAL(10,2) as string; null means no tip (CLAUDE.md Rule 6)
   mopId: number;
   mopNameSnapshot: string;          // Denormalized at creation — never join to mops for display
   receiverId: number;               // FK to receivers table (replaces free-text receiver — Phase 5)

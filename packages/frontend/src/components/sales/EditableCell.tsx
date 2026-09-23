@@ -9,7 +9,7 @@ import { useAuthStore } from '../../stores/authStore';
 
 interface EditableCellProps {
   sale: Sale;
-  field: 'productId' | 'mopId' | 'receiverId' | 'notes';
+  field: 'productId' | 'mopId' | 'receiverId' | 'notes' | 'tip';
   displayValue: string;
 }
 

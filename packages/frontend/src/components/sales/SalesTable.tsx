@@ -32,6 +32,15 @@ const BASE_COLUMNS: ColumnDef<Sale>[] = [
     },
   },
   {
+    accessorKey: 'tip',
+    header: () => <span className="block text-right">Tip</span>,
+    size: 100,
+    cell: ({ row }) => {
+      const sale = row.original;
+      return <EditableCell sale={sale} field="tip" displayValue={sale.tip ?? ''} />;
+    },
+  },
+  {
     accessorKey: 'mopNameSnapshot',
     header: 'Mode of Payment',
     size: 180,
@@ -214,7 +223,7 @@ export function SalesTable({
   return (
     <div className="flex flex-col h-full">
       <div className="overflow-auto flex-1 min-h-0">
-        <table className="w-full border-collapse" style={{ minWidth: '1060px', tableLayout: 'fixed' }}>
+        <table className="w-full border-collapse" style={{ minWidth: '1160px', tableLayout: 'fixed' }}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} ref={headerRowRef} className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
