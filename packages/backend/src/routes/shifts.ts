@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 export const shiftsRouter = Router();
 
@@ -98,7 +99,8 @@ shiftsRouter.post('/clock-out', async (req: Request, res: Response) => {
 // D-13: live totals — active-sales count + revenue scoped to the caller's own current shift.
 // Returns `null` (not 404) when not clocked in — matches the frontend's
 // `useQuery<CurrentShift | null>` contract (UI-SPEC.md §ClockControl).
-// Rule 6: revenue computed via Prisma aggregate (Decimal), never JS float / parseFloat.
+// Rule 6: revenue (price + tip, Phase 13 D-01) computed via Prisma.Decimal `.add()`, never JS
+// float / parseFloat. Tips-only share also returned, for the banner's secondary line (D-04).
 shiftsRouter.get('/current', async (req: Request, res: Response) => {
   const organizationId = req.session.organizationId!;
   const userId = req.session.userId!;
@@ -116,13 +118,14 @@ shiftsRouter.get('/current', async (req: Request, res: Response) => {
   const agg = await prisma.sale.aggregate({
     where: { organizationId, shiftId: shift.id, status: 'active' },
     _count: { _all: true },
-    _sum: { priceSnapshot: true },
+    _sum: { priceSnapshot: true, tip: true },
   });
 
   res.json({
     ...serializeShift(shift),
     activeSalesCount: agg._count._all,
-    activeSalesRevenue: (agg._sum.priceSnapshot ?? 0).toFixed(2),
+    activeSalesRevenue: new Prisma.Decimal(agg._sum.priceSnapshot ?? 0).add(agg._sum.tip ?? 0).toFixed(2),
+    activeSalesTips: (agg._sum.tip ?? 0).toFixed(2),
   });
 });
 
@@ -146,11 +149,12 @@ shiftsRouter.get('/history', async (req: Request, res: Response) => {
 
   const shiftIds = shifts.map((s) => s.id);
   // groupBy on a plain column (shiftId) — Decimal SUM computed by Prisma/MySQL, never JS float.
+  // Phase 13 D-01/D-06: revenue includes tip; no separate tips field returned on history rows.
   const aggregates = await prisma.sale.groupBy({
     by: ['shiftId'],
     where: { organizationId, status: 'active', shiftId: { in: shiftIds } },
     _count: { _all: true },
-    _sum: { priceSnapshot: true },
+    _sum: { priceSnapshot: true, tip: true },
   });
   const aggByShiftId = new Map(aggregates.map((a) => [a.shiftId, a]));
 
@@ -160,7 +164,7 @@ shiftsRouter.get('/history', async (req: Request, res: Response) => {
       return {
         ...serializeShift(s),
         activeSalesCount: agg?._count._all ?? 0,
-        activeSalesRevenue: (agg?._sum.priceSnapshot ?? 0).toFixed(2),
+        activeSalesRevenue: new Prisma.Decimal(agg?._sum.priceSnapshot ?? 0).add(agg?._sum.tip ?? 0).toFixed(2),
       };
     }),
   );

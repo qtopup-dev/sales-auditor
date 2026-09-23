@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { param, query, validationResult } from 'express-validator';
 import { prisma } from '../lib/prisma.js';
 import { requireRole } from '../middleware/requireRole.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 export const adminRouter = Router();
 
@@ -24,7 +25,8 @@ const toMoneyStr = (v: unknown): string => {
 // ─── GET /api/admin/summary ───────────────────────────────────────────────────
 // Returns aggregated dashboard stats — all figures are active-only (voided sales excluded):
 //   totalCount     — number of active sales in org
-//   totalRevenue   — sum of active sale prices as string "NNN.NN" (CLAUDE.md Rule 6)
+//   totalRevenue   — sum of active sale price + tip as string "NNN.NN" (Phase 13 D-01, Rule 6)
+//   totalTips      — tips-only share of totalRevenue, as string "NNN.NN" (Phase 13 D-05)
 //   trendData      — [{date, count}] grouped by PH calendar day (CONVERT_TZ) via $queryRaw, active-only
 //   productBreakdown — [{name, count, revenue}] grouped by productNameSnapshot, active-only
 //   mopBreakdown   — [{name, count}] grouped by mopNameSnapshot, active-only
@@ -49,8 +51,9 @@ adminRouter.get('/summary', async (req, res) => {
         where: { organizationId, status: 'active' },
       }),
       // Revenue only from active sales (voided sales excluded from revenue)
+      // Phase 13 D-01: includes tip; _sum.tip also drives the totalTips caption (D-05)
       prisma.sale.aggregate({
-        _sum: { priceSnapshot: true },
+        _sum: { priceSnapshot: true, tip: true },
         where: { organizationId, status: 'active' },
       }),
       // Product breakdown: group by snapshot name (not product ID join — CLAUDE.md Rule 4)
@@ -129,8 +132,8 @@ adminRouter.get('/summary', async (req, res) => {
       // depending on driver version — toMoneyStr handles both via .toFixed() duck-type check.
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -138,8 +141,8 @@ adminRouter.get('/summary', async (req, res) => {
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -147,8 +150,8 @@ adminRouter.get('/summary', async (req, res) => {
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -157,8 +160,8 @@ adminRouter.get('/summary', async (req, res) => {
       `,
       prisma.$queryRaw<[{ profitSum: unknown; turnoverSum: unknown }]>`
         SELECT
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS profitSum,
-          SUM(CASE WHEN status = 'active' THEN priceSnapshot ELSE 0 END) AS turnoverSum
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS profitSum,
+          SUM(CASE WHEN status = 'active' THEN priceSnapshot + COALESCE(tip, 0) ELSE 0 END) AS turnoverSum
         FROM sales
         WHERE organizationId = ${organizationId}
           AND status IN ('active', 'void')
@@ -169,8 +172,10 @@ adminRouter.get('/summary', async (req, res) => {
 
   res.json({
     totalCount,
+    // Phase 13 D-01/D-05: combined price+tip via Prisma.Decimal.add(), plus the tips-only share.
     // Decimal.toFixed(2) returns string — complies with CLAUDE.md Rule 6 (never return float for money)
-    totalRevenue: (revenueResult._sum.priceSnapshot ?? 0).toFixed(2),
+    totalRevenue: new Prisma.Decimal(revenueResult._sum.priceSnapshot ?? 0).add(revenueResult._sum.tip ?? 0).toFixed(2),
+    totalTips: (revenueResult._sum.tip ?? 0).toFixed(2),
     trendData: rawTrend.map((r) => ({
       // DATE(createdAt) may come back as Date object or string depending on MySQL driver
       date: typeof r.date === 'string' ? r.date : (r.date as unknown as Date).toISOString().slice(0, 10),
@@ -231,6 +236,7 @@ function serializeSaleForAdminShifts(sale: {
   id: number;
   productNameSnapshot: string;
   priceSnapshot: { toFixed: (n: number) => string };
+  tip: { toFixed: (n: number) => string } | null;
   mopNameSnapshot: string;
   receiverNameSnapshot: string;
   notes: string | null;
@@ -243,6 +249,7 @@ function serializeSaleForAdminShifts(sale: {
     id: sale.id,
     productNameSnapshot: sale.productNameSnapshot,
     priceSnapshot: sale.priceSnapshot.toFixed(2),
+    tip: sale.tip?.toFixed(2) ?? null,
     mopNameSnapshot: sale.mopNameSnapshot,
     receiverNameSnapshot: sale.receiverNameSnapshot,
     notes: sale.notes,
@@ -312,7 +319,7 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
     by: ['shiftId'],
     where: { organizationId, status: 'active', shiftId: { in: allShiftIds } },
     _count: { _all: true },
-    _sum: { priceSnapshot: true },
+    _sum: { priceSnapshot: true, tip: true },
   });
   const aggByShiftId = new Map(perShiftAgg.map((a) => [a.shiftId, a]));
 
@@ -322,14 +329,17 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
     const userSales = allSales.filter((sale) => sale.shiftId !== null && userShiftIds.has(sale.shiftId));
 
     // Sum counts/revenue across all of this user's shift sessions that date (usually just one).
-    // toMoneyStr (module scope, EDIT 2 above) safely handles the Decimal | number union.
+    // Phase 13 D-01/D-04/D-16: Decimal accumulators (never JS float) — activeRevenue is
+    // price+tip combined, activeTips is the tips-only share for the banner's secondary line.
     let activeSalesCount = 0;
-    let activeRevenueRaw = 0;
+    let activeRevenue = new Prisma.Decimal(0);
+    let activeTips = new Prisma.Decimal(0);
     for (const shiftId of userShiftIds) {
       const agg = aggByShiftId.get(shiftId);
       if (agg) {
         activeSalesCount += agg._count._all;
-        activeRevenueRaw += Number(agg._sum.priceSnapshot ?? 0);
+        activeRevenue = activeRevenue.add(agg._sum.priceSnapshot ?? 0).add(agg._sum.tip ?? 0);
+        activeTips = activeTips.add(agg._sum.tip ?? 0);
       }
     }
 
@@ -339,7 +349,8 @@ adminRouter.get('/shifts', shiftsByDateValidation, async (req: Request, res: Res
       shiftId: latest.shiftId,
       clockOutAt: latest.clockOutAt ? latest.clockOutAt.toISOString() : null,
       activeSalesCount,
-      activeSalesRevenue: toMoneyStr(activeRevenueRaw),
+      activeSalesRevenue: activeRevenue.toFixed(2),
+      activeSalesTips: activeTips.toFixed(2),
       sales: userSales.map(serializeSaleForAdminShifts),
     };
   });
