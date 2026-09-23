@@ -1,6 +1,7 @@
 // UI-SPEC.md §Void Requests admin table — direct structural clone of AdminSalesTable.tsx's
-// seven sale columns (Product/Price/MOP/Receiver/Notes/Created By/Created At), plus a Reason
+// eight sale columns (Product/Price/Tip/MOP/Receiver/Notes/Created By/Created At), plus a Reason
 // column (identical truncation + title treatment as Notes) and a Status column (D-05).
+// Tip is display-only here (void-request rows are not edited) — see D-20.
 // No CSV export, no client-side sorting, no status filter — none of these are in scope for v1 (D-04).
 
 import { useState, useMemo, useEffect } from 'react';
@@ -86,6 +87,15 @@ export function VoidRequestsTable({ rows, loading, onApprove }: VoidRequestsTabl
         cell: ({ row }) => (
           // Display string as-is — NEVER parseFloat (CLAUDE.md Rule 6)
           <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{row.original.sale.priceSnapshot}</span>
+        ),
+      },
+      {
+        id: 'tip',
+        header: () => <span className="block text-right">Tip</span>,
+        size: 100,
+        cell: ({ row }) => (
+          // Display string as-is — NEVER parseFloat (CLAUDE.md Rule 6). Empty when no tip (D-21).
+          <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{row.original.sale.tip ?? ''}</span>
         ),
       },
       {
