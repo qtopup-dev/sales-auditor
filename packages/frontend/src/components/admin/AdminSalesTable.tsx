@@ -1,4 +1,5 @@
-// UI-SPEC.md §AdminSalesTable — read-only admin all-sales table
+// UI-SPEC.md §AdminSalesTable — admin all-sales table, read-only except the
+// inline-editable Tip column (D-17), which reuses the moderator sheet's EditableCell/PATCH flow.
 // ADMIN-01/02: all columns + Status column
 // ADMIN-07/08/09: downloadCSV with injection sanitization and BOM
 // ADMIN-12: Audit button opens AuditDrawer via useSalesEditStore().openAuditDrawer
@@ -17,6 +18,7 @@ import type { Sale } from '@alejinput/shared';
 import { useSalesEditStore } from '../../stores/salesEditStore';
 import { formatDateTime } from '../../lib/dateTime';
 import { phTodayString } from '../../lib/shiftTime';
+import { EditableCell } from '../sales/EditableCell';
 
 // CSV formula injection sanitizer (D-11, ADMIN-09)
 // Prepend single quote to cells starting with dangerous characters
@@ -38,6 +40,7 @@ export function downloadCSV(rows: Sale[]): void {
     const sanitizedRows: Record<string, unknown>[] = rows.map((row) => ({
       productNameSnapshot: sanitizeCell(row.productNameSnapshot),
       priceSnapshot: sanitizeCell(row.priceSnapshot),
+      tip: sanitizeCell(row.tip ?? ''),
       mopNameSnapshot: sanitizeCell(row.mopNameSnapshot),
       receiverNameSnapshot: sanitizeCell(row.receiverNameSnapshot),
       notes: sanitizeCell(row.notes ?? ''),
@@ -51,6 +54,7 @@ export function downloadCSV(rows: Sale[]): void {
     const fields = [
       { label: 'Product',        value: 'productNameSnapshot' },
       { label: 'Price',          value: 'priceSnapshot' },
+      { label: 'Tip',            value: 'tip' },
       { label: 'MOP',            value: 'mopNameSnapshot' },
       { label: 'Receiver',       value: 'receiverNameSnapshot' },
       { label: 'Notes',          value: 'notes' },
@@ -115,6 +119,12 @@ export function AdminSalesTable({ rows, loading, onVoid }: AdminSalesTableProps)
           // Display string as-is — NEVER parseFloat (CLAUDE.md Rule 6)
           <span className="block text-right text-sm text-gray-900 dark:text-gray-100">{getValue<string>()}</span>
         ),
+      },
+      {
+        accessorKey: 'tip',
+        header: () => <span className="block text-right">Tip</span>,
+        size: 100,
+        cell: ({ row }) => <EditableCell sale={row.original} field="tip" displayValue={row.original.tip ?? ''} />,
       },
       {
         accessorKey: 'mopNameSnapshot',
