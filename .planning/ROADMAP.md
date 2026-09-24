@@ -316,6 +316,17 @@ Plans:
 - [x] 13-02-PLAN.md — Tips counted in every revenue figure (shift banner, shift history, admin shift tabs, dashboard total, KPIs; product breakdown stays price-only) + `incl. ₱X tips` captions + admin per-shift Tip column
 - [x] 13-03-PLAN.md — Admin tables: inline-editable Tip column + CSV Tip column on the dashboard, Tip column on Void Requests
 
+### Phase 14: Moderator Product Management
+
+**Goal:** Moderators can open /products and have full control of the product catalog (create, edit, activate/deactivate, delete) exactly like admins — route guard, sidebar nav, and backend RBAC on product endpoints all opened to the moderator role
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 14-01-PLAN.md — Moderator product parity: widened RBAC + route/nav (tracer), audited + race-guarded mutations with 409 duplicate-name rule, inline modal error + catalog-products freshness
+
 ---
 
 ## Traceability
