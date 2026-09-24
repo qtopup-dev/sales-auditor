@@ -103,7 +103,7 @@ export function createApp(): Express {
   // Protected routes — requireAuth applied to all; requireRole applied per sub-router
   const protectedRouter = express.Router();
   protectedRouter.use('/users', usersRouter); // admin-only (usersRouter mounts requireRole internally)
-  protectedRouter.use('/products', productsRouter); // admin-only (productsRouter mounts requireRole internally)
+  protectedRouter.use('/products', productsRouter); // admin + moderator (productsRouter mounts requireRole internally)
   protectedRouter.use('/mops', mopsRouter); // admin-only (mopsRouter mounts requireRole internally)
   protectedRouter.use('/receivers', receiversRouter); // admin-only (receiversRouter mounts requireRole internally)
   protectedRouter.use('/shifts', shiftsRouter); // moderator-only (shiftsRouter mounts requireRole('moderator') internally)

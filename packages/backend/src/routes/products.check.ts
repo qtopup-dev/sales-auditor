@@ -86,9 +86,129 @@ assert.deepEqual(JSON.parse(createAuditRows[0].newValue!), {
   price: '10.00',
 });
 
+// ─── D-09: create conflict (case/space variant) ──────────────────────────────
+const createConflictRes = await call('POST', '/products', modCookie, {
+  name: '  p14 CHECK ' + stamp + '  ',
+  price: '5',
+});
+assert.equal(createConflictRes.status, 409);
+assert.equal((createConflictRes.data as { error: string }).error, 'DUPLICATE_PRODUCT_NAME');
+
+// ─── D-09: case-variant rename of A's own name is not a conflict ────────────
+const selfRenameRes = await call('PATCH', `/products/${id}`, modCookie, {
+  name: 'p14 check ' + stamp,
+  price: '12.5',
+});
+assert.equal(selfRenameRes.status, 200);
+assert.equal((selfRenameRes.data as { price: string }).price, '12.50');
+
+// ─── Unchanged save writes no audit row ──────────────────────────────────────
+const unchangedRes = await call('PATCH', `/products/${id}`, modCookie, {
+  name: 'p14 check ' + stamp,
+  price: '12.50',
+});
+assert.equal(unchangedRes.status, 200);
+
+// ─── Second product ───────────────────────────────────────────────────────────
+const createBRes = await call('POST', '/products', modCookie, {
+  name: 'P14 Other ' + stamp,
+  price: '1',
+});
+assert.equal(createBRes.status, 201);
+const idB = (createBRes.data as { id: number }).id;
+
+// ─── D-09: rename conflict ────────────────────────────────────────────────────
+const renameConflictRes = await call('PATCH', `/products/${idB}`, modCookie, {
+  name: 'P14 CHECK ' + stamp,
+});
+assert.equal(renameConflictRes.status, 409);
+
+// ─── D-10: legacy duplicate (created outside the API) can still be re-priced ─
+const legacy = await prisma.product.create({
+  data: { organizationId: 1, name: 'P14 Other ' + stamp, price: '2' },
+});
+const idLegacy = legacy.id;
+const legacyRepriceRes = await call('PATCH', `/products/${idLegacy}`, modCookie, {
+  name: 'P14 Other ' + stamp,
+  price: '3',
+});
+assert.equal(legacyRepriceRes.status, 200);
+
+// ─── Toggle A off as moderator ────────────────────────────────────────────────
+const toggleOffRes = await call('PATCH', `/products/${id}/toggle`, modCookie);
+assert.equal(toggleOffRes.status, 200);
+assert.equal((toggleOffRes.data as { isActive: boolean }).isActive, false);
+
+// ─── Inactive names still block create ───────────────────────────────────────
+const inactiveBlockRes = await call('POST', '/products', modCookie, {
+  name: 'P14 check ' + stamp,
+  price: '1',
+});
+assert.equal(inactiveBlockRes.status, 409);
+
+// ─── D-07: toggle A back on as admin — audit has no role branch ─────────────
+const toggleOnRes = await call('PATCH', `/products/${id}/toggle`, adminCookie);
+assert.equal(toggleOnRes.status, 200);
+assert.equal((toggleOnRes.data as { isActive: boolean }).isActive, true);
+
+// ─── Delete A; race losers get 404 ────────────────────────────────────────────
+const deleteARes = await call('DELETE', `/products/${id}`, modCookie);
+assert.equal(deleteARes.status, 204);
+
+const deleteAAgainRes = await call('DELETE', `/products/${id}`, modCookie);
+assert.equal(deleteAAgainRes.status, 404);
+
+const toggleDeletedRes = await call('PATCH', `/products/${id}/toggle`, modCookie);
+assert.equal(toggleDeletedRes.status, 404);
+
+// ─── Deleted names are free again ────────────────────────────────────────────
+const createA2Res = await call('POST', '/products', modCookie, {
+  name: 'P14 Check ' + stamp,
+  price: '1',
+});
+assert.equal(createA2Res.status, 201);
+const idA2 = (createA2Res.data as { id: number }).id;
+
+// ─── Full audit trail for A ───────────────────────────────────────────────────
+const auditRowsA = await prisma.auditLog.findMany({
+  where: { tableName: 'products', rowId: id },
+  orderBy: { id: 'asc' },
+});
+assert.deepEqual(
+  auditRowsA.map((r) => r.fieldName),
+  [null, 'name', 'price', 'isActive', 'isActive', 'deletedAt'],
+);
+assert.equal(auditRowsA[1].oldValue, 'P14 Check ' + stamp);
+assert.equal(auditRowsA[1].newValue, 'p14 check ' + stamp);
+assert.equal(auditRowsA[2].oldValue, '10.00');
+assert.equal(auditRowsA[2].newValue, '12.50');
+assert.equal(auditRowsA[3].oldValue, 'true');
+assert.equal(auditRowsA[3].newValue, 'false');
+assert.equal(auditRowsA[3].userUsername, modName);
+assert.equal(auditRowsA[4].oldValue, 'false');
+assert.equal(auditRowsA[4].newValue, 'true');
+assert.equal(auditRowsA[4].userUsername, 'admin');
+assert.equal(auditRowsA[5].oldValue, null);
+assert.ok(Number.isFinite(Date.parse(auditRowsA[5].newValue!)));
+for (const row of auditRowsA) {
+  assert.equal(row.saleId, null);
+}
+
+// ─── Audit trail for the legacy duplicate: price only, no name row ──────────
+const auditRowsLegacy = await prisma.auditLog.findMany({
+  where: { tableName: 'products', rowId: idLegacy },
+  orderBy: { id: 'asc' },
+});
+assert.equal(auditRowsLegacy.length, 1);
+assert.equal(auditRowsLegacy[0].fieldName, 'price');
+assert.equal(auditRowsLegacy[0].oldValue, '2.00');
+assert.equal(auditRowsLegacy[0].newValue, '3.00');
+
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
-const deleteRes = await call('DELETE', `/products/${id}`, modCookie);
-assert.equal(deleteRes.status, 204);
+for (const cleanupId of [idB, idLegacy, idA2]) {
+  const res = await call('DELETE', `/products/${cleanupId}`, modCookie);
+  assert.equal(res.status, 204);
+}
 
 const deleteModRes = await call('DELETE', `/users/${modId}`, adminCookie);
 assert.equal(deleteModRes.status, 204);
