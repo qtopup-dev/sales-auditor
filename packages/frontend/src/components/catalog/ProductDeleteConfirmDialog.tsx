@@ -19,6 +19,8 @@ export function ProductDeleteConfirmDialog({ product, onClose }: ProductDeleteCo
     mutationFn: (productId: number) => api.delete(`/products/${productId}`).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Phase 14 D-11: same-tab sales-sheet product dropdowns refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['catalog-products'] });
       onClose();
     },
   });

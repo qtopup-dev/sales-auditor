@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { Modal } from '../Modal';
 import { api } from '../../lib/axios';
 import type { Product } from '@alejinput/shared';
@@ -20,7 +21,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const queryClient = useQueryClient();
   const isEdit = product !== null;
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<ProductFormData>({
+  const { register, handleSubmit, setError, formState: { errors }, reset } = useForm<ProductFormData>({
     defaultValues: isEdit ? { name: product.name, price: product.price } : { name: '', price: '' },
   });
 
@@ -29,26 +30,43 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     reset(isEdit ? { name: product.name, price: product.price } : { name: '', price: '' });
   }, [product, isEdit, reset]);
 
-  const createMutation = useMutation({
+  // Phase 14 D-09: inline duplicate-name error on the name field, not a page-level alert
+  const onNameConflict = (err: unknown) => {
+    if (axios.isAxiosError(err) && err.response?.status === 409) {
+      setError('name', { message: 'A product with this name already exists.' });
+    }
+  };
+
+  // Explicit <Product, Error, ...> generics keep TError as Error (react-query's default) instead
+  // of narrowing to `unknown` from onNameConflict's (err: unknown) parameter type.
+  const createMutation = useMutation<Product, Error, ProductFormData>({
     mutationFn: (data: ProductFormData) =>
       api.post<Product>('/products', data).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Phase 14 D-11: same-tab sales-sheet product dropdowns refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['catalog-products'] });
       onClose();
     },
+    onError: onNameConflict,
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useMutation<Product, Error, ProductFormData>({
     mutationFn: (data: ProductFormData) =>
       api.patch<Product>(`/products/${product!.id}`, data).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Phase 14 D-11: same-tab sales-sheet product dropdowns refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['catalog-products'] });
       onClose();
     },
+    onError: onNameConflict,
   });
 
   const isPending = createMutation.isPending || updateMutation.isPending;
   const error = createMutation.error || updateMutation.error;
+  // A 409 already renders inline under Product Name — don't also show the generic error
+  const isNameConflict = axios.isAxiosError(error) && error.response?.status === 409;
 
   const onSubmit = (data: ProductFormData) => {
     if (isEdit) {
@@ -135,8 +153,8 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           {errors.price && <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.price.message}</p>}
         </div>
 
-        {/* API error */}
-        {error && (
+        {/* API error — a 409 duplicate-name conflict is rendered inline under Product Name instead */}
+        {error && !isNameConflict && (
           <p className="text-sm text-red-600 dark:text-red-400 mt-1">Something went wrong. Please try again.</p>
         )}
       </form>
