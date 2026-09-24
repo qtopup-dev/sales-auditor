@@ -12,7 +12,7 @@ import { ProductModal } from '../components/catalog/ProductModal';
 import { ProductDeleteConfirmDialog } from '../components/catalog/ProductDeleteConfirmDialog';
 import type { Product } from '@alejinput/shared';
 
-// PROD-04: admin views all products (active + inactive)
+// PROD-01..04: admins and moderators manage products on this same page (Phase 14 D-01/D-02), with no role branching
 // PROD-01/02: create/edit via ProductModal
 // PROD-03: toggle active/inactive via Deactivate/Activate button
 // PROD-06/07: product entity with name, price, status columns
@@ -39,6 +39,8 @@ export function ProductsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Phase 14 D-11: same-tab sales-sheet product dropdowns refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['catalog-products'] });
       setPendingToggleId(null);
     },
     onError: () => setPendingToggleId(null),

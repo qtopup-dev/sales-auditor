@@ -46,16 +46,16 @@ export const router = createBrowserRouter([
       {
         element: <AuthenticatedLayout />,
         children: [
-          // Moderator route — accessible to both roles
+          // Routes accessible to both roles (Phase 14 D-02: /products too)
           { path: '/sales', element: <SalesPage /> },
           { path: '/shift-history', element: <ShiftHistoryPage /> },
+          { path: '/products', element: <ProductsPage /> },
 
           // Admin-only routes — ProtectedRoute with requiredRole='admin'
           {
             element: <ProtectedRoute requiredRole="admin" />,
             children: [
               { path: '/dashboard', element: <DashboardPage /> },
-              { path: '/products', element: <ProductsPage /> },
               { path: '/mops', element: <MopsPage /> },
               { path: '/receivers', element: <ReceiversPage /> },
               { path: '/users', element: <UsersPage /> },
