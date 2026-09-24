@@ -321,11 +321,11 @@ Plans:
 **Goal:** Moderators can open /products and have full control of the product catalog (create, edit, activate/deactivate, delete) exactly like admins — route guard, sidebar nav, and backend RBAC on product endpoints all opened to the moderator role
 **Requirements**: TBD
 **Depends on:** Phase 13
-**Plans:** 1 plan
+**Plans:** 1/1 plans executed
 
 Plans:
 
-- [ ] 14-01-PLAN.md — Moderator product parity: widened RBAC + route/nav (tracer), audited + race-guarded mutations with 409 duplicate-name rule, inline modal error + catalog-products freshness
+- [x] 14-01-PLAN.md — Moderator product parity: widened RBAC + route/nav (tracer), audited + race-guarded mutations with 409 duplicate-name rule, inline modal error + catalog-products freshness
 
 ---
 
