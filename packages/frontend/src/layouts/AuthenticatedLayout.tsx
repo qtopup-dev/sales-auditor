@@ -20,10 +20,11 @@ const ADMIN_NAV = [
   { to: '/void-requests', label: 'Void Requests' },
 ];
 
-// Moderator nav items per CONTEXT.md D-04 (ROLES-07: only Sales Sheet visible)
+// Moderator nav items per CONTEXT.md D-04; Phase 14 D-12 adds Products
 const MODERATOR_NAV = [
   { to: '/sales', label: 'Sales Sheet' },
   { to: '/shift-history', label: 'Shift History' },
+  { to: '/products', label: 'Products' },
 ];
 
 // Sidebar body — shared between the static desktop aside and the mobile drawer
